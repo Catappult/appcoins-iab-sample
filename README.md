@@ -10,7 +10,7 @@ If this is not the case for you, let us know.
 
 ### Prerequisites
 
-+ In order for the ASF SDK to work, you must have an AppCoins compliant wallet (trust link) installed.
++ In order for the ASF SDK to work, you must have an [AppCoins compliant wallet](https://github.com/Aptoide/asf-wallet-android/tree/dev) installed.
 + The Android minimum API Level to use ASF SDK is 21 (Android 5.0).
 + Basic understanding of RxJava is advised but now required.
 
