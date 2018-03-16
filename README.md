@@ -5,7 +5,7 @@ The ASF SDK lets you sell in-app items for AppCoins (APPC) tokens.
 ## Abstract
 
 This tutorial will guide through the process of integrating the ASF SDK.
-The integration should be simple enough to be done in under 10 minutes. 
+The integration should be simple enough to be done in under 10 minutes.
 If this is not the case for you, let us know.
 
 ### Prerequisites
@@ -14,6 +14,35 @@ If this is not the case for you, let us know.
 + The Android minimum API Level to use ASF SDK is 21 (Android 5.0).
 + Basic understanding of RxJava is advised but now required.
 
+## Important!
+#### Currently there's no aar published yet, so you should download [this](app/libs/appcoins-sdk-0.1.aar) aar and put it in your App "libs" (app/libs) folder. As you're importing the aar manually, you have to add it's dependencies to your project as well.
+
+First, in your **project's buildscript**, make sure you have the following:
+
+```
+allprojects {
+    repositories {
+        google()
+        jcenter()
+        flatDir {
+            dirs 'libs'
+        }
+    }
+}
+```
+And then, in your **app's buildscript**, add the following dependencies:
+
+```
+dependencies {
+    // https://mvnrepository.com/artifact/io.reactivex.rxjava2/rxjava
+    api group: 'io.reactivex.rxjava2', name: 'rxjava', version: '2.1.10'
+    // https://mvnrepository.com/artifact/org.web3j/core
+    api group: 'org.web3j', name: 'core', version: '3.1.1-android'
+
+    compile(name:'appcoins-sdk-0.1', ext:'aar')
+}
+```
+
 ## Getting Started
 
 To integrate the ASF SDK, you only need an instance of the AppCoinsSdk interface.
@@ -21,6 +50,11 @@ For the sake of simplicity, in the sample code we just hold a static referecence
 
 ```
   public static AppCoinsSdk appCoinsSdk;
+
+  public static final String SKU_GAS = "gas";
+  public static final String SKU_PREMIUM = "premium";
+  public static final String SKU_GAS_NAME = SKU_GAS;
+  public static final String SKU_PREMIUM_NAME = SKU_PREMIUM;
 
   private final String developerAddress = "0x4fbcc5ce88493c3d9903701c143af65f54481119";
 
@@ -49,7 +83,7 @@ Given the Android architecture, you will have to let the SDK know each time a Pu
 
 ```
 @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-    appCoinsSdk.onActivityResult(requestCode, requestCode, data);
+    Application.appCoinsSdk.onActivityResult(requestCode, requestCode, data);
 }
 ```
 
@@ -58,7 +92,7 @@ AppCoinsSdk's onActivityResult will return **true** if handled, and **false** ot
 To start the purchase flow, you have to pass one of the previously defined *SKU_IDs*, and the activity that will be used to call the Wallet:
 
 ```
-appCoinsSdk.buy(SKU_GAS, this);
+Application.appCoinsSdk.buy(SKU_GAS, this);
 ```
 
 And finally, we want to react to the purchase, so we can reflect that change in our App's state.
@@ -69,13 +103,13 @@ Below we provide a good pattern to follow:
 @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     super.onActivityResult(requestCode, resultCode, data);
 
-    if (appCoinsSdk.onActivityResult(requestCode, requestCode, data)) {
-      appCoinsSdk.getLastPayment()
+    if (Application.appCoinsSdk.onActivityResult(requestCode, requestCode, data)) {
+      Application.appCoinsSdk.getLastPayment()
           .subscribe(paymentDetails -> runOnUiThread(() -> {
             if (paymentDetails.getPaymentStatus() == PaymentStatus.SUCCESS) {
               String skuId = paymentDetails.getSkuId();
               // Now we tell the sdk to consume the skuId.
-              appCoinsSdk.consume(skuId);
+              Application.appCoinsSdk.consume(skuId);
 
               // Purchase successfully done. Release the prize.
             }
