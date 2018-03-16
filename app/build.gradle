@@ -1,0 +1,66 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 25
+    buildToolsVersion '26.0.2'
+
+    flavorDimensions "default"
+
+    defaultConfig {
+        applicationId "com.aptoide.trivialdrivesample"
+        minSdkVersion 21
+        targetSdkVersion 25
+        versionCode 10
+        versionName "1.8"
+        multiDexEnabled true
+    }
+
+    compileOptions {
+        sourceCompatibility 1.8
+        targetCompatibility 1.8
+    }
+
+    productFlavors {
+        googleiab {
+            buildConfigField "String", "IAB_BIND_ACTION",
+                "\"" + project.GOOGLE_IAB_BIND_ACTION + "\""
+            buildConfigField "String", "IAB_KEY",
+                "\"" + project.GOOGLE_IAB_KEY + "\""
+            buildConfigField "String", "IAB_BIND_PACKAGE",
+                "\"" + project.GOOGLE_IAB_BIND_PACKAGE + "\""
+            buildConfigField "String", "IAB_UPDATE_ACTION",
+                "\"" + project.GOOGLE_IAB_UPDATE_ACTION+ "\""
+            manifestPlaceholders = [iabPermission: project.GOOGLE_IAB_PERMISSION]
+        }
+
+        aptoideiab {
+            buildConfigField "String", "IAB_BIND_ACTION",
+                "\"" + project.APTOIDE_IAB_BIND_ACTION + "\""
+            buildConfigField "String", "IAB_KEY",
+                "\"" + project.APTOIDE_IAB_KEY + "\""
+            buildConfigField "String", "IAB_BIND_PACKAGE",
+                "\"" + project.APTOIDE_IAB_BIND_PACKAGE + "\""
+            buildConfigField "String", "IAB_UPDATE_ACTION",
+                "\"" + project.APTOIDE_IAB_UPDATE_ACTION+ "\""
+            manifestPlaceholders = [iabPermission: project.APTOIDE_IAB_PERMISSION]
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    compile 'com.android.support:appcompat-v7:25.3.0'
+
+    // https://mvnrepository.com/artifact/io.reactivex.rxjava2/rxjava
+    api group: 'io.reactivex.rxjava2', name: 'rxjava', version: '2.1.10'
+    // https://mvnrepository.com/artifact/org.web3j/core
+    api group: 'org.web3j', name: 'core', version: '3.1.1-android'
+
+    compile(name:'appcoins-sdk-0.1', ext:'aar')
+}
