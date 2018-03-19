@@ -144,7 +144,7 @@ public class MainActivity extends Activity implements OnClickListener {
       // billing...
       super.onActivityResult(requestCode, resultCode, data);
 
-      appCoinsSdk.getLastPayment()
+      appCoinsSdk.getCurrentPayment()
           .subscribe(paymentDetails -> runOnUiThread(() -> {
             if (paymentDetails.getPaymentStatus() == PaymentStatus.SUCCESS) {
               String skuId = paymentDetails.getSkuId();
@@ -168,12 +168,12 @@ public class MainActivity extends Activity implements OnClickListener {
               }
 
               updateUi();
-              setWaitScreen(false);
               Log.d(TAG, "End consumption flow.");
             }
+            setWaitScreen(false);
           }));
     }
-    }
+  }
 
     // User clicked the "Buy Gas" button
     public void onBuyGasButtonClicked(View arg0) {

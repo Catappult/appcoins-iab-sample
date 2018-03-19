@@ -104,7 +104,7 @@ Below we provide a good pattern to follow:
     super.onActivityResult(requestCode, resultCode, data);
 
     if (Application.appCoinsSdk.onActivityResult(requestCode, requestCode, data)) {
-      Application.appCoinsSdk.getLastPayment()
+      Application.appCoinsSdk.getCurrentPayment()
           .subscribe(paymentDetails -> runOnUiThread(() -> {
             if (paymentDetails.getPaymentStatus() == PaymentStatus.SUCCESS) {
               String skuId = paymentDetails.getSkuId();
