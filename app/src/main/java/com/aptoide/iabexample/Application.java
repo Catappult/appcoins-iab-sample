@@ -27,8 +27,8 @@ public class Application extends android.app.Application {
   private List<SKU> buildSkus() {
     List<SKU> skus = new LinkedList<>();
 
-    skus.add(new SKU(MainActivity.SKU_GAS, MainActivity.SKU_GAS, BigDecimal.valueOf(5)));
-    skus.add(new SKU(MainActivity.SKU_PREMIUM, MainActivity.SKU_PREMIUM, BigDecimal.TEN));
+    skus.add(new SKU(MainActivity.SKU_GAS, MainActivity.SKU_GAS, BigDecimal.valueOf(1)));
+    skus.add(new SKU(MainActivity.SKU_PREMIUM, MainActivity.SKU_PREMIUM, BigDecimal.valueOf(2)));
 
     return skus;
   }
