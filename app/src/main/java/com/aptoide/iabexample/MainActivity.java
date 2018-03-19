@@ -137,12 +137,12 @@ public class MainActivity extends Activity implements OnClickListener {
 
   @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     Log.d(TAG, "onActivityResult(" + requestCode + "," + resultCode + "," + data);
+    super.onActivityResult(requestCode, resultCode, data);
 
     if (appCoinsSdk.onActivityResult(requestCode, requestCode, data)) {
       // not handled, so handle it ourselves (here's where you'd
       // perform any handling of activity results not related to in-app
       // billing...
-      super.onActivityResult(requestCode, resultCode, data);
 
       appCoinsSdk.getCurrentPayment()
           .subscribe(paymentDetails -> runOnUiThread(() -> {
