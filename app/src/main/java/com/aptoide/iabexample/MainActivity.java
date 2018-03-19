@@ -73,8 +73,10 @@ public class MainActivity extends Activity implements OnClickListener {
     // Debug tag, for logging
     static final String TAG = "TrivialDrive";
   // SKUs for our products: the premium upgrade (non-consumable) and gas (consumable)
-  static final String SKU_PREMIUM = "premium";
-  static final String SKU_GAS = "gas";
+  static final String SKU_PREMIUM_LABEL = "Premium";
+  static final String SKU_PREMIUM_ID = "premium";
+  static final String SKU_GAS_LABEL = "Gas";
+  static final String SKU_GAS_ID = "gas";
   // SKU for our subscription (infinite gas)
   static final String SKU_INFINITE_GAS_MONTHLY = "infinite_gas_monthly";
   static final String SKU_INFINITE_GAS_YEARLY = "infinite_gas_yearly";
@@ -150,14 +152,14 @@ public class MainActivity extends Activity implements OnClickListener {
 
               // successfully consumed, so we apply the effects of the item in our
               // game world's logic, which in our case means filling the gas tank a bit
-              if (SKU_GAS.equals(skuId)) {
+              if (SKU_GAS_ID.equals(skuId)) {
                 Log.d(TAG, "Consumption successful. Provisioning.");
                 mTank = mTank == TANK_MAX ? TANK_MAX : mTank + 1;
                 saveData();
                 alert(
                     "You filled 1/4 tank. Your tank is now " + String.valueOf(mTank) + "/4 full!");
               } else {
-                if (SKU_PREMIUM.equals(skuId)) {
+                if (SKU_PREMIUM_ID.equals(skuId)) {
                   // bought the premium upgrade!
                   Log.d(TAG, "Purchase is premium upgrade. Congratulating user.");
                   alert("Thank you for upgrading to premium!");
@@ -197,7 +199,7 @@ public class MainActivity extends Activity implements OnClickListener {
          *        an empty string, but on a production app you should carefully generate this. */
         String payload = "";
 
-      appCoinsSdk.buy(SKU_GAS, this);
+      appCoinsSdk.buy(SKU_GAS_ID, this);
     }
 
     // User clicked the "Upgrade to Premium" button.
@@ -209,7 +211,7 @@ public class MainActivity extends Activity implements OnClickListener {
          *        verifyDeveloperPayload() for more info. Since this is a SAMPLE, we just use
          *        an empty string, but on a production app you should carefully generate this. */
         String payload = "";
-      appCoinsSdk.buy(SKU_PREMIUM, this);
+      appCoinsSdk.buy(SKU_PREMIUM_ID, this);
     }
 
     // "Subscribe to infinite gas" button clicked. Explain to user, then start purchase
