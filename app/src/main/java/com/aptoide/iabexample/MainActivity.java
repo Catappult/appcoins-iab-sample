@@ -135,6 +135,12 @@ public class MainActivity extends Activity implements OnClickListener {
       updateUi();
     }
 
+  @Override protected void onResume() {
+    super.onResume();
+
+    setWaitScreen(false);
+  }
+
   @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     Log.d(TAG, "onActivityResult(" + requestCode + "," + resultCode + "," + data);
     super.onActivityResult(requestCode, resultCode, data);

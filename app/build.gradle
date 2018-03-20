@@ -62,5 +62,6 @@ dependencies {
     // https://mvnrepository.com/artifact/org.web3j/core
     api group: 'org.web3j', name: 'core', version: '3.1.1-android'
 
-    compile(name:'appcoins-sdk-0.1', ext:'aar')
+    api 'com.asfoundation:sdk-android:0.1.0a'
+
 }
