@@ -7,7 +7,7 @@ android {
     flavorDimensions "default"
 
     defaultConfig {
-        applicationId "com.aptoide.trivialdrivesample"
+        applicationId "com.asfoundation.trivialdrivesample"
         minSdkVersion 21
         targetSdkVersion 25
         versionCode 10
