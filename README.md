@@ -14,32 +14,29 @@ If this is not the case for you, let us know.
 + The Android minimum API Level to use ASF SDK is 21 (Android 5.0).
 + Basic understanding of RxJava is advised but now required.
 
-## Important!
-#### Currently there's no aar published yet, so you should download [this](app/libs/appcoins-sdk-0.1.aar) aar and put it in your App "libs" (app/libs) folder. As you're importing the aar manually, you have to add it's dependencies to your project as well.
+## Build Script
 
-First, in your **project's buildscript**, make sure you have the following:
+In your **project's buildscript**, make sure you have the following:
 
 ```
 allprojects {
     repositories {
         google()
         jcenter()
-        flatDir {
-            dirs 'libs'
-        }
+        maven { url "https://dl.bintray.com/asf/asf" }
     }
 }
 ```
-And then, in your **app's buildscript**, add the following dependencies:
+And in your **app's buildscript**, add the following dependency:
 
 ```
 dependencies {
     // https://mvnrepository.com/artifact/io.reactivex.rxjava2/rxjava
     api group: 'io.reactivex.rxjava2', name: 'rxjava', version: '2.1.10'
     // https://mvnrepository.com/artifact/org.web3j/core
-    api group: 'org.web3j', name: 'core', version: '3.1.1-android'
+    api group: 'org.web3j', name: 'core', version: '3.3.1-android'
 
-    compile(name:'appcoins-sdk-0.1', ext:'aar')
+    api 'com.asfoundation:sdk-android:0.1.0a'
 }
 ```
 
