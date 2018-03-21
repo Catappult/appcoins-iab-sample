@@ -70,8 +70,8 @@ import static com.aptoide.iabexample.Application.appCoinsSdk;
  * is also very important!
  */
 public class MainActivity extends Activity implements OnClickListener {
-    // Debug tag, for logging
-    static final String TAG = "TrivialDrive";
+  // Debug tag, for logging
+  static final String TAG = "TrivialDrive";
   // SKUs for our products: the premium upgrade (non-consumable) and gas (consumable)
   static final String SKU_PREMIUM_LABEL = "Premium";
   static final String SKU_PREMIUM_ID = "premium";
@@ -86,32 +86,31 @@ public class MainActivity extends Activity implements OnClickListener {
   static int[] TANK_RES_IDS = {
       R.drawable.gas0, R.drawable.gas1, R.drawable.gas2, R.drawable.gas3, R.drawable.gas4
   };
-    // Does the user have the premium upgrade?
-    boolean mIsPremium = false;
-    // Does the user have an active subscription to the infinite gas plan?
-    boolean mSubscribedToInfiniteGas = false;
-    // Will the subscription auto-renew?
-    boolean mAutoRenewEnabled = false;
-    // Tracks the currently owned infinite gas SKU, and the options in the Manage dialog
-    String mInfiniteGasSku = "";
-    String mFirstChoiceSku = "";
-    String mSecondChoiceSku = "";
-    // Used to select between purchasing gas on a monthly or yearly basis
-    String mSelectedSubscriptionPeriod = "";
-    // Current amount of gas in tank, in units
-    int mTank;
+  // Does the user have the premium upgrade?
+  boolean mIsPremium = false;
+  // Does the user have an active subscription to the infinite gas plan?
+  boolean mSubscribedToInfiniteGas = false;
+  // Will the subscription auto-renew?
+  boolean mAutoRenewEnabled = false;
+  // Tracks the currently owned infinite gas SKU, and the options in the Manage dialog
+  String mInfiniteGasSku = "";
+  String mFirstChoiceSku = "";
+  String mSecondChoiceSku = "";
+  // Used to select between purchasing gas on a monthly or yearly basis
+  String mSelectedSubscriptionPeriod = "";
+  // Current amount of gas in tank, in units
+  int mTank;
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+  @Override public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_main);
+    setContentView(R.layout.activity_main);
 
-        // load game data
-        loadData();
+    // load game data
+    loadData();
 
-      updateUi();
-    }
+    updateUi();
+  }
 
   @Override protected void onResume() {
     super.onResume();
@@ -159,189 +158,190 @@ public class MainActivity extends Activity implements OnClickListener {
     }
   }
 
-    // User clicked the "Buy Gas" button
-    public void onBuyGasButtonClicked(View arg0) {
-        Log.d(TAG, "Buy gas button clicked.");
+  // User clicked the "Buy Gas" button
+  public void onBuyGasButtonClicked(View arg0) {
+    Log.d(TAG, "Buy gas button clicked.");
 
-        if (mSubscribedToInfiniteGas) {
-            complain("No need! You're subscribed to infinite gas. Isn't that awesome?");
-            return;
-        }
+    if (mSubscribedToInfiniteGas) {
+      complain("No need! You're subscribed to infinite gas. Isn't that awesome?");
+      return;
+    }
 
-        if (mTank >= TANK_MAX) {
-            complain("Your tank is full. Drive around a bit!");
-            return;
-        }
+    if (mTank >= TANK_MAX) {
+      complain("Your tank is full. Drive around a bit!");
+      return;
+    }
 
-        // launch the gas purchase UI flow.
-        // We will be notified of completion via mPurchaseFinishedListener
-        setWaitScreen(true);
-        Log.d(TAG, "Launching purchase flow for gas.");
+    // launch the gas purchase UI flow.
+    // We will be notified of completion via mPurchaseFinishedListener
+    setWaitScreen(true);
+    Log.d(TAG, "Launching purchase flow for gas.");
 
         /* TODO: for security, generate your payload here for verification. See the comments on
          *        verifyDeveloperPayload() for more info. Since this is a SAMPLE, we just use
          *        an empty string, but on a production app you should carefully generate this. */
-        String payload = "";
+    String payload = "";
 
-      appCoinsSdk.buy(SKU_GAS_ID, this);
-    }
+    appCoinsSdk.buy(SKU_GAS_ID, this);
+  }
 
-    // User clicked the "Upgrade to Premium" button.
-    public void onUpgradeAppButtonClicked(View arg0) {
-        Log.d(TAG, "Upgrade button clicked; launching purchase flow for upgrade.");
-        setWaitScreen(true);
+  // User clicked the "Upgrade to Premium" button.
+  public void onUpgradeAppButtonClicked(View arg0) {
+    Log.d(TAG, "Upgrade button clicked; launching purchase flow for upgrade.");
+    setWaitScreen(true);
 
         /* TODO: for security, generate your payload here for verification. See the comments on
          *        verifyDeveloperPayload() for more info. Since this is a SAMPLE, we just use
          *        an empty string, but on a production app you should carefully generate this. */
-        String payload = "";
-      appCoinsSdk.buy(SKU_PREMIUM_ID, this);
+    String payload = "";
+    appCoinsSdk.buy(SKU_PREMIUM_ID, this);
+  }
+
+  // "Subscribe to infinite gas" button clicked. Explain to user, then start purchase
+  // flow for subscription.
+  public void onInfiniteGasButtonClicked(View arg0) {
+    CharSequence[] options;
+    if (!mSubscribedToInfiniteGas || !mAutoRenewEnabled) {
+      // Both subscription options should be available
+      options = new CharSequence[2];
+      options[0] = getString(R.string.subscription_period_monthly);
+      options[1] = getString(R.string.subscription_period_yearly);
+      mFirstChoiceSku = SKU_INFINITE_GAS_MONTHLY;
+      mSecondChoiceSku = SKU_INFINITE_GAS_YEARLY;
+    } else {
+      // This is the subscription upgrade/downgrade path, so only one option is valid
+      options = new CharSequence[1];
+      if (mInfiniteGasSku.equals(SKU_INFINITE_GAS_MONTHLY)) {
+        // Give the option to upgrade to yearly
+        options[0] = getString(R.string.subscription_period_yearly);
+        mFirstChoiceSku = SKU_INFINITE_GAS_YEARLY;
+      } else {
+        // Give the option to downgrade to monthly
+        options[0] = getString(R.string.subscription_period_monthly);
+        mFirstChoiceSku = SKU_INFINITE_GAS_MONTHLY;
+      }
+      mSecondChoiceSku = "";
     }
 
-    // "Subscribe to infinite gas" button clicked. Explain to user, then start purchase
-    // flow for subscription.
-    public void onInfiniteGasButtonClicked(View arg0) {
-        CharSequence[] options;
-        if (!mSubscribedToInfiniteGas || !mAutoRenewEnabled) {
-            // Both subscription options should be available
-            options = new CharSequence[2];
-            options[0] = getString(R.string.subscription_period_monthly);
-            options[1] = getString(R.string.subscription_period_yearly);
-            mFirstChoiceSku = SKU_INFINITE_GAS_MONTHLY;
-            mSecondChoiceSku = SKU_INFINITE_GAS_YEARLY;
-        } else {
-            // This is the subscription upgrade/downgrade path, so only one option is valid
-            options = new CharSequence[1];
-            if (mInfiniteGasSku.equals(SKU_INFINITE_GAS_MONTHLY)) {
-                // Give the option to upgrade to yearly
-                options[0] = getString(R.string.subscription_period_yearly);
-                mFirstChoiceSku = SKU_INFINITE_GAS_YEARLY;
-            } else {
-                // Give the option to downgrade to monthly
-                options[0] = getString(R.string.subscription_period_monthly);
-                mFirstChoiceSku = SKU_INFINITE_GAS_MONTHLY;
-            }
-            mSecondChoiceSku = "";
-        }
-
-        int titleResId;
-        if (!mSubscribedToInfiniteGas) {
-            titleResId = R.string.subscription_period_prompt;
-        } else if (!mAutoRenewEnabled) {
-            titleResId = R.string.subscription_resignup_prompt;
-        } else {
-            titleResId = R.string.subscription_update_prompt;
-        }
-
-        Builder builder = new Builder(this);
-        builder.setTitle(titleResId)
-                .setSingleChoiceItems(options, 0 /* checkedItem */, this)
-                .setPositiveButton(R.string.subscription_prompt_continue, this)
-                .setNegativeButton(R.string.subscription_prompt_cancel, this);
-        AlertDialog dialog = builder.create();
-        dialog.show();
+    int titleResId;
+    if (!mSubscribedToInfiniteGas) {
+      titleResId = R.string.subscription_period_prompt;
+    } else if (!mAutoRenewEnabled) {
+      titleResId = R.string.subscription_resignup_prompt;
+    } else {
+      titleResId = R.string.subscription_update_prompt;
     }
 
-    @Override
-    public void onClick(DialogInterface dialog, int id) {
-        if (id == 0 /* First choice item */) {
-            mSelectedSubscriptionPeriod = mFirstChoiceSku;
-        } else if (id == 1 /* Second choice item */) {
-            mSelectedSubscriptionPeriod = mSecondChoiceSku;
-        } else if (id == DialogInterface.BUTTON_POSITIVE /* continue button */) {
+    Builder builder = new Builder(this);
+    builder.setTitle(titleResId)
+        .setSingleChoiceItems(options, 0 /* checkedItem */, this)
+        .setPositiveButton(R.string.subscription_prompt_continue, this)
+        .setNegativeButton(R.string.subscription_prompt_cancel, this);
+    AlertDialog dialog = builder.create();
+    dialog.show();
+  }
+
+  @Override public void onClick(DialogInterface dialog, int id) {
+    if (id == 0 /* First choice item */) {
+      mSelectedSubscriptionPeriod = mFirstChoiceSku;
+    } else if (id == 1 /* Second choice item */) {
+      mSelectedSubscriptionPeriod = mSecondChoiceSku;
+    } else if (id == DialogInterface.BUTTON_POSITIVE /* continue button */) {
             /* TODO: for security, generate your payload here for verification. See the comments on
              *        verifyDeveloperPayload() for more info. Since this is a SAMPLE, we just use
              *        an empty string, but on a production app you should carefully generate
              *        this. */
-            String payload = "";
+      String payload = "";
 
-            if (TextUtils.isEmpty(mSelectedSubscriptionPeriod)) {
-                // The user has not changed from the default selection
-                mSelectedSubscriptionPeriod = mFirstChoiceSku;
-            }
+      if (TextUtils.isEmpty(mSelectedSubscriptionPeriod)) {
+        // The user has not changed from the default selection
+        mSelectedSubscriptionPeriod = mFirstChoiceSku;
+      }
 
-            List<String> oldSkus = null;
-            if (!TextUtils.isEmpty(mInfiniteGasSku)
-                    && !mInfiniteGasSku.equals(mSelectedSubscriptionPeriod)) {
-                // The user currently has a valid subscription, any purchase action is going to
-                // replace that subscription
-                oldSkus = new ArrayList<String>();
-                oldSkus.add(mInfiniteGasSku);
-            }
+      List<String> oldSkus = null;
+      if (!TextUtils.isEmpty(mInfiniteGasSku) && !mInfiniteGasSku.equals(
+          mSelectedSubscriptionPeriod)) {
+        // The user currently has a valid subscription, any purchase action is going to
+        // replace that subscription
+        oldSkus = new ArrayList<String>();
+        oldSkus.add(mInfiniteGasSku);
+      }
 
-            setWaitScreen(true);
-            Log.d(TAG, "Launching purchase flow for gas subscription.");
-          // TODO: 14-03-2018 neuro subscription
-            // Reset the dialog options
-            mSelectedSubscriptionPeriod = "";
-            mFirstChoiceSku = "";
-            mSecondChoiceSku = "";
-        } else if (id != DialogInterface.BUTTON_NEGATIVE) {
-            // There are only four buttons, this should not happen
-            Log.e(TAG, "Unknown button clicked in subscription dialog: " + id);
-        }
+      setWaitScreen(true);
+      Log.d(TAG, "Launching purchase flow for gas subscription.");
+      // TODO: 14-03-2018 neuro subscription
+      // Reset the dialog options
+      mSelectedSubscriptionPeriod = "";
+      mFirstChoiceSku = "";
+      mSecondChoiceSku = "";
+    } else if (id != DialogInterface.BUTTON_NEGATIVE) {
+      // There are only four buttons, this should not happen
+      Log.e(TAG, "Unknown button clicked in subscription dialog: " + id);
+    }
+  }
+
+  // Drive button clicked. Burn gas!
+  public void onDriveButtonClicked(View arg0) {
+    Log.d(TAG, "Drive button clicked.");
+    if (!mSubscribedToInfiniteGas && mTank <= 0) {
+      alert("Oh, no! You are out of gas! Try buying some!");
+    } else {
+      if (!mSubscribedToInfiniteGas) --mTank;
+      saveData();
+      alert("Vroooom, you drove a few miles.");
+      updateUi();
+      Log.d(TAG, "Vrooom. Tank is now " + mTank);
+    }
+  }
+
+  // updates UI to reflect model
+  public void updateUi() {
+    // update the car color to reflect premium status or lack thereof
+    ((ImageView) findViewById(R.id.free_or_premium)).setImageResource(
+        mIsPremium ? R.drawable.premium : R.drawable.free);
+
+    // "Upgrade" button is only visible if the user is not premium
+    findViewById(R.id.upgrade_button).setVisibility(mIsPremium ? View.GONE : View.VISIBLE);
+
+    ImageView infiniteGasButton = (ImageView) findViewById(R.id.infinite_gas_button);
+    if (mSubscribedToInfiniteGas) {
+      // If subscription is active, show "Manage Infinite Gas"
+      infiniteGasButton.setImageResource(R.drawable.manage_infinite_gas);
+    } else {
+      // The user does not have infinite gas, show "Get Infinite Gas"
+      infiniteGasButton.setImageResource(R.drawable.get_infinite_gas);
     }
 
-    // Drive button clicked. Burn gas!
-    public void onDriveButtonClicked(View arg0) {
-        Log.d(TAG, "Drive button clicked.");
-        if (!mSubscribedToInfiniteGas && mTank <= 0) alert("Oh, no! You are out of gas! Try buying some!");
-        else {
-            if (!mSubscribedToInfiniteGas) --mTank;
-            saveData();
-            alert("Vroooom, you drove a few miles.");
-            updateUi();
-            Log.d(TAG, "Vrooom. Tank is now " + mTank);
-        }
+    // update gas gauge to reflect tank status
+    if (mSubscribedToInfiniteGas) {
+      ((ImageView) findViewById(R.id.gas_gauge)).setImageResource(R.drawable.gas_inf);
+    } else {
+      int index = mTank >= TANK_RES_IDS.length ? TANK_RES_IDS.length - 1 : mTank;
+      ((ImageView) findViewById(R.id.gas_gauge)).setImageResource(TANK_RES_IDS[index]);
     }
+  }
 
-    // updates UI to reflect model
-    public void updateUi() {
-        // update the car color to reflect premium status or lack thereof
-        ((ImageView)findViewById(R.id.free_or_premium)).setImageResource(mIsPremium ? R.drawable.premium : R.drawable.free);
+  // Enables or disables the "please wait" screen.
+  void setWaitScreen(boolean set) {
+    findViewById(R.id.screen_main).setVisibility(set ? View.GONE : View.VISIBLE);
+    findViewById(R.id.screen_wait).setVisibility(set ? View.VISIBLE : View.GONE);
+  }
 
-        // "Upgrade" button is only visible if the user is not premium
-        findViewById(R.id.upgrade_button).setVisibility(mIsPremium ? View.GONE : View.VISIBLE);
+  void complain(String message) {
+    Log.e(TAG, "**** TrivialDrive Error: " + message);
+    alert("Error: " + message);
+  }
 
-        ImageView infiniteGasButton = (ImageView) findViewById(R.id.infinite_gas_button);
-        if (mSubscribedToInfiniteGas) {
-            // If subscription is active, show "Manage Infinite Gas"
-            infiniteGasButton.setImageResource(R.drawable.manage_infinite_gas);
-        } else {
-            // The user does not have infinite gas, show "Get Infinite Gas"
-            infiniteGasButton.setImageResource(R.drawable.get_infinite_gas);
-        }
+  void alert(String message) {
+    AlertDialog.Builder bld = new AlertDialog.Builder(this);
+    bld.setMessage(message);
+    bld.setNeutralButton("OK", null);
+    Log.d(TAG, "Showing alert dialog: " + message);
+    bld.create()
+        .show();
+  }
 
-        // update gas gauge to reflect tank status
-        if (mSubscribedToInfiniteGas) {
-            ((ImageView)findViewById(R.id.gas_gauge)).setImageResource(R.drawable.gas_inf);
-        }
-        else {
-            int index = mTank >= TANK_RES_IDS.length ? TANK_RES_IDS.length - 1 : mTank;
-            ((ImageView)findViewById(R.id.gas_gauge)).setImageResource(TANK_RES_IDS[index]);
-        }
-    }
-
-    // Enables or disables the "please wait" screen.
-    void setWaitScreen(boolean set) {
-        findViewById(R.id.screen_main).setVisibility(set ? View.GONE : View.VISIBLE);
-        findViewById(R.id.screen_wait).setVisibility(set ? View.VISIBLE : View.GONE);
-    }
-
-    void complain(String message) {
-        Log.e(TAG, "**** TrivialDrive Error: " + message);
-        alert("Error: " + message);
-    }
-
-    void alert(String message) {
-        AlertDialog.Builder bld = new AlertDialog.Builder(this);
-        bld.setMessage(message);
-        bld.setNeutralButton("OK", null);
-        Log.d(TAG, "Showing alert dialog: " + message);
-        bld.create().show();
-    }
-
-    void saveData() {
+  void saveData() {
 
         /*
          * WARNING: on a real application, we recommend you save data in a secure way to
@@ -349,15 +349,15 @@ public class MainActivity extends Activity implements OnClickListener {
          * SharedPreferences.
          */
 
-        SharedPreferences.Editor spe = getPreferences(MODE_PRIVATE).edit();
-        spe.putInt("tank", mTank);
-        spe.apply();
-        Log.d(TAG, "Saved data: tank = " + String.valueOf(mTank));
-    }
+    SharedPreferences.Editor spe = getPreferences(MODE_PRIVATE).edit();
+    spe.putInt("tank", mTank);
+    spe.apply();
+    Log.d(TAG, "Saved data: tank = " + String.valueOf(mTank));
+  }
 
-    void loadData() {
-        SharedPreferences sp = getPreferences(MODE_PRIVATE);
-        mTank = sp.getInt("tank", 2);
-        Log.d(TAG, "Loaded data: tank = " + String.valueOf(mTank));
-    }
+  void loadData() {
+    SharedPreferences sp = getPreferences(MODE_PRIVATE);
+    mTank = sp.getInt("tank", 2);
+    Log.d(TAG, "Loaded data: tank = " + String.valueOf(mTank));
+  }
 }
