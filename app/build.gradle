@@ -46,16 +46,26 @@ android {
         }
     }
 
+    signingConfigs {
+        release {
+            storeFile = file(project.ASF_WALLET_STORE_FILE)
+            storePassword = project.ASF_WALLET_STORE_PASSWORD
+            keyAlias = project.ASF_WALLET_KEY_ALIAS
+            keyPassword = project.ASF_WALLET_KEY_PASSWORD
+        }
+    }
+
     buildTypes {
         release {
-            minifyEnabled true
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
 }
 
 dependencies {
-    compile 'com.android.support:appcompat-v7:25.3.0'
+    compile 'com.android.support:appcompat-v7:25.4.0'
 
     // https://mvnrepository.com/artifact/io.reactivex.rxjava2/rxjava
     api group: 'io.reactivex.rxjava2', name: 'rxjava', version: '2.1.10'
