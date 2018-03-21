@@ -12,6 +12,8 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.Toast;
+import com.asf.appcoins.sdk.payment.PaymentDetails;
 import com.asf.appcoins.sdk.payment.PaymentStatus;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +21,7 @@ import java.util.List;
 import static com.aptoide.iabexample.Application.appCoinsSdk;
 
 /**
- * Example game using in-app billing version 3.
+ * Example game using in-app billing version 4.
  *
  * Before attempting to run this sample, please read the README file. It
  * contains important information on how to set up this project.
@@ -72,14 +74,6 @@ import static com.aptoide.iabexample.Application.appCoinsSdk;
 public class MainActivity extends Activity implements OnClickListener {
   // Debug tag, for logging
   static final String TAG = "TrivialDrive";
-  // SKUs for our products: the premium upgrade (non-consumable) and gas (consumable)
-  static final String SKU_PREMIUM_LABEL = "Premium";
-  static final String SKU_PREMIUM_ID = "premium";
-  static final String SKU_GAS_LABEL = "Gas";
-  static final String SKU_GAS_ID = "gas";
-  // SKU for our subscription (infinite gas)
-  static final String SKU_INFINITE_GAS_MONTHLY = "infinite_gas_monthly";
-  static final String SKU_INFINITE_GAS_YEARLY = "infinite_gas_yearly";
   // How many units (1/4 tank is our unit) fill in the tank.
   static final int TANK_MAX = 4;
   // Graphics for the gas gauge
@@ -123,39 +117,37 @@ public class MainActivity extends Activity implements OnClickListener {
     super.onActivityResult(requestCode, resultCode, data);
 
     if (appCoinsSdk.onActivityResult(requestCode, requestCode, data)) {
-      // not handled, so handle it ourselves (here's where you'd
-      // perform any handling of activity results not related to in-app
-      // billing...
-
       appCoinsSdk.getCurrentPayment()
-          .subscribe(paymentDetails -> runOnUiThread(() -> {
-            if (paymentDetails.getPaymentStatus() == PaymentStatus.SUCCESS) {
-              String skuId = paymentDetails.getSkuId();
-              appCoinsSdk.consume(skuId);
-
-              // successfully consumed, so we apply the effects of the item in our
-              // game world's logic, which in our case means filling the gas tank a bit
-              if (SKU_GAS_ID.equals(skuId)) {
-                Log.d(TAG, "Consumption successful. Provisioning.");
-                mTank = mTank == TANK_MAX ? TANK_MAX : mTank + 1;
-                saveData();
-                alert(
-                    "You filled 1/4 tank. Your tank is now " + String.valueOf(mTank) + "/4 full!");
-              } else {
-                if (SKU_PREMIUM_ID.equals(skuId)) {
-                  // bought the premium upgrade!
-                  Log.d(TAG, "Purchase is premium upgrade. Congratulating user.");
-                  alert("Thank you for upgrading to premium!");
-                  mIsPremium = true;
-                }
-              }
-
-              updateUi();
-              Log.d(TAG, "End consumption flow.");
-            }
-            setWaitScreen(false);
-          }));
+          .subscribe(paymentDetails -> runOnUiThread(() -> handlePayment(paymentDetails)));
     }
+  }
+
+  private void handlePayment(PaymentDetails paymentDetails) {
+    if (paymentDetails.getPaymentStatus() == PaymentStatus.SUCCESS) {
+      String skuId = paymentDetails.getSkuId();
+      appCoinsSdk.consume(skuId);
+
+      // successfully consumed, so we apply the effects of the item in our
+      // game world's logic, which in our case means filling the gas tank a bit
+      if (Skus.SKU_GAS_ID.equals(skuId)) {
+        Log.d(TAG, "Consumption successful. Provisioning.");
+        mTank = mTank == TANK_MAX ? TANK_MAX : mTank + 1;
+        saveData();
+        alert("You filled 1/4 tank. Your tank is now " + String.valueOf(mTank) + "/4 full!");
+      } else {
+        if (Skus.SKU_PREMIUM_ID.equals(skuId)) {
+          // bought the premium upgrade!
+          Log.d(TAG, "Purchase is premium upgrade. Congratulating user.");
+          alert("Thank you for upgrading to premium!");
+          mIsPremium = true;
+          saveData();
+        }
+      }
+
+      updateUi();
+      Log.d(TAG, "End consumption flow.");
+    }
+    setWaitScreen(false);
   }
 
   // User clicked the "Buy Gas" button
@@ -177,12 +169,7 @@ public class MainActivity extends Activity implements OnClickListener {
     setWaitScreen(true);
     Log.d(TAG, "Launching purchase flow for gas.");
 
-        /* TODO: for security, generate your payload here for verification. See the comments on
-         *        verifyDeveloperPayload() for more info. Since this is a SAMPLE, we just use
-         *        an empty string, but on a production app you should carefully generate this. */
-    String payload = "";
-
-    appCoinsSdk.buy(SKU_GAS_ID, this);
+    appCoinsSdk.buy(Skus.SKU_GAS_ID, this);
   }
 
   // User clicked the "Upgrade to Premium" button.
@@ -190,35 +177,37 @@ public class MainActivity extends Activity implements OnClickListener {
     Log.d(TAG, "Upgrade button clicked; launching purchase flow for upgrade.");
     setWaitScreen(true);
 
-        /* TODO: for security, generate your payload here for verification. See the comments on
-         *        verifyDeveloperPayload() for more info. Since this is a SAMPLE, we just use
-         *        an empty string, but on a production app you should carefully generate this. */
-    String payload = "";
-    appCoinsSdk.buy(SKU_PREMIUM_ID, this);
+    appCoinsSdk.buy(Skus.SKU_PREMIUM_ID, this);
   }
 
   // "Subscribe to infinite gas" button clicked. Explain to user, then start purchase
   // flow for subscription.
   public void onInfiniteGasButtonClicked(View arg0) {
+    if (true) {
+      Toast.makeText(this, "Not Implemented", Toast.LENGTH_SHORT)
+          .show();
+      return;
+    }
+
     CharSequence[] options;
     if (!mSubscribedToInfiniteGas || !mAutoRenewEnabled) {
       // Both subscription options should be available
       options = new CharSequence[2];
       options[0] = getString(R.string.subscription_period_monthly);
       options[1] = getString(R.string.subscription_period_yearly);
-      mFirstChoiceSku = SKU_INFINITE_GAS_MONTHLY;
-      mSecondChoiceSku = SKU_INFINITE_GAS_YEARLY;
+      mFirstChoiceSku = Skus.SKU_INFINITE_GAS_MONTHLY_ID;
+      mSecondChoiceSku = Skus.SKU_INFINITE_GAS_YEARLY_ID;
     } else {
       // This is the subscription upgrade/downgrade path, so only one option is valid
       options = new CharSequence[1];
-      if (mInfiniteGasSku.equals(SKU_INFINITE_GAS_MONTHLY)) {
+      if (mInfiniteGasSku.equals(Skus.SKU_INFINITE_GAS_MONTHLY_ID)) {
         // Give the option to upgrade to yearly
         options[0] = getString(R.string.subscription_period_yearly);
-        mFirstChoiceSku = SKU_INFINITE_GAS_YEARLY;
+        mFirstChoiceSku = Skus.SKU_INFINITE_GAS_YEARLY_ID;
       } else {
         // Give the option to downgrade to monthly
         options[0] = getString(R.string.subscription_period_monthly);
-        mFirstChoiceSku = SKU_INFINITE_GAS_MONTHLY;
+        mFirstChoiceSku = Skus.SKU_INFINITE_GAS_MONTHLY_ID;
       }
       mSecondChoiceSku = "";
     }
@@ -247,23 +236,18 @@ public class MainActivity extends Activity implements OnClickListener {
     } else if (id == 1 /* Second choice item */) {
       mSelectedSubscriptionPeriod = mSecondChoiceSku;
     } else if (id == DialogInterface.BUTTON_POSITIVE /* continue button */) {
-            /* TODO: for security, generate your payload here for verification. See the comments on
-             *        verifyDeveloperPayload() for more info. Since this is a SAMPLE, we just use
-             *        an empty string, but on a production app you should carefully generate
-             *        this. */
-      String payload = "";
 
       if (TextUtils.isEmpty(mSelectedSubscriptionPeriod)) {
         // The user has not changed from the default selection
         mSelectedSubscriptionPeriod = mFirstChoiceSku;
       }
 
-      List<String> oldSkus = null;
+      List<String> oldSkus;
       if (!TextUtils.isEmpty(mInfiniteGasSku) && !mInfiniteGasSku.equals(
           mSelectedSubscriptionPeriod)) {
         // The user currently has a valid subscription, any purchase action is going to
         // replace that subscription
-        oldSkus = new ArrayList<String>();
+        oldSkus = new ArrayList<>();
         oldSkus.add(mInfiniteGasSku);
       }
 
@@ -342,14 +326,8 @@ public class MainActivity extends Activity implements OnClickListener {
   }
 
   void saveData() {
-
-        /*
-         * WARNING: on a real application, we recommend you save data in a secure way to
-         * prevent tampering. For simplicity in this sample, we simply store the data using a
-         * SharedPreferences.
-         */
-
     SharedPreferences.Editor spe = getPreferences(MODE_PRIVATE).edit();
+    spe.putBoolean("mIsPremium", mIsPremium);
     spe.putInt("tank", mTank);
     spe.apply();
     Log.d(TAG, "Saved data: tank = " + String.valueOf(mTank));
@@ -358,6 +336,7 @@ public class MainActivity extends Activity implements OnClickListener {
   void loadData() {
     SharedPreferences sp = getPreferences(MODE_PRIVATE);
     mTank = sp.getInt("tank", 2);
+    mIsPremium = sp.getBoolean("mIsPremium", mIsPremium);
     Log.d(TAG, "Loaded data: tank = " + String.valueOf(mTank));
   }
 }
