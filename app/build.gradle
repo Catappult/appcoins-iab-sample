@@ -20,32 +20,6 @@ android {
         targetCompatibility 1.8
     }
 
-    productFlavors {
-        googleiab {
-            buildConfigField "String", "IAB_BIND_ACTION",
-                "\"" + project.GOOGLE_IAB_BIND_ACTION + "\""
-            buildConfigField "String", "IAB_KEY",
-                "\"" + project.GOOGLE_IAB_KEY + "\""
-            buildConfigField "String", "IAB_BIND_PACKAGE",
-                "\"" + project.GOOGLE_IAB_BIND_PACKAGE + "\""
-            buildConfigField "String", "IAB_UPDATE_ACTION",
-                "\"" + project.GOOGLE_IAB_UPDATE_ACTION+ "\""
-            manifestPlaceholders = [iabPermission: project.GOOGLE_IAB_PERMISSION]
-        }
-
-        aptoideiab {
-            buildConfigField "String", "IAB_BIND_ACTION",
-                "\"" + project.APTOIDE_IAB_BIND_ACTION + "\""
-            buildConfigField "String", "IAB_KEY",
-                "\"" + project.APTOIDE_IAB_KEY + "\""
-            buildConfigField "String", "IAB_BIND_PACKAGE",
-                "\"" + project.APTOIDE_IAB_BIND_PACKAGE + "\""
-            buildConfigField "String", "IAB_UPDATE_ACTION",
-                "\"" + project.APTOIDE_IAB_UPDATE_ACTION+ "\""
-            manifestPlaceholders = [iabPermission: project.APTOIDE_IAB_PERMISSION]
-        }
-    }
-
     signingConfigs {
         release {
             storeFile = file(project.ASF_WALLET_STORE_FILE)

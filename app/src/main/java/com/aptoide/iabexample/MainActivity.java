@@ -110,28 +110,6 @@ public class MainActivity extends Activity implements OnClickListener {
         // load game data
         loadData();
 
-        /* base64EncodedPublicKey should be YOUR APPLICATION'S PUBLIC KEY
-         * (that you got from your Aptoide's back office). This is not your
-         * developer public key, it's the *app-specific* public key.
-         *
-         * Instead of just storing the entire literal string here embedded in the
-         * program,  construct the key at runtime from pieces or
-         * use bit manipulation (for example, XOR with some other string) to hide
-         * the actual key.  The key itself is not secret information, but we don't
-         * want to make it easy for an attacker to replace the public key with one
-         * of their own and then fake messages from the server.
-         */
-        String base64EncodedPublicKey = BuildConfig.IAB_KEY;
-
-        // Some sanity checks to see if the developer (that's you!) really followed the
-        // instructions to run this sample (don't put these checks on your app!)
-        if (base64EncodedPublicKey.contains("CONSTRUCT_YOUR")) {
-            throw new RuntimeException("Please put your app's public key in MainActivity.java. See README.");
-        }
-      //if (getPackageName().startsWith("com.aptoide")) {
-      //    throw new RuntimeException("Please change the sample's package name! See README.");
-      //}
-
       updateUi();
     }
 
