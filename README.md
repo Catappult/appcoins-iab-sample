@@ -31,11 +31,6 @@ And in your **app's buildscript**, add the following dependency:
 
 ```
 dependencies {
-    // https://mvnrepository.com/artifact/io.reactivex.rxjava2/rxjava
-    api group: 'io.reactivex.rxjava2', name: 'rxjava', version: '2.1.10'
-    // https://mvnrepository.com/artifact/org.web3j/core
-    api group: 'org.web3j', name: 'core', version: '3.3.1-android'
-
     api 'com.asfoundation:sdk-android:0.1.0a'
 }
 ```
