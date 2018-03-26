@@ -31,7 +31,7 @@ And in your **app's buildscript**, add the following dependency:
 
 ```
 dependencies {
-    api 'com.asfoundation:sdk-android:0.1.0a'
+    api 'com.asfoundation:sdk-android:0.1.1a'
 }
 ```
 

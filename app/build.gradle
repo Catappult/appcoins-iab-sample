@@ -30,8 +30,13 @@ android {
     }
 
     buildTypes {
-        release {
+        debug {
             minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+
+        release {
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
         }
@@ -41,6 +46,6 @@ android {
 dependencies {
     compile 'com.android.support:appcompat-v7:25.4.0'
 
-    api 'com.asfoundation:sdk-android:0.1.0a'
+    api 'com.asfoundation:sdk-android:0.1.1a'
 
 }
