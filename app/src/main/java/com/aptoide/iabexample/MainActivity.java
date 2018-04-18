@@ -13,12 +13,12 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
-import com.asf.appcoins.sdk.payment.PaymentDetails;
-import com.asf.appcoins.sdk.payment.PaymentStatus;
+import com.asf.appcoins.sdk.iab.payment.PaymentDetails;
+import com.asf.appcoins.sdk.iab.payment.PaymentStatus;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.aptoide.iabexample.Application.appCoinsSdk;
+import static com.aptoide.iabexample.Application.appCoinsIab;
 
 /**
  * Example game using in-app billing version 4.
@@ -116,8 +116,8 @@ public class MainActivity extends Activity implements OnClickListener {
     Log.d(TAG, "onActivityResult(" + requestCode + "," + resultCode + "," + data);
     super.onActivityResult(requestCode, resultCode, data);
 
-    if (appCoinsSdk.onActivityResult(requestCode, requestCode, data)) {
-      appCoinsSdk.getCurrentPayment()
+    if (appCoinsIab.onActivityResult(requestCode, requestCode, data)) {
+      appCoinsIab.getCurrentPayment()
           .subscribe(paymentDetails -> runOnUiThread(() -> handlePayment(paymentDetails)));
     }
   }
@@ -125,7 +125,7 @@ public class MainActivity extends Activity implements OnClickListener {
   private void handlePayment(PaymentDetails paymentDetails) {
     if (paymentDetails.getPaymentStatus() == PaymentStatus.SUCCESS) {
       String skuId = paymentDetails.getSkuId();
-      appCoinsSdk.consume(skuId);
+      appCoinsIab.consume(skuId);
 
       // successfully consumed, so we apply the effects of the item in our
       // game world's logic, which in our case means filling the gas tank a bit
@@ -169,7 +169,7 @@ public class MainActivity extends Activity implements OnClickListener {
     setWaitScreen(true);
     Log.d(TAG, "Launching purchase flow for gas.");
 
-    appCoinsSdk.buy(Skus.SKU_GAS_ID, this);
+    appCoinsIab.buy(Skus.SKU_GAS_ID, this);
   }
 
   // User clicked the "Upgrade to Premium" button.
@@ -177,7 +177,7 @@ public class MainActivity extends Activity implements OnClickListener {
     Log.d(TAG, "Upgrade button clicked; launching purchase flow for upgrade.");
     setWaitScreen(true);
 
-    appCoinsSdk.buy(Skus.SKU_PREMIUM_ID, this);
+    appCoinsIab.buy(Skus.SKU_PREMIUM_ID, this);
   }
 
   // "Subscribe to infinite gas" button clicked. Explain to user, then start purchase

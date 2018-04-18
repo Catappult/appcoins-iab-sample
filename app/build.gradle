@@ -46,6 +46,6 @@ android {
 dependencies {
     compile 'com.android.support:appcompat-v7:25.4.0'
 
-    api 'com.asfoundation:sdk-android:0.1.1a'
+    api "com.asfoundation:appcoins:0.2.1a"
 
 }
