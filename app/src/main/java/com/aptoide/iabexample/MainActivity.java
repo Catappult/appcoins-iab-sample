@@ -13,8 +13,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
-import com.asf.appcoins.sdk.payment.PaymentDetails;
-import com.asf.appcoins.sdk.payment.PaymentStatus;
+import com.asf.appcoins.sdk.iab.payment.PaymentDetails;
+import com.asf.appcoins.sdk.iab.payment.PaymentStatus;
 import java.util.ArrayList;
 import java.util.List;
 

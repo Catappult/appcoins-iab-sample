@@ -1,8 +1,10 @@
 package com.aptoide.iabexample;
 
-import com.asf.appcoins.sdk.AppCoinsSdk;
-import com.asf.appcoins.sdk.AppCoinsSdkBuilder;
-import com.asf.appcoins.sdk.entity.SKU;
+import com.asf.appcoins.sdk.ads.AppCoinsAds;
+import com.asf.appcoins.sdk.ads.AppCoinsAdsBuilder;
+import com.asf.appcoins.sdk.iab.AppCoinsIab;
+import com.asf.appcoins.sdk.iab.AppCoinsIabBuilder;
+import com.asf.appcoins.sdk.iab.entity.SKU;
 import java.math.BigDecimal;
 import java.util.LinkedList;
 import java.util.List;
@@ -13,15 +15,22 @@ import java.util.List;
 
 public class Application extends android.app.Application {
 
-  public static AppCoinsSdk appCoinsSdk;
+  public static AppCoinsIab appCoinsSdk;
+
+  private static AppCoinsAds adsSdk;
+
   private final String developerAddress = "0x4fbcc5ce88493c3d9903701c143af65f54481119";
 
   @Override public void onCreate() {
     super.onCreate();
 
-    appCoinsSdk = new AppCoinsSdkBuilder(developerAddress).withSkus(buildSkus())
-        .withDebug(true)
-        .createAppCoinsSdk();
+    appCoinsSdk = new AppCoinsIabBuilder(developerAddress).withSkus(buildSkus())
+        .withDebug(false)
+        .createAppCoinsIab();
+
+    adsSdk = new AppCoinsAdsBuilder().withDebug(false)
+        .createAdvertisementSdk(this);
+    adsSdk.init(this);
   }
 
   private List<SKU> buildSkus() {

@@ -18,3 +18,12 @@
 
 -dontwarn java.nio.file.**
 -dontwarn jnr.**
+
+-keep class com.squareup.okhttp.** { *;}
+
+-dontwarn okhttp3.**
+
+-dontwarn retrofit2.Platform$Java8
+
+#-keepattributes Signature
+#-keepattributes Exceptions
