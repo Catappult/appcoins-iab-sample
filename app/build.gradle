@@ -49,5 +49,4 @@ dependencies {
     api 'com.asfoundation:appcoins-ads:0.2.3a'
     api 'com.asfoundation:appcoins-iab:0.2.3a'
 
-
 }

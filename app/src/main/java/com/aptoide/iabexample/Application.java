@@ -15,7 +15,7 @@ import java.util.List;
 
 public class Application extends android.app.Application {
 
-  public static AppCoinsIab appCoinsSdk;
+  public static AppCoinsIab appCoinsIab;
 
   private static AppCoinsAds adsSdk;
 
@@ -24,13 +24,14 @@ public class Application extends android.app.Application {
   @Override public void onCreate() {
     super.onCreate();
 
-    appCoinsSdk = new AppCoinsIabBuilder(developerAddress).withSkus(buildSkus())
+    appCoinsIab = new AppCoinsIabBuilder(developerAddress).withSkus(buildSkus())
         .withDebug(false)
         .createAppCoinsIab();
 
     adsSdk = new AppCoinsAdsBuilder().withDebug(false)
         .createAdvertisementSdk(this);
     adsSdk.init(this);
+
   }
 
   private List<SKU> buildSkus() {
