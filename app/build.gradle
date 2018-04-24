@@ -9,9 +9,9 @@ android {
     defaultConfig {
         applicationId "com.asfoundation.trivialdrivesample"
         minSdkVersion 21
-        targetSdkVersion 25
-        versionCode 11
-        versionName "1.8.1"
+        targetSdkVersion 27
+        versionCode 12
+        versionName "1.9.0"
         multiDexEnabled true
     }
 
@@ -44,8 +44,9 @@ android {
 }
 
 dependencies {
-    compile 'com.android.support:appcompat-v7:25.4.0'
+    implementation 'com.android.support:appcompat-v7:25.4.0'
 
-    api "com.asfoundation:appcoins:0.2.1a"
+    api 'com.asfoundation:appcoins-ads:0.2.3a'
+    api 'com.asfoundation:appcoins-iab:0.2.3a'
 
 }

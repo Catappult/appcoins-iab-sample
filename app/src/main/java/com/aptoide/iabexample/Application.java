@@ -1,5 +1,7 @@
 package com.aptoide.iabexample;
 
+import com.asf.appcoins.sdk.ads.AppCoinsAds;
+import com.asf.appcoins.sdk.ads.AppCoinsAdsBuilder;
 import com.asf.appcoins.sdk.iab.AppCoinsIab;
 import com.asf.appcoins.sdk.iab.AppCoinsIabBuilder;
 import com.asf.appcoins.sdk.iab.entity.SKU;
@@ -14,14 +16,22 @@ import java.util.List;
 public class Application extends android.app.Application {
 
   public static AppCoinsIab appCoinsIab;
+
+  private static AppCoinsAds adsSdk;
+
   private final String developerAddress = "0x4fbcc5ce88493c3d9903701c143af65f54481119";
 
   @Override public void onCreate() {
     super.onCreate();
 
     appCoinsIab = new AppCoinsIabBuilder(developerAddress).withSkus(buildSkus())
-        .withDebug(true)
+        .withDebug(false)
         .createAppCoinsIab();
+
+    adsSdk = new AppCoinsAdsBuilder().withDebug(false)
+        .createAdvertisementSdk(this);
+    adsSdk.init(this);
+
   }
 
   private List<SKU> buildSkus() {
