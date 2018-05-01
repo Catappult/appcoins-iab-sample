@@ -46,7 +46,7 @@ android {
 dependencies {
     implementation 'com.android.support:appcompat-v7:25.4.0'
 
-    api 'com.asfoundation:appcoins-ads:0.2.3a'
-    api 'com.asfoundation:appcoins-iab:0.2.3a'
+    api 'com.asfoundation:appcoins-ads:0.3.0a.dev'
+    api 'com.asfoundation:appcoins-iab:0.3.0a.dev'
 
 }
