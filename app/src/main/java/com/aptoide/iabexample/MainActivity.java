@@ -118,6 +118,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
     if (appCoinsIab.onActivityResult(requestCode, requestCode, data)) {
       appCoinsIab.getCurrentPayment()
+          .distinctUntilChanged(PaymentDetails::getPaymentStatus)
           .subscribe(paymentDetails -> runOnUiThread(() -> handlePayment(paymentDetails)));
     }
   }
