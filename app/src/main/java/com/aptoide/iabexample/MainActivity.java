@@ -123,7 +123,7 @@ public class MainActivity extends Activity implements OnClickListener {
   }
 
   private void handlePayment(PaymentDetails paymentDetails) {
-    if (paymentDetails.getPaymentStatus() == PaymentStatus.SUCCESS) {
+    if (paymentDetails.getPaymentStatus() == PaymentStatus.PENDING) {
       String skuId = paymentDetails.getSkuId();
       appCoinsIab.consume(skuId);
 
