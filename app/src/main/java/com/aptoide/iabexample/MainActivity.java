@@ -8,6 +8,7 @@ import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -15,6 +16,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 import com.asf.appcoins.sdk.iab.payment.PaymentDetails;
 import com.asf.appcoins.sdk.iab.payment.PaymentStatus;
+import io.reactivex.disposables.Disposable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -170,7 +172,7 @@ public class MainActivity extends Activity implements OnClickListener {
     setWaitScreen(true);
     Log.d(TAG, "Launching purchase flow for gas.");
 
-    appCoinsIab.buy(Skus.SKU_GAS_ID, this);
+    startBuyFlow(Skus.SKU_GAS_ID);
   }
 
   // User clicked the "Upgrade to Premium" button.
@@ -178,7 +180,19 @@ public class MainActivity extends Activity implements OnClickListener {
     Log.d(TAG, "Upgrade button clicked; launching purchase flow for upgrade.");
     setWaitScreen(true);
 
-    appCoinsIab.buy(Skus.SKU_PREMIUM_ID, this);
+    startBuyFlow(Skus.SKU_PREMIUM_ID);
+  }
+
+  @NonNull private Disposable startBuyFlow(String skuPremiumId) {
+    return appCoinsIab.buy(skuPremiumId, this)
+        .subscribe(() -> {
+          // Buy process successfully started.
+          setWaitScreen(false);
+        }, (throwable) -> {
+          // User didn't install wallet
+          throwable.printStackTrace();
+          setWaitScreen(false);
+        });
   }
 
   // "Subscribe to infinite gas" button clicked. Explain to user, then start purchase
