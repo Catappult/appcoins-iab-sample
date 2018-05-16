@@ -120,13 +120,14 @@ public class MainActivity extends Activity implements OnClickListener {
 
     if (appCoinsIab.onActivityResult(requestCode, requestCode, data)) {
       appCoinsIab.getCurrentPayment()
-          .distinctUntilChanged(PaymentDetails::getPaymentStatus)
+          .distinctUntilChanged(PaymentDetails::getPaymentStatus).take(1)
           .subscribe(paymentDetails -> runOnUiThread(() -> handlePayment(paymentDetails)));
     }
   }
 
   private void handlePayment(PaymentDetails paymentDetails) {
-    if (paymentDetails.getPaymentStatus() == PaymentStatus.PENDING) {
+    if (paymentDetails.getPaymentStatus() == PaymentStatus.PENDING
+        || paymentDetails.getPaymentStatus() == PaymentStatus.SUCCESS) {
       String skuId = paymentDetails.getSkuId();
       appCoinsIab.consume(skuId);
 
