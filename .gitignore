@@ -7,3 +7,7 @@
 /local.properties
 *.iml
 *.apk
+/app/debug
+/app/mainNetwork
+/app/release
+/app/ropstenNetwork
