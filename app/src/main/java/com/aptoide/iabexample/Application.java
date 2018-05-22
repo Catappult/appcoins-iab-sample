@@ -25,10 +25,10 @@ public class Application extends android.app.Application {
     super.onCreate();
 
     appCoinsIab = new AppCoinsIabBuilder(developerAddress).withSkus(buildSkus())
-        .withDebug(BuildConfig.DEBUG)
+        .withDebug(BuildConfig.TEST_NETWORK)
         .createAppCoinsIab();
 
-    adsSdk = new AppCoinsAdsBuilder().withDebug(BuildConfig.DEBUG)
+    adsSdk = new AppCoinsAdsBuilder().withDebug(BuildConfig.TEST_NETWORK)
         .createAdvertisementSdk(this);
     adsSdk.init(this);
 

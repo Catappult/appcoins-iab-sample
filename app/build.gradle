@@ -1,52 +1,77 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion '27.0.3'
+  compileSdkVersion 25
+  buildToolsVersion '27.0.3'
 
-    flavorDimensions "default"
+  flavorDimensions "default"
 
-    defaultConfig {
-        applicationId "com.asfoundation.trivialdrivesample"
-        minSdkVersion 21
-        targetSdkVersion 27
-        versionCode 13
-        versionName "1.9.1"
-        multiDexEnabled true
+  defaultConfig {
+    applicationId "com.asfoundation.trivialdrivesample"
+    minSdkVersion 21
+    targetSdkVersion 27
+    versionCode 15
+    versionName "1.9.3"
+    multiDexEnabled true
+  }
+
+  compileOptions {
+    sourceCompatibility 1.8
+    targetCompatibility 1.8
+  }
+
+  signingConfigs {
+    release {
+      storeFile = file(project.ASF_WALLET_STORE_FILE)
+      storePassword = project.ASF_WALLET_STORE_PASSWORD
+      keyAlias = project.ASF_WALLET_KEY_ALIAS
+      keyPassword = project.ASF_WALLET_KEY_PASSWORD
+    }
+  }
+
+  buildTypes {
+    debug {
+      minifyEnabled false
+      proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+      applicationIdSuffix ".debug"
+      applicationVariants.all { variant -> renameArtifact(defaultConfig)
+      }
+
     }
 
-    compileOptions {
-        sourceCompatibility 1.8
-        targetCompatibility 1.8
+    release {
+      minifyEnabled true
+      proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+      signingConfig signingConfigs.release
+      applicationVariants.all { variant -> renameArtifact(defaultConfig)
+      }
+    }
+  }
+
+  productFlavors {
+    mainNetwork {
+      buildConfigField "boolean", "TEST_NETWORK", "false"
     }
 
-    signingConfigs {
-        release {
-            storeFile = file(project.ASF_WALLET_STORE_FILE)
-            storePassword = project.ASF_WALLET_STORE_PASSWORD
-            keyAlias = project.ASF_WALLET_KEY_ALIAS
-            keyPassword = project.ASF_WALLET_KEY_PASSWORD
-        }
+    ropstenNetwork{
+      applicationIdSuffix ".test"
+      buildConfigField "boolean", "TEST_NETWORK", "true"
     }
-
-    buildTypes {
-        debug {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-        }
-
-        release {
-            minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.release
-        }
-    }
+  }
 }
 
 dependencies {
-    implementation 'com.android.support:appcompat-v7:25.4.0'
+  implementation 'com.android.support:appcompat-v7:25.4.0'
 
-    api 'com.asfoundation:appcoins-ads:0.3.0a'
-    api 'com.asfoundation:appcoins-iab:0.3.0a'
+  api 'com.asfoundation:appcoins-ads:0.3.1a'
+  api 'com.asfoundation:appcoins-iab:0.3.1a'
+}
 
+def renameArtifact(defaultConfig) {
+  android.applicationVariants.all { variant ->
+    variant.outputs.all {
+      def fileName = "trivial-drive-asf-sample-${defaultConfig.versionName}_${variant.name}"
+      outputFileName = new File("${fileName}.apk")
+    }
+  }
 }
