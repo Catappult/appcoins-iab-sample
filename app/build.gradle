@@ -10,8 +10,8 @@ android {
     applicationId "com.asfoundation.trivialdrivesample"
     minSdkVersion 21
     targetSdkVersion 27
-    versionCode 15
-    versionName "1.9.3"
+    versionCode 16
+    versionName "1.9.4"
     multiDexEnabled true
   }
 
@@ -63,8 +63,8 @@ android {
 dependencies {
   implementation 'com.android.support:appcompat-v7:25.4.0'
 
-  api 'com.asfoundation:appcoins-ads:0.3.1a'
-  api 'com.asfoundation:appcoins-iab:0.3.1a'
+  api 'com.asfoundation:appcoins-ads:0.3.2a'
+  api 'com.asfoundation:appcoins-iab:0.3.2a'
 }
 
 def renameArtifact(defaultConfig) {
