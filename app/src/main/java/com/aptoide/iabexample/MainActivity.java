@@ -257,6 +257,28 @@ public class MainActivity extends Activity
 
       // Have we been disposed of in the meantime? If so, quit.
       if (mHelper == null) return;
+
+      // Important: Dynamically register for broadcast messages about updated purchases.
+      // We register the receiver here instead of as a <receiver> in the Manifest
+      // because we always call getPurchases() at startup, so therefore we can ignore
+      // any broadcasts sent while the app isn't running.
+      // Note: registering this listener in an Activity is a bad idea, but is done here
+      // because this is a SAMPLE. Regardless, the receiver must be registered after
+      // IabHelper is setup, but before first call to getPurchases().
+      // Verify the action for the broadcast receiver is empty meaning the feature is not
+      // supported and there is no reason to create a listener.
+      //if (!IabBroadcastReceiver.ACTION.isEmpty()) {
+      //  mBroadcastReceiver = new IabBroadcastReceiver(MainActivity.this);
+      //  IntentFilter broadcastFilter = new IntentFilter(IabBroadcastReceiver.ACTION);
+      //  registerReceiver(mBroadcastReceiver, broadcastFilter);
+      //}
+      // IAB is fully set up. Now, let's get an inventory of stuff we own.
+      Log.d(TAG, "Setup successful. Querying inventory.");
+      try {
+        mHelper.queryInventoryAsync(mGotInventoryListener);
+      } catch (IabHelper.IabAsyncInProgressException e) {
+        complain("Error querying inventory. Another async operation in progress.");
+      }
     });
 
     updateUi();
