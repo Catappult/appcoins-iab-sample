@@ -16,6 +16,8 @@ import android.widget.ImageView;
 import android.widget.Toast;
 import com.asf.appcoins.sdk.iab.payment.PaymentDetails;
 import com.asf.appcoins.sdk.iab.payment.PaymentStatus;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import java.util.ArrayList;
 import java.util.List;
@@ -119,9 +121,11 @@ public class MainActivity extends Activity implements OnClickListener {
     super.onActivityResult(requestCode, resultCode, data);
 
     if (appCoinsIab.onActivityResult(requestCode, requestCode, data)) {
-      appCoinsIab.getCurrentPayment()
-          .distinctUntilChanged(PaymentDetails::getPaymentStatus).take(1)
-          .subscribe(paymentDetails -> runOnUiThread(() -> handlePayment(paymentDetails)));
+      final Disposable subscribe = appCoinsIab.getCurrentPayment()
+          .distinctUntilChanged(PaymentDetails::getPaymentStatus)
+          .take(1)
+          .observeOn(AndroidSchedulers.mainThread())
+          .subscribe(paymentDetails -> handlePayment(paymentDetails));
     }
   }
 
@@ -186,6 +190,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
   @NonNull private Disposable startBuyFlow(String skuPremiumId) {
     return appCoinsIab.buy(skuPremiumId, this)
+        .observeOn(AndroidSchedulers.mainThread())
         .subscribe(() -> {
           // Buy process successfully started.
           setWaitScreen(false);
