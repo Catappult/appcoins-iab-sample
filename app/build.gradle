@@ -1,17 +1,17 @@
 apply plugin: 'com.android.application'
 
 android {
-  compileSdkVersion 25
+  compileSdkVersion 27
   buildToolsVersion '27.0.3'
 
-  flavorDimensions "default"
+  flavorDimensions "iab", "network"
 
   defaultConfig {
-    applicationId "com.asfoundation.trivialdrivesample"
+    applicationId "com.appcoins.trivialdrivesample"
     minSdkVersion 21
     targetSdkVersion 27
-    versionCode 17
-    versionName "1.9.5"
+    versionCode 1
+    versionName "1.0.0"
     multiDexEnabled true
   }
 
@@ -22,10 +22,10 @@ android {
 
   signingConfigs {
     release {
-      storeFile = file(project.ASF_WALLET_STORE_FILE)
-      storePassword = project.ASF_WALLET_STORE_PASSWORD
-      keyAlias = project.ASF_WALLET_KEY_ALIAS
-      keyPassword = project.ASF_WALLET_KEY_PASSWORD
+      storeFile = file(project.APPCOINS_WALLET_STORE_FILE)
+      storePassword = project.APPCOINS_WALLET_STORE_PASSWORD
+      keyAlias = project.APPCOINS_WALLET_KEY_ALIAS
+      keyPassword = project.APPCOINS_WALLET_KEY_PASSWORD
     }
   }
 
@@ -36,7 +36,6 @@ android {
       applicationIdSuffix ".debug"
       applicationVariants.all { variant -> renameArtifact(defaultConfig)
       }
-
     }
 
     release {
@@ -49,11 +48,49 @@ android {
   }
 
   productFlavors {
+    googleiab {
+      dimension "iab"
+      buildConfigField "String", "IAB_BIND_ACTION",
+          "\"" + project.GOOGLE_IAB_BIND_ACTION + "\""
+      buildConfigField "String", "IAB_KEY",
+          "\"" + project.GOOGLE_IAB_KEY + "\""
+      buildConfigField "String", "IAB_BIND_PACKAGE",
+          "\"" + project.GOOGLE_IAB_BIND_PACKAGE + "\""
+      buildConfigField "String", "IAB_UPDATE_ACTION",
+          "\"" + project.GOOGLE_IAB_UPDATE_ACTION+ "\""
+      manifestPlaceholders = [iabPermission: project.GOOGLE_IAB_PERMISSION]
+    }
+
+    appcoinsiab {
+      dimension "iab"
+      buildConfigField "String", "IAB_KEY",
+          "\"" + project.APPCOINS_IAB_KEY + "\""
+      buildConfigField "String", "IAB_UPDATE_ACTION",
+          "\"" + project.APPCOINS_IAB_UPDATE_ACTION + "\""
+      applicationVariants.all { variant ->
+        if (variant.buildType.getName().equalsIgnoreCase("debug")) {
+          buildConfigField "String", "IAB_BIND_ACTION",
+              "\"" + project.APPCOINS_DEV_IAB_BIND_ACTION + "\""
+          buildConfigField "String", "IAB_BIND_PACKAGE",
+              "\"" + project.APPCOINS_DEV_IAB_BIND_PACKAGE + "\""
+          variant.getMergedFlavor().manifestPlaceholders = [iabPermission: project.APPCOINS_DEV_IAB_PERMISSION]
+        } else {
+          buildConfigField "String", "IAB_BIND_ACTION",
+              "\"" + project.APPCOINS_IAB_BIND_ACTION + "\""
+          buildConfigField "String", "IAB_BIND_PACKAGE",
+              "\"" + project.APPCOINS_IAB_BIND_PACKAGE + "\""
+          variant.getMergedFlavor().manifestPlaceholders = [iabPermission: project.APPCOINS_IAB_PERMISSION]
+        }
+      }
+    }
+
     mainNetwork {
+      dimension "network"
       buildConfigField "boolean", "TEST_NETWORK", "false"
     }
 
-    ropstenNetwork{
+    ropstenNetwork {
+      dimension "network"
       applicationIdSuffix ".test"
       buildConfigField "boolean", "TEST_NETWORK", "true"
     }
@@ -61,7 +98,7 @@ android {
 }
 
 dependencies {
-  implementation 'com.android.support:appcompat-v7:25.4.0'
+  implementation 'com.android.support:appcompat-v7:27.1.1'
 
   api 'com.asfoundation:appcoins-ads:0.3.7a'
   api 'com.asfoundation:appcoins-iab:0.3.7a'
@@ -70,7 +107,7 @@ dependencies {
 def renameArtifact(defaultConfig) {
   android.applicationVariants.all { variant ->
     variant.outputs.all {
-      def fileName = "trivial-drive-asf-sample-${defaultConfig.versionName}_${variant.name}"
+      def fileName = "trivial-drive-appcoins-sample-${defaultConfig.versionName}_${variant.name}"
       outputFileName = new File("${fileName}.apk")
     }
   }
