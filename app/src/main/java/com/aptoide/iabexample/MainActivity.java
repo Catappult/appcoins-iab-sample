@@ -6,7 +6,6 @@ import android.app.AlertDialog.Builder;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -276,7 +275,8 @@ public class MainActivity extends Activity
       final Disposable subscribe = appCoinsIab.getCurrentPayment()
           .distinctUntilChanged(PaymentDetails::getPaymentStatus)
           .take(1)
-          .subscribe(paymentDetails -> runOnUiThread(() -> handlePayment(paymentDetails)));
+          .observeOn(AndroidSchedulers.mainThread())
+          .subscribe(paymentDetails -> handlePayment(paymentDetails));
     }
   }
 
