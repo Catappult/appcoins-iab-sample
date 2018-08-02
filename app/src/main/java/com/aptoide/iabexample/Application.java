@@ -28,10 +28,9 @@ public class Application extends android.app.Application {
         .withDebug(BuildConfig.TEST_NETWORK)
         .createAppCoinsIab();
 
-    adsSdk = new AppCoinsAdsBuilder().withDebug(BuildConfig.TEST_NETWORK)
-        .createAdvertisementSdk(this);
-    adsSdk.init(this);
-
+    //adsSdk = new AppCoinsAdsBuilder().withDebug(BuildConfig.TEST_NETWORK)
+    //    .createAdvertisementSdk(this);
+    //adsSdk.init(this);
   }
 
   private List<SKU> buildSkus() {
@@ -42,5 +41,9 @@ public class Application extends android.app.Application {
         BigDecimal.valueOf(2)));
 
     return skus;
+  }
+
+  public String getDeveloperAddress() {
+    return developerAddress;
   }
 }
