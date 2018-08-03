@@ -15,18 +15,12 @@ import java.util.List;
 
 public class Application extends android.app.Application {
 
-  public static AppCoinsIab appCoinsIab;
-
   private static AppCoinsAds adsSdk;
 
   private final String developerAddress = "0x4fbcc5ce88493c3d9903701c143af65f54481119";
 
   @Override public void onCreate() {
     super.onCreate();
-
-    appCoinsIab = new AppCoinsIabBuilder(developerAddress).withSkus(buildSkus())
-        .withDebug(BuildConfig.TEST_NETWORK)
-        .createAppCoinsIab();
 
     //adsSdk = new AppCoinsAdsBuilder().withDebug(BuildConfig.TEST_NETWORK)
     //    .createAdvertisementSdk(this);
