@@ -1,114 +1,63 @@
-# ASF SDK
+# AppCoins IAB
+AppCoins IAB lets you sell digital content from inside applications.
 
-The ASF SDK lets you sell in-app items for AppCoins (APPC) tokens.
 
-## Abstract
+## Architecture
+AppCoinsWallet exposes a Android Service which your application should bind with. Once bound to AppCoinsWallet service your application can start communicating over IPC using an AIDL inteface.
 
-This tutorial will guide through the process of integrating the ASF SDK.
-The integration should be simple enough to be done in under 10 minutes.
-If this is not the case for you, let us know.
+## Google Play IAB to AppCoins IAB Migration
 
-### Prerequisites
 
-+ In order for the ASF SDK to work, you must have an [AppCoins compliant wallet](https://github.com/Aptoide/asf-wallet-android/tree/dev) installed.
-+ The Android minimum API Level to use ASF SDK is 21 (Android 5.0).
-+ Basic understanding of RxJava is advised but now required.
+### AIDL
 
-## Build Script
+Like Google Play IAB, AppCoins IAB uses a AIDL file in order to communicate with AppCoins service. The package for your AIDL must be **com.appcoins.billing** instead of **com.android.vending.billing**. Both AppCoins and Google AIDL files are identical, but you need to rename **InAppBillingService.aild** to **AppcoinsBilling.aidl**.
 
-In your **project's buildscript**, make sure you have the following:
+![Migration](docs/aidl-migration.png)
 
-```
-allprojects {
-    repositories {
-        google()
-        jcenter()
-        maven { url "https://dl.bintray.com/asf/asf" }
-    }
-}
-```
-And in your **app's buildscript**, add the following dependency:
+### Permissions
 
-```
-dependencies {
-    api 'com.asfoundation:sdk-android:0.1.1a'
-}
-```
+Your application needs a permission to allow it to perform billing actions with AppCoins IAB. The permission is declared in **AndroidManifest.xml** of your application. Google Play IAB already declares a permision with name **com.android.vending.BILLING** you should rename it to **com.appcoins.BILLING**.
 
-## Getting Started
 
-To integrate the ASF SDK, you only need an instance of the AppCoinsSdk interface.
-For the sake of simplicity, in the sample code we just hold a static referecence to the ASF SDK instance in the Application class.
+**Google Play IAB**
 
-```
-  public static AppCoinsSdk appCoinsSdk;
+	<uses-permission android:name="com.android.vending.BILLING" />
 
-  public static final String SKU_GAS = "gas";
-  public static final String SKU_PREMIUM = "premium";
-  public static final String SKU_GAS_NAME = SKU_GAS;
-  public static final String SKU_PREMIUM_NAME = SKU_PREMIUM;
+**AppCoins IAB**
 
-  private final String developerAddress = "0x4fbcc5ce88493c3d9903701c143af65f54481119";
+	<uses-permission android:name="com.appcoins.BILLING" />
 
-  @Override public void onCreate() {
-    super.onCreate();
+### Service Connection
 
-    appCoinsSdk = new AppCoinsSdkBuilder(developerAddress).withSkus(buildSkus())
-        .withDebug(true)
-        .createAppCoinsSdk();
-  }
+In order to communicate with AppCoins IAB your application must bind to a service the same way Google Play IAB. Google Play IAB Intent action and package must be updated from **com.android.vending.billing.InAppBillingService.BIND** to **com.appcoins.wallet.iab.action.BIND** and from **com.android.vending** to **com.appcoins.wallet** respectively.
 
-  private List<SKU> buildSkus() {
-    List<SKU> skus = new LinkedList<>();
 
-    skus.add(new SKU(SKU_GAS_NAME, SKU_GAS, BigDecimal.valueOf(5)));
-    skus.add(new SKU(SKU_PREMIUM_NAME, SKU_PREMIUM, BigDecimal.TEN));
+**Google IAB Service Intent**
 
-    return skus;
-  }
-```
+	Intent serviceIntent = new Intent("com.android.vending.billing.InAppBillingService.BIND");
+	serviceIntent.setPackage("com.android.vending");
 
-Here we use a convenient builder to create our AppCoinsSDK instance with a list consisting of two products.
-The debug flag will set the ASF SDK to use the testnet (Ropsten) instead of the mainnet.
+**AppCoins IAB Service Intent**
 
-Given the Android architecture, you will have to let the SDK know each time a Purchase Flow is finished. For that, just inform the sdk:
+	Intent serviceIntent = new Intent("com.appcoins.wallet.iab.action.BIND");
+	serviceIntent.setPackage("com.appcoins.wallet");
+	
 
-```
-@Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-    Application.appCoinsSdk.onActivityResult(requestCode, requestCode, data);
-}
-```
 
-AppCoinsSdk's onActivityResult will return **true** if handled, and **false** otherwise. This may be useful if you want to include further logic at this point.
 
-To start the purchase flow, you have to pass one of the previously defined *SKU_IDs*, and the activity that will be used to call the Wallet:
+### AppCoins Public Key
 
-```
-Application.appCoinsSdk.buy(SKU_GAS, this);
-```
+Just like Google Play IAB, AppCoins IAB also exposes a public key. You should use AppCoins IAB public key to verify your purchases. It works exactly like Google Play IAB key so you just need to replace each other.
 
-And finally, we want to react to the purchase, so we can reflect that change in our App's state.
+To find your AppCoins public key go to [BDS Back Office -> My Apps -> Apps List -> Open Your App](https://developers-dev.blockchainds.com/myApps/appsList). Scroll down to Monetisation card, create a product, refresh the page and click "get key" button.
 
-Below we provide a good pattern to follow:
 
-```
-@Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-    super.onActivityResult(requestCode, resultCode, data);
+### Purchase Broadcast
 
-    if (Application.appCoinsSdk.onActivityResult(requestCode, requestCode, data)) {
-      Application.appCoinsSdk.getCurrentPayment()
-          .subscribe(paymentDetails -> runOnUiThread(() -> {
-            if (paymentDetails.getPaymentStatus() == PaymentStatus.SUCCESS) {
-              String skuId = paymentDetails.getSkuId();
-              // Now we tell the sdk to consume the skuId.
-              Application.appCoinsSdk.consume(skuId);
+Google Play IAB broadcasts and Intent with action **com.android.vending.billing.PURCHASES_UPDATED**. AppCoins IAB does not do that therefore any code related with listening to that Intent can be removed.
 
-              // Purchase successfully done. Release the prize.
-            }
-          }));
-    }
-  }
-```
 
-First we check if it was the ASF SDK who made us leave the current activity. If so, we will react to the purchase result.
-In order to complete the purchase flow, we must consume the purchase.
+# Known Issues
+
+
+* AppCoins IAB is not compliant with [Google Play IAB v5](https://developer.android.com/google/play/billing/versions.html). Calls to **getBuyIntentToReplaceSkus** method will always fail.
