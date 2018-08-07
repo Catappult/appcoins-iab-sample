@@ -41,15 +41,24 @@ In order to communicate with AppCoins IAB your application must bind to a servic
 
 	Intent serviceIntent = new Intent("com.appcoins.wallet.iab.action.BIND");
 	serviceIntent.setPackage("com.appcoins.wallet");
-	
 
+**Payment Intent**	
+
+When calling [getPaymentIntent method](https://github.com/Aptoide/appcoins-iab-sample/blob/feature/APPC-541-documentation/app/src/appcoinsiab/aidl/com/appcoins/billing/AppcoinsBilling.aidl#L96), you must send the developer's ethereum wallet address. This can be done by using the helper provided [here](app/src/main/java/com/aptoide/iabexample/util/PayloadHelper.java).
+
+```java
+...
+String payload = PayloadHelper.buildIntentPayload("developer_ethereum_address","developer_payload")
+Bundle buyIntentBundle = mService.getBuyIntent(3, mContext.getPackageName(), sku, itemType, payload);
+```
+In order to get the Developer Ethereum Address go to [BDS Back Office -> Wallet -> Deposit APPC](https://developers-dev.blockchainds.com/wallet/depositAppc) and click on "copy to clipboard button".
 
 
 ### AppCoins Public Key
 
 Just like Google Play IAB, AppCoins IAB also exposes a public key. You should use AppCoins IAB public key to verify your purchases. It works exactly like Google Play IAB key so you just need to replace each other.
 
-To find your AppCoins public key go to [BDS Back Office -> My Apps -> Apps List -> Open Your App](https://developers-dev.blockchainds.com/myApps/appsList). Scroll down to Monetisation card, create a product, refresh the page and click "get key" button.
+To find your AppCoins public key go to [BDS Back Office -> Manage Apps -> Apps List -> Open Your App](https://developers-dev.blockchainds.com/myApps/appsList). Scroll down to Monetisation card, create a product, refresh the page and click "get key" button.
 
 
 ### Purchase Broadcast
