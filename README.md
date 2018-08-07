@@ -58,7 +58,7 @@ In order to get your developer's Ethereum wallet address, go to [BDS Back Office
 
 Just like Google Play IAB, AppCoins IAB also exposes a public key. You should use AppCoins IAB public key to verify your purchases. It works exactly like Google Play IAB key, so you just need to replace one for the other.
 
-To find your AppCoins public key, go to [BDS Back Office -> Manage Apps -> Apps List -> Open Your App](https://developers-dev.blockchainds.com/myApps/appsList). Scroll down to the monetization card and click "get key" button.
+To find your AppCoins public key, go to [BDS Back Office -> Manage Apps -> Apps List -> Open Your App](https://developers-dev.blockchainds.com/myApps/appsList). Scroll down to the monetization card and click "GET KEY" button.
 
 
 ### Purchase Broadcast
