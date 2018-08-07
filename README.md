@@ -5,7 +5,7 @@ AppCoins IAB lets you sell digital content from inside Android apps.
 ## Architecture
 AppCoinsWallet exposes a Android Service which your app should bind with. Once bound to AppCoinsWallet service, your app can start communicating over IPC using an AIDL inteface.
 
-## Google Play IAB to AppCoins IAB Migration
+## Google Play IAB to AppCoins IAB Migration Guide
 
 
 ### AIDL
@@ -16,7 +16,7 @@ Like Google Play IAB, AppCoins IAB uses a AIDL file in order to communicate with
 
 ### Permissions
 
-Your app needs a permission to allow it to perform billing actions with AppCoins IAB. The permission is declared in the **AndroidManifest.xml** file of your app. Since Google Play IAB already declares a permision with name **com.android.vending.BILLING**, you should rename it to **com.appcoins.BILLING**.
+Your app needs a permission to allow it to perform billing actions with AppCoins IAB. The permission is declared in the **AndroidManifest.xml** file of your app. Since Google Play IAB already declares a permission with name **com.android.vending.BILLING**, you should rename it to **com.appcoins.BILLING**.
 
 
 **Google Play IAB**
