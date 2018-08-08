@@ -284,10 +284,10 @@ public class MainActivity extends Activity
 
     // Some sanity checks to see if the developer (that's you!) really followed the
     // instructions to run this sample (don't put these checks on your app!)
-    //if (base64EncodedPublicKey.contains("CONSTRUCT_YOUR")) {
-    //  throw new RuntimeException(
-    //      "Please put your app's public key in MainActivity.java. See README.");
-    //}
+    if (base64EncodedPublicKey.contains("CONSTRUCT_YOUR")) {
+      throw new RuntimeException(
+          "Please put your app's public key in MainActivity.java. See README.");
+    }
 
     // Create the helper, passing it our context and the public key to verify signatures with
     Log.d(TAG, "Creating IAB helper.");
