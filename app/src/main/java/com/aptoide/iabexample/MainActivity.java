@@ -8,7 +8,6 @@ import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -18,15 +17,10 @@ import com.aptoide.iabexample.util.IabBroadcastReceiver;
 import com.aptoide.iabexample.util.IabHelper;
 import com.aptoide.iabexample.util.IabResult;
 import com.aptoide.iabexample.util.Inventory;
+import com.aptoide.iabexample.util.PayloadHelper;
 import com.aptoide.iabexample.util.Purchase;
-import com.asf.appcoins.sdk.iab.payment.PaymentDetails;
-import com.asf.appcoins.sdk.iab.payment.PaymentStatus;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.aptoide.iabexample.Application.appCoinsIab;
 
 /**
  * Example game using in-app billing version 4.
@@ -108,6 +102,9 @@ public class MainActivity extends Activity
   // Provides purchase notification while this app is running
   IabBroadcastReceiver mBroadcastReceiver;
 
+  // (arbitrary) request code for the purchase flow
+  static final int RC_REQUEST = 10001;
+
   // Listener that's called when we finish querying the items and subscriptions we own
   IabHelper.QueryInventoryFinishedListener mGotInventoryListener =
       new IabHelper.QueryInventoryFinishedListener() {
@@ -179,6 +176,63 @@ public class MainActivity extends Activity
         }
       };
 
+  // Callback for when a purchase is finished
+  IabHelper.OnIabPurchaseFinishedListener mPurchaseFinishedListener =
+      new IabHelper.OnIabPurchaseFinishedListener() {
+        public void onIabPurchaseFinished(IabResult result, Purchase purchase) {
+          Log.d(TAG, "Purchase finished: " + result + ", purchase: " + purchase);
+
+          // if we were disposed of in the meantime, quit.
+          if (mHelper == null) return;
+
+          if (result.isFailure()) {
+            complain("Error purchasing: " + result);
+            setWaitScreen(false);
+            return;
+          }
+          if (!verifyDeveloperPayload(purchase)) {
+            complain("Error purchasing. Authenticity verification failed.");
+            setWaitScreen(false);
+            return;
+          }
+
+          Log.d(TAG, "Purchase successful.");
+
+          if (purchase.getSku()
+              .equals(Skus.SKU_GAS_ID)) {
+            // bought 1/4 tank of gas. So consume it.
+            Log.d(TAG, "Purchase is gas. Starting gas consumption.");
+            try {
+              mHelper.consumeAsync(purchase, mConsumeFinishedListener);
+            } catch (IabHelper.IabAsyncInProgressException e) {
+              complain("Error consuming gas. Another async operation in progress.");
+              setWaitScreen(false);
+              return;
+            }
+          } else if (purchase.getSku()
+              .equals(Skus.SKU_PREMIUM_ID)) {
+            // bought the premium upgrade!
+            Log.d(TAG, "Purchase is premium upgrade. Congratulating user.");
+            alert("Thank you for upgrading to premium!");
+            mIsPremium = true;
+            updateUi();
+            setWaitScreen(false);
+          } else if (purchase.getSku()
+              .equals(Skus.SKU_INFINITE_GAS_MONTHLY_ID) || purchase.getSku()
+              .equals(Skus.SKU_INFINITE_GAS_YEARLY_ID)) {
+            // bought the infinite gas subscription
+            Log.d(TAG, "Infinite gas subscription purchased.");
+            alert("Thank you for subscribing to infinite gas!");
+            mSubscribedToInfiniteGas = true;
+            mAutoRenewEnabled = purchase.isAutoRenewing();
+            mInfiniteGasSku = purchase.getSku();
+            mTank = TANK_MAX;
+            updateUi();
+            setWaitScreen(false);
+          }
+        }
+      };
+
   // Called when consumption is complete
   IabHelper.OnConsumeFinishedListener mConsumeFinishedListener =
       new IabHelper.OnConsumeFinishedListener() {
@@ -230,10 +284,10 @@ public class MainActivity extends Activity
 
     // Some sanity checks to see if the developer (that's you!) really followed the
     // instructions to run this sample (don't put these checks on your app!)
-    //if (base64EncodedPublicKey.contains("CONSTRUCT_YOUR")) {
-    //  throw new RuntimeException(
-    //      "Please put your app's public key in MainActivity.java. See README.");
-    //}
+    if (base64EncodedPublicKey.contains("CONSTRUCT_YOUR")) {
+      throw new RuntimeException(
+          "Please put your app's public key in MainActivity.java. See README.");
+    }
 
     // Create the helper, passing it our context and the public key to verify signatures with
     Log.d(TAG, "Creating IAB helper.");
@@ -256,6 +310,28 @@ public class MainActivity extends Activity
 
       // Have we been disposed of in the meantime? If so, quit.
       if (mHelper == null) return;
+
+      // Important: Dynamically register for broadcast messages about updated purchases.
+      // We register the receiver here instead of as a <receiver> in the Manifest
+      // because we always call getPurchases() at startup, so therefore we can ignore
+      // any broadcasts sent while the app isn't running.
+      // Note: registering this listener in an Activity is a bad idea, but is done here
+      // because this is a SAMPLE. Regardless, the receiver must be registered after
+      // IabHelper is setup, but before first call to getPurchases().
+      // Verify the action for the broadcast receiver is empty meaning the feature is not
+      // supported and there is no reason to create a listener.
+      //if (!IabBroadcastReceiver.ACTION.isEmpty()) {
+      //  mBroadcastReceiver = new IabBroadcastReceiver(MainActivity.this);
+      //  IntentFilter broadcastFilter = new IntentFilter(IabBroadcastReceiver.ACTION);
+      //  registerReceiver(mBroadcastReceiver, broadcastFilter);
+      //}
+      // IAB is fully set up. Now, let's get an inventory of stuff we own.
+      Log.d(TAG, "Setup successful. Querying inventory.");
+      try {
+        mHelper.queryInventoryAsync(mGotInventoryListener);
+      } catch (IabHelper.IabAsyncInProgressException e) {
+        complain("Error querying inventory. Another async operation in progress.");
+      }
     });
 
     updateUi();
@@ -269,14 +345,16 @@ public class MainActivity extends Activity
 
   @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     Log.d(TAG, "onActivityResult(" + requestCode + "," + resultCode + "," + data);
-    super.onActivityResult(requestCode, resultCode, data);
+    if (mHelper == null) return;
 
-    if (appCoinsIab.onActivityResult(requestCode, requestCode, data)) {
-      final Disposable subscribe = appCoinsIab.getCurrentPayment()
-          .distinctUntilChanged(PaymentDetails::getPaymentStatus)
-          .take(1)
-          .observeOn(AndroidSchedulers.mainThread())
-          .subscribe(paymentDetails -> handlePayment(paymentDetails));
+    // Pass on the activity result to the helper for handling
+    if (!mHelper.handleActivityResult(requestCode, resultCode, data)) {
+      // not handled, so handle it ourselves (here's where you'd
+      // perform any handling of activity results not related to in-app
+      // billing...
+      super.onActivityResult(requestCode, resultCode, data);
+    } else {
+      Log.d(TAG, "onActivityResult handled by IABUtil.");
     }
   }
 
@@ -292,7 +370,7 @@ public class MainActivity extends Activity
         mSelectedSubscriptionPeriod = mFirstChoiceSku;
       }
 
-      List<String> oldSkus;
+      List<String> oldSkus = null;
       if (!TextUtils.isEmpty(mInfiniteGasSku) && !mInfiniteGasSku.equals(
           mSelectedSubscriptionPeriod)) {
         // The user currently has a valid subscription, any purchase action is going to
@@ -301,10 +379,25 @@ public class MainActivity extends Activity
         oldSkus.add(mInfiniteGasSku);
       }
 
+      /*
+       * TODO: for security, generate your payload here for verification. See the comments on
+       *        verifyDeveloperPayload() for more info. Since this is a SAMPLE, we just use
+       *        an empty string, but on a production app you should carefully generate this.
+       * TODO: On this payload the developer's wallet address must be added, or the purchase does NOT work.
+       */
+      String payload =
+          PayloadHelper.buildIntentPayload(((Application) getApplication()).getDeveloperAddress(),
+              null);
+
       setWaitScreen(true);
       Log.d(TAG, "Launching purchase flow for gas subscription.");
-      // TODO: 14-03-2018 neuro subscription
-      // Reset the dialog options
+      try {
+        mHelper.launchPurchaseFlow(this, mSelectedSubscriptionPeriod, IabHelper.ITEM_TYPE_SUBS,
+            oldSkus, RC_REQUEST, mPurchaseFinishedListener, payload);
+      } catch (IabHelper.IabAsyncInProgressException e) {
+        complain("Error launching purchase flow. Another async operation in progress.");
+        setWaitScreen(false);
+      }      // Reset the dialog options
       mSelectedSubscriptionPeriod = "";
       mFirstChoiceSku = "";
       mSecondChoiceSku = "";
@@ -322,35 +415,6 @@ public class MainActivity extends Activity
     } catch (IabHelper.IabAsyncInProgressException e) {
       complain("Error querying inventory. Another async operation in progress.");
     }
-  }
-
-  private void handlePayment(PaymentDetails paymentDetails) {
-    if (paymentDetails.getPaymentStatus() == PaymentStatus.PENDING
-        || paymentDetails.getPaymentStatus() == PaymentStatus.SUCCESS) {
-      String skuId = paymentDetails.getSkuId();
-      appCoinsIab.consume(skuId);
-
-      // successfully consumed, so we apply the effects of the item in our
-      // game world's logic, which in our case means filling the gas tank a bit
-      if (Skus.SKU_GAS_ID.equals(skuId)) {
-        Log.d(TAG, "Consumption successful. Provisioning.");
-        mTank = mTank == TANK_MAX ? TANK_MAX : mTank + 1;
-        saveData();
-        alert("You filled 1/4 tank. Your tank is now " + String.valueOf(mTank) + "/4 full!");
-      } else {
-        if (Skus.SKU_PREMIUM_ID.equals(skuId)) {
-          // bought the premium upgrade!
-          Log.d(TAG, "Purchase is premium upgrade. Congratulating user.");
-          alert("Thank you for upgrading to premium!");
-          mIsPremium = true;
-          saveData();
-        }
-      }
-
-      updateUi();
-      Log.d(TAG, "End consumption flow.");
-    }
-    setWaitScreen(false);
   }
 
   // User clicked the "Buy Gas" button
@@ -372,7 +436,21 @@ public class MainActivity extends Activity
     setWaitScreen(true);
     Log.d(TAG, "Launching purchase flow for gas.");
 
-    startBuyFlow(Skus.SKU_GAS_ID);
+    /* TODO: for security, generate your payload here for verification. See the comments on
+     *        verifyDeveloperPayload() for more info. Since this is a SAMPLE, we just use
+     *        an empty string, but on a production app you should carefully generate this.
+     * TODO: On this payload the developer's wallet address must be added, or the purchase does NOT work.
+     */
+    String payload =
+          PayloadHelper.buildIntentPayload(((Application) getApplication()).getDeveloperAddress(),
+              null);
+    try {
+      mHelper.launchPurchaseFlow(this, Skus.SKU_GAS_ID, RC_REQUEST, mPurchaseFinishedListener,
+          payload);
+    } catch (IabHelper.IabAsyncInProgressException e) {
+      complain("Error launching purchase flow. Another async operation in progress.");
+      setWaitScreen(false);
+    }
   }
 
   // User clicked the "Upgrade to Premium" button.
@@ -380,20 +458,22 @@ public class MainActivity extends Activity
     Log.d(TAG, "Upgrade button clicked; launching purchase flow for upgrade.");
     setWaitScreen(true);
 
-    startBuyFlow(Skus.SKU_PREMIUM_ID);
-  }
+    /* TODO: for security, generate your payload here for verification. See the comments on
+     *        verifyDeveloperPayload() for more info. Since this is a SAMPLE, we just use
+     *        an empty string, but on a production app you should carefully generate this.
+     * TODO: On this payload the developer's wallet address must be added, or the purchase does NOT work.
+     */
+    String payload =
+        PayloadHelper.buildIntentPayload(((Application) getApplication()).getDeveloperAddress(),
+            null);
 
-  @NonNull private Disposable startBuyFlow(String skuPremiumId) {
-    return appCoinsIab.buy(skuPremiumId, this)
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(() -> {
-          // Buy process successfully started.
-          setWaitScreen(false);
-        }, (throwable) -> {
-          // User didn't install wallet
-          throwable.printStackTrace();
-          setWaitScreen(false);
-        });
+    try {
+      mHelper.launchPurchaseFlow(this, Skus.SKU_PREMIUM_ID, RC_REQUEST, mPurchaseFinishedListener,
+          payload);
+    } catch (IabHelper.IabAsyncInProgressException e) {
+      complain("Error launching purchase flow. Another async operation in progress.");
+      setWaitScreen(false);
+    }
   }
 
   // "Subscribe to infinite gas" button clicked. Explain to user, then start purchase
@@ -550,5 +630,13 @@ public class MainActivity extends Activity
      */
 
     return true;
+  }
+
+  class DeveloperAddress {
+    String address;
+
+    public DeveloperAddress(String address) {
+      this.address = address;
+    }
   }
 }
