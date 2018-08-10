@@ -19,7 +19,7 @@ public class Purchase {
     String mSignature;
     boolean mIsAutoRenewing;
 
-    public Purchase(String itemType, String jsonPurchaseInfo, String signature) throws
+    public Purchase(String id, String itemType, String jsonPurchaseInfo, String signature) throws
         JSONException {
         mItemType = itemType;
         mOriginalJson = jsonPurchaseInfo;
@@ -33,6 +33,7 @@ public class Purchase {
         mToken = o.optString("token", o.optString("purchaseToken"));
         mIsAutoRenewing = o.optBoolean("autoRenewing");
         mSignature = signature;
+        mToken = id;
     }
 
     public String getItemType() { return mItemType; }
