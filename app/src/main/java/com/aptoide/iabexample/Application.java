@@ -5,7 +5,7 @@ package com.aptoide.iabexample;
  */
 
 public class Application extends android.app.Application {
-  private final String developerAddress = "0xda99070eb09ab6ab7e49866c390b01d3bca9d516";
+  private final String developerAddress = "0xd133fab7abc4711fd328c4aefbf04256a79b1b40";
 
   @Override public void onCreate() {
     super.onCreate();
