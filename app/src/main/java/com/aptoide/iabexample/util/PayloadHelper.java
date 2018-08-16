@@ -1,8 +1,8 @@
 package com.aptoide.iabexample.util;
 
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import com.appcoins.billing.AppcoinsBilling;
-import io.reactivex.annotations.NonNull;
 
 /**
  * Intent payload helper class that provide a way to send the developers wallet address together

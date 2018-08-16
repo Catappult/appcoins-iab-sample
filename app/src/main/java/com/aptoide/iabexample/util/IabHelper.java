@@ -134,6 +134,9 @@ public class IabHelper {
   public static final String RESPONSE_INAPP_SIGNATURE_LIST = "INAPP_DATA_SIGNATURE_LIST";
   public static final String INAPP_CONTINUATION_TOKEN = "INAPP_CONTINUATION_TOKEN";
 
+  public static final String RESPONSE_INAPP_PURCHASE_ID_LIST = "INAPP_PURCHASE_ID_LIST";
+  public static final String RESPONSE_INAPP_PURCHASE_ID = "INAPP_PURCHASE_ID";
+
   // Item types
   public static final String ITEM_TYPE_INAPP = "inapp";
   public static final String ITEM_TYPE_SUBS = "subs";
@@ -512,6 +515,7 @@ public class IabHelper {
     int responseCode = getResponseCodeFromIntent(data);
     String purchaseData = data.getStringExtra(RESPONSE_INAPP_PURCHASE_DATA);
     String dataSignature = data.getStringExtra(RESPONSE_INAPP_SIGNATURE);
+    String id = data.getStringExtra(RESPONSE_INAPP_PURCHASE_ID);
 
     if (resultCode == Activity.RESULT_OK && responseCode == BILLING_RESPONSE_RESULT_OK) {
       logDebug("Successful resultcode from purchase activity.");
@@ -532,7 +536,7 @@ public class IabHelper {
 
       Purchase purchase = null;
       try {
-        purchase = new Purchase(mPurchasingItemType, purchaseData, dataSignature);
+        purchase = new Purchase(id, mPurchasingItemType, purchaseData, dataSignature);
         String sku = purchase.getSku();
 
         // Verify signature
@@ -959,14 +963,17 @@ public class IabHelper {
           ownedItems.getStringArrayList(RESPONSE_INAPP_PURCHASE_DATA_LIST);
       ArrayList<String> signatureList =
           ownedItems.getStringArrayList(RESPONSE_INAPP_SIGNATURE_LIST);
+      ArrayList<String> idsList =
+          ownedItems.getStringArrayList(RESPONSE_INAPP_PURCHASE_ID_LIST);
 
       for (int i = 0; i < purchaseDataList.size(); ++i) {
         String purchaseData = purchaseDataList.get(i);
         String signature = signatureList.get(i);
         String sku = ownedSkus.get(i);
+        String id = idsList.get(i);
         if (Security.verifyPurchase(mSignatureBase64, purchaseData, signature)) {
           logDebug("Sku is owned: " + sku);
-          Purchase purchase = new Purchase(itemType, purchaseData, signature);
+          Purchase purchase = new Purchase(id, itemType, purchaseData, signature);
 
           if (TextUtils.isEmpty(purchase.getToken())) {
             logWarn("BUG: empty/null token!");
