@@ -51,7 +51,7 @@ When calling [getPaymentIntent method](https://github.com/Aptoide/appcoins-iab-s
 String payload = PayloadHelper.buildIntentPayload("developer_ethereum_address","developer_payload")
 Bundle buyIntentBundle = mService.getBuyIntent(3, mContext.getPackageName(), sku, itemType, payload);
 ```
-In order to get your developer's Ethereum wallet address, go to [BDS Back Office -> Wallet -> Deposit APPC](https://developers-dev.blockchainds.com/wallet/depositAppc) and click on "copy to clipboard button".
+In order to get your developer's Ethereum wallet address, go to [BDS Back Office -> Wallet -> Deposit APPC](https://blockchainds.com/wallet/depositAppc) and click on "copy to clipboard button".
 
 
 ### AppCoins Public Key
