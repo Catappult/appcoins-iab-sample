@@ -54,11 +54,11 @@ Bundle buyIntentBundle = mService.getBuyIntent(3, mContext.getPackageName(), sku
 In order to get your developer's Ethereum wallet address, go to [BDS Back Office -> Wallet -> Deposit APPC](https://blockchainds.com/wallet/depositAppc) and click on "copy to clipboard button".
 
 
-### AppCoins Public Key
+### BDS Public Key
 
 Just like Google Play IAB, AppCoins IAB also exposes a public key. You should use AppCoins IAB public key to verify your purchases. It works exactly like Google Play IAB key, so you just need to replace one for the other.
 
-To find your AppCoins public key, you should be registered in BDS Back Office. You should also have an early version of your app already uploaded. Then, you should go to [BDS Back Office -> Manage Apps -> Apps List -> Open Your App](https://developers-dev.blockchainds.com/myApps/appsList), scroll down to the monetization card, and click "GET KEY" button.
+To find your BDS public key, you should be registered in BDS Back Office. You should head to [Add App section](https://developers.blockchainds.com/myApps/upload/publicKey) of the BO and add the package name of your app (e.g. com.appcoins.wallet). Please make sure it's the same package name of the APK you'll upload later. Once you insert the package name and click "Next", you should already see your public key.
 
 
 ### Purchase Broadcast
