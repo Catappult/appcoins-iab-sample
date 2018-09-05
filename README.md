@@ -70,15 +70,10 @@ Google Play IAB broadcasts and Intent with action **com.android.vending.billing.
 In order to use the AppCoins, you will need a compliant wallet installed. The following snippets shows how you can prompt the user to install the AppCoins BDS Wallet when not present:
 
 ```
-    if (!hasWalletInstalled(activity)) {
-      promptToInstallWallet(activity,
-            activity.getString(R.string.install_wallet_from_iab))
-            .toCompletable()
-            .doOnSubscribe(disposable1 -> loadingVisible = true)
-            .doOnComplete(() -> loadingVisible = false)
-            .subscribe(() -> {
-            }, Throwable::printStackTrace)
-    }
+if (!hasWalletInstalled(this)) {
+    showWalletInstallDialog(this,
+    this.getString(R.string.install_wallet_from_iab));
+}
 ```
 
 ```
@@ -100,28 +95,16 @@ public static boolean hasHandlerAvailable(Intent intent, Context context) {
 ```
 
 ```
-public static Single<Boolean> promptToInstallWallet(Activity activity, String message) {
-    return showWalletInstallDialog(activity, message).doOnSuccess(aBoolean -> {
-      if (aBoolean) {
-        gotoStore(activity);
-      }
-    });
-  }
-```
-
-```
-private static Single<Boolean> showWalletInstallDialog(Context context, String message) {
-    return Single.create(emitter -> {
-      AlertDialog.Builder builder;
-      builder = new AlertDialog.Builder(context);
-      builder.setTitle(R.string.wallet_missing)
-          .setMessage(message)
-          .setPositiveButton(R.string.install, (dialog, which) -> emitter.onSuccess(true))
-          .setNegativeButton(R.string.skip, (dialog, which) -> emitter.onSuccess(false))
-          .setIcon(android.R.drawable.ic_dialog_alert)
-          .show();
-    });
-  }
+private static void showWalletInstallDialog(Context context, String message) {
+    AlertDialog.Builder builder;
+    builder = new AlertDialog.Builder(context);
+    builder.setTitle(R.string.wallet_missing)
+        .setMessage(message)
+        .setPositiveButton(R.string.install, (dialog, which) -> gotoStore(context))
+        .setNegativeButton(R.string.skip, (DialogInterface dialog, int which) -> dialog.dismiss())
+        .setIcon(android.R.drawable.ic_dialog_alert)
+        .show();
+}
 ```
 
 ```
