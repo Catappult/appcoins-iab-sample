@@ -120,7 +120,7 @@ If you follow with the use of the code above the resources below are required.
   <string name="wallet_missing">AppCoins Wallet Missing</string>
 ```
 
-Finally, the following method is the one used to redirect the used to AppCoins Wallet store page. 
+Finally, the following method is the one used to redirect the used to AppCoins BDS Wallet store page. 
 ```
 @NonNull private static void gotoStore(Context activity) {
     String appPackageName = "com.appcoins.wallet";
