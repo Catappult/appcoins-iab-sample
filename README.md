@@ -93,7 +93,7 @@ Finally, the following method is the one used to redirect the used to AppCoins B
     }
   }
 ```
-##Integration
+## Integration
 ### 1. AIDL
 
 Like Google Play IAB, AppCoins IAB uses a AIDL file in order to communicate with AppCoins service. The package for your AIDL must be **com.appcoins.billing** instead of **com.android.vending.billing**. Both AppCoins and Google AIDL files are identical, but you need to rename **InAppBillingService.aild** to **AppcoinsBilling.aidl**.
@@ -144,7 +144,7 @@ In order to get your developer's Ethereum wallet address, go to [BDS Back Office
 Google Play IAB broadcasts and Intent with action **com.android.vending.billing.PURCHASES_UPDATED**. Since AppCoins IAB does not implement this, any code related with listening to that Intent can be removed.
 
 
-###Testing
+### Testing
 
 For testing purposes you can use the following data to test the billing of you application.
 * **applicationId**: *com.appcoins.sample*
