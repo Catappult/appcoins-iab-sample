@@ -144,11 +144,11 @@ In order to get your developer's Ethereum wallet address, go to [BDS Back Office
 Google Play IAB broadcasts and Intent with action **com.android.vending.billing.PURCHASES_UPDATED**. Since AppCoins IAB does not implement this, any code related with listening to that Intent can be removed.
 
 
-### Testing
+## Testing
 
 For testing purposes you can use the following data to test the billing of you application.
 * **applicationId**: *com.appcoins.sample*
-* **APPCOINS_IAB_KEY**: *MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAyEt94j9rt0UvpkZ2jPMZZ16yUrBOtjpIQCWi/F3HN0+iwSAeEJyDw7xIKfNTEc0msm+m6ud1kJpLK3oCsK61syZ8bYQlNZkUxTaWNof1nMnbw3Xu5nuYMuowmzDqNMWg5jNooy6oxwIgVcdvbyGi5RIlxqbo2vSAwpbAAZE2HbUrysKhLME7IOrdRR8MQbSbKEy/9MtfKz0uZCJGi9h+dQb0b69H7Yo+/BN/ayBSJzOPlaqmiHK5lZsnZhK+ixpB883fr+PgSczU7qGoktqoe6Fs+nhk9bLElljCs5ZIl9/NmOSteipkbplhqLY7KwapDmhrtBgrTetmnW9PU/eCWQIDAQAB* 
+* **IAB_KEY**: *MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAyEt94j9rt0UvpkZ2jPMZZ16yUrBOtjpIQCWi/F3HN0+iwSAeEJyDw7xIKfNTEc0msm+m6ud1kJpLK3oCsK61syZ8bYQlNZkUxTaWNof1nMnbw3Xu5nuYMuowmzDqNMWg5jNooy6oxwIgVcdvbyGi5RIlxqbo2vSAwpbAAZE2HbUrysKhLME7IOrdRR8MQbSbKEy/9MtfKz0uZCJGi9h+dQb0b69H7Yo+/BN/ayBSJzOPlaqmiHK5lZsnZhK+ixpB883fr+PgSczU7qGoktqoe6Fs+nhk9bLElljCs5ZIl9/NmOSteipkbplhqLY7KwapDmhrtBgrTetmnW9PU/eCWQIDAQAB* 
 
 # Known Issues
 
