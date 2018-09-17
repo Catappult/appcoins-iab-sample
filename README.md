@@ -8,14 +8,14 @@ AppCoinsWallet exposes a Android Service which your app should bind with. Once b
 ## Google Play IAB to AppCoins IAB Migration Guide
 
 **Requirements**
-* [AppCoins Public Key](#AppCoins Public Key)
-* [Wallet Support](#Wallet Support)
+* [AppCoins Public Key](#appcoins-public-key)
+* [Wallet Support](#wallet-support)
 
 **Integration**
-1. [AIDL](#1.AIDL)
-2. [Permissions](#2.Permissions)
-3. [Service Connection](#3.Service Connection)
-4. [Purchase Broadcast](#4.Purchase Broadcast)
+1. [AIDL](#1-aidl)
+2. [Permissions](#2-permissions)
+3. [Service Connection](#3-service-connection)
+4. [Purchase Broadcast](#4-purchase-broadcast)
 
 ## Requirements
 ### AppCoins Public Key
@@ -94,13 +94,13 @@ Finally, the following method is the one used to redirect the used to AppCoins B
   }
 ```
 ##Integration
-### 1.AIDL
+### 1. AIDL
 
 Like Google Play IAB, AppCoins IAB uses a AIDL file in order to communicate with AppCoins service. The package for your AIDL must be **com.appcoins.billing** instead of **com.android.vending.billing**. Both AppCoins and Google AIDL files are identical, but you need to rename **InAppBillingService.aild** to **AppcoinsBilling.aidl**.
 
 ![Migration](docs/aidl-migration.png)
 
-### 2.Permissions
+### 2. Permissions
 
 Your app needs a permission to allow it to perform billing actions with AppCoins IAB. The permission is declared in the **AndroidManifest.xml** file of your app. Since Google Play IAB already declares a permission with name **com.android.vending.BILLING**, you should rename it to **com.appcoins.BILLING**.
 
@@ -113,7 +113,7 @@ Your app needs a permission to allow it to perform billing actions with AppCoins
 
 	<uses-permission android:name="com.appcoins.BILLING" />
 
-### 3.Service Connection
+### 3. Service Connection
 
 In order to communicate with AppCoins IAB, your app must bind to a service in the same way as in Google Play IAB. Google Play IAB Intent action and package must be updated from **com.android.vending.billing.InAppBillingService.BIND** and **com.android.vending** to **com.appcoins.wallet.iab.action.BIND** and **com.appcoins.wallet**, respectively.
 
@@ -139,7 +139,7 @@ Bundle buyIntentBundle = mService.getBuyIntent(3, mContext.getPackageName(), sku
 ```
 In order to get your developer's Ethereum wallet address, go to [BDS Back Office -> Wallet -> Deposit APPC](https://blockchainds.com/wallet/depositAppc) and click on "copy to clipboard button".
 
-### 4.Purchase Broadcast
+### 4. Purchase Broadcast
 
 Google Play IAB broadcasts and Intent with action **com.android.vending.billing.PURCHASES_UPDATED**. Since AppCoins IAB does not implement this, any code related with listening to that Intent can be removed.
 
