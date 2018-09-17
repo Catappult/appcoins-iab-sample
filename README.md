@@ -7,62 +7,22 @@ AppCoinsWallet exposes a Android Service which your app should bind with. Once b
 
 ## Google Play IAB to AppCoins IAB Migration Guide
 
+**Requirements**
+* [AppCoins Public Key](#AppCoins Public Key)
+* [Wallet Support](#Wallet Support)
 
-### AIDL
+**Integration**
+1. [AIDL](#1.AIDL)
+2. [Permissions](#2.Permissions)
+3. [Service Connection](#3.Service Connection)
+4. [Purchase Broadcast](#4.Purchase Broadcast)
 
-Like Google Play IAB, AppCoins IAB uses a AIDL file in order to communicate with AppCoins service. The package for your AIDL must be **com.appcoins.billing** instead of **com.android.vending.billing**. Both AppCoins and Google AIDL files are identical, but you need to rename **InAppBillingService.aild** to **AppcoinsBilling.aidl**.
-
-![Migration](docs/aidl-migration.png)
-
-### Permissions
-
-Your app needs a permission to allow it to perform billing actions with AppCoins IAB. The permission is declared in the **AndroidManifest.xml** file of your app. Since Google Play IAB already declares a permission with name **com.android.vending.BILLING**, you should rename it to **com.appcoins.BILLING**.
-
-
-**Google Play IAB**
-
-	<uses-permission android:name="com.android.vending.BILLING" />
-
-**AppCoins IAB**
-
-	<uses-permission android:name="com.appcoins.BILLING" />
-
-### Service Connection
-
-In order to communicate with AppCoins IAB, your app must bind to a service in the same way as in Google Play IAB. Google Play IAB Intent action and package must be updated from **com.android.vending.billing.InAppBillingService.BIND** and **com.android.vending** to **com.appcoins.wallet.iab.action.BIND** and **com.appcoins.wallet**, respectively.
-
-
-**Google IAB Service Intent**
-
-	Intent serviceIntent = new Intent("com.android.vending.billing.InAppBillingService.BIND");
-	serviceIntent.setPackage("com.android.vending");
-
-**AppCoins IAB Service Intent**
-
-	Intent serviceIntent = new Intent("com.appcoins.wallet.iab.action.BIND");
-	serviceIntent.setPackage("com.appcoins.wallet");
-
-**Payment Intent**	
-
-When calling [getPaymentIntent method](https://github.com/Aptoide/appcoins-iab-sample/blob/feature/APPC-541-documentation/app/src/appcoinsiab/aidl/com/appcoins/billing/AppcoinsBilling.aidl#L96), you must send your developer's Ethereum wallet address. This can be done by using the helper provided [here](app/src/main/java/com/aptoide/iabexample/util/PayloadHelper.java).
-
-```java
-...
-String payload = PayloadHelper.buildIntentPayload("developer_ethereum_address","developer_payload")
-Bundle buyIntentBundle = mService.getBuyIntent(3, mContext.getPackageName(), sku, itemType, payload);
-```
-In order to get your developer's Ethereum wallet address, go to [BDS Back Office -> Wallet -> Deposit APPC](https://blockchainds.com/wallet/depositAppc) and click on "copy to clipboard button".
-
-
+## Requirements
 ### AppCoins Public Key
 
 Just like Google Play IAB, AppCoins IAB also exposes a public key. You should use AppCoins IAB public key to verify your purchases. It works exactly like Google Play IAB key, so you just need to replace one for the other.
 
 To find your AppCoins public key, you should be registered in BDS Back Office. You should also have an early version of your app already uploaded. Then, you should go to [BDS Back Office -> Manage Apps -> Apps List -> Open Your App](https://developers-dev.blockchainds.com/myApps/appsList), scroll down to the monetization card, and click "GET KEY" button.
-
-### Purchase Broadcast
-
-Google Play IAB broadcasts and Intent with action **com.android.vending.billing.PURCHASES_UPDATED**. Since AppCoins IAB does not implement this, any code related with listening to that Intent can be removed.
 
 ### Wallet Support
 
@@ -133,7 +93,58 @@ Finally, the following method is the one used to redirect the used to AppCoins B
     }
   }
 ```
-### Testing
+##Integration
+### 1.AIDL
+
+Like Google Play IAB, AppCoins IAB uses a AIDL file in order to communicate with AppCoins service. The package for your AIDL must be **com.appcoins.billing** instead of **com.android.vending.billing**. Both AppCoins and Google AIDL files are identical, but you need to rename **InAppBillingService.aild** to **AppcoinsBilling.aidl**.
+
+![Migration](docs/aidl-migration.png)
+
+### 2.Permissions
+
+Your app needs a permission to allow it to perform billing actions with AppCoins IAB. The permission is declared in the **AndroidManifest.xml** file of your app. Since Google Play IAB already declares a permission with name **com.android.vending.BILLING**, you should rename it to **com.appcoins.BILLING**.
+
+
+**Google Play IAB**
+
+	<uses-permission android:name="com.android.vending.BILLING" />
+
+**AppCoins IAB**
+
+	<uses-permission android:name="com.appcoins.BILLING" />
+
+### 3.Service Connection
+
+In order to communicate with AppCoins IAB, your app must bind to a service in the same way as in Google Play IAB. Google Play IAB Intent action and package must be updated from **com.android.vending.billing.InAppBillingService.BIND** and **com.android.vending** to **com.appcoins.wallet.iab.action.BIND** and **com.appcoins.wallet**, respectively.
+
+
+**Google IAB Service Intent**
+
+	Intent serviceIntent = new Intent("com.android.vending.billing.InAppBillingService.BIND");
+	serviceIntent.setPackage("com.android.vending");
+
+**AppCoins IAB Service Intent**
+
+	Intent serviceIntent = new Intent("com.appcoins.wallet.iab.action.BIND");
+	serviceIntent.setPackage("com.appcoins.wallet");
+
+**Payment Intent**
+
+When calling [getPaymentIntent method](https://github.com/Aptoide/appcoins-iab-sample/blob/feature/APPC-541-documentation/app/src/appcoinsiab/aidl/com/appcoins/billing/AppcoinsBilling.aidl#L96), you must send your developer's Ethereum wallet address. This can be done by using the helper provided [here](app/src/main/java/com/aptoide/iabexample/util/PayloadHelper.java).
+
+```java
+...
+String payload = PayloadHelper.buildIntentPayload("developer_ethereum_address","developer_payload")
+Bundle buyIntentBundle = mService.getBuyIntent(3, mContext.getPackageName(), sku, itemType, payload);
+```
+In order to get your developer's Ethereum wallet address, go to [BDS Back Office -> Wallet -> Deposit APPC](https://blockchainds.com/wallet/depositAppc) and click on "copy to clipboard button".
+
+### 4.Purchase Broadcast
+
+Google Play IAB broadcasts and Intent with action **com.android.vending.billing.PURCHASES_UPDATED**. Since AppCoins IAB does not implement this, any code related with listening to that Intent can be removed.
+
+
+###Testing
 
 For testing purposes you can use the following data to test the billing of you application.
 * **applicationId**: *com.appcoins.sample*
