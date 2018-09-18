@@ -3,7 +3,7 @@ AppCoins IAB lets you sell digital content from inside Android apps.
 
 
 ## Architecture
-AppCoinsWallet exposes a Android Service which your app should bind with. Once bound to AppCoinsWallet service, your app can start communicating over IPC using an AIDL inteface.
+AppCoinsWallet exposes a Android Service which your app should bind with. Once bound to AppCoinsWallet service, your app can start communicating over IPC using an AIDL interface.
 
 ## Google Play IAB to AppCoins IAB Migration Guide
 
@@ -27,6 +27,8 @@ To find your AppCoins public key, you should be registered in BDS Back Office. Y
 ### Wallet Support
 
 In order to use AppCoins, you will need a compliant wallet installed. The following snippets shows how you can prompt the user to install the AppCoins BDS Wallet when not present.
+ 
+We recommend you to do this validation when the user intends to do a purchase. Doing in this way, you avoid misleading the user the start an purchase without the wallet installed.
 
 To do that, first validate if an EIP 681 compatible wallet is installed.
 ```
