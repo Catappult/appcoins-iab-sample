@@ -18,7 +18,7 @@ AppCoinsWallet exposes a Android Service which your app should bind with. Once b
 4. [Purchase Broadcast](#4-purchase-broadcast)
 
 ## Requirements
-### AppCoins Public Key
+### BDS Public Key
 
 Just like Google Play IAB, AppCoins IAB also exposes a public key. You should use AppCoins IAB public key to verify your purchases. It works exactly like Google Play IAB key, so you just need to replace one for the other.
 
