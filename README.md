@@ -1,5 +1,5 @@
 # AppCoins IAB
-AppCoins IAB lets you sell digital content from inside Android apps.
+AppCoins BDS SDK IAB lets you sell digital content from inside Android apps.
 
 
 ## Architecture
