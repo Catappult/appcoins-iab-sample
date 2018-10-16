@@ -14,7 +14,11 @@ import java.math.BigDecimal;
 import java.util.Formatter;
 import org.spongycastle.util.encoders.Hex;
 
-public class BillingIntentBuilder {
+/**
+ * This class contains the help method to build the intent to call the BDS Wallet for generic
+ * payments.
+ */
+public class GenericPaymentIntentBuilder {
   private static final int MAIN_NETWORK_ID = 1;
   private static final int ROPSTEN_NETWORK_ID = 3;
 
@@ -77,13 +81,22 @@ public class BillingIntentBuilder {
             .getBytes("UTF-8"));
   }
 
+  /**
+   * Class used to build the content of the EIP681 composed data.
+   */
   public static class TransactionData {
+    /** Transaction data type for in app purchases. */
     public static final String TYPE_INAPP = "INAPP";
+    /** Transaction data type for donations. */
     public static final String TYPE_DONATION = "DONATION";
 
+    /** The type o transaction */
     String type;
+    /** The domain/packageName to witch the transaction is to be done */
     String domain;
+    /** The skuId of the items being "bought" */
     String skuId;
+    /** The additional payload to be sent if needed */
     String payload;
 
     public TransactionData(String type, String domain, String skuId, String payload) {

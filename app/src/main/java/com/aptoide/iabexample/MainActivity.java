@@ -13,7 +13,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
-import com.aptoide.iabexample.util.BillingIntentBuilder;
+import com.aptoide.iabexample.util.GenericPaymentIntentBuilder;
 import com.aptoide.iabexample.util.IabBroadcastReceiver;
 import com.aptoide.iabexample.util.IabHelper;
 import com.aptoide.iabexample.util.IabResult;
@@ -480,9 +480,9 @@ public class MainActivity extends Activity
   // "Subscribe to infinite gas" button clicked. Explain to user, then start purchase
   // flow for subscription.
   public void onInfiniteGasButtonClicked(View arg0) {
-    PendingIntent intent = BillingIntentBuilder.buildBuyIntent(this, "donation", "0.1"
+    PendingIntent intent = GenericPaymentIntentBuilder.buildBuyIntent(this, "donation", "0.1"
         ,
-        ((Application) getApplication()).getDeveloperAddress(), getPackageName(), BillingIntentBuilder.TransactionData.TYPE_DONATION,
+        ((Application) getApplication()).getDeveloperAddress(), getPackageName(), GenericPaymentIntentBuilder.TransactionData.TYPE_DONATION,
         "", true);
     try {
       startIntentSenderForResult(intent.getIntentSender(), RC_REQUEST, new Intent(), 0, 0, 0);
