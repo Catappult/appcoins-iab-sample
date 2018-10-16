@@ -2,17 +2,18 @@ package com.aptoide.iabexample;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.AlertDialog.Builder;
+import android.app.PendingIntent;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.Toast;
+import com.aptoide.iabexample.util.BillingIntentBuilder;
 import com.aptoide.iabexample.util.IabBroadcastReceiver;
 import com.aptoide.iabexample.util.IabHelper;
 import com.aptoide.iabexample.util.IabResult;
@@ -442,8 +443,8 @@ public class MainActivity extends Activity
      * TODO: On this payload the developer's wallet address must be added, or the purchase does NOT work.
      */
     String payload =
-          PayloadHelper.buildIntentPayload(((Application) getApplication()).getDeveloperAddress(),
-              null);
+        PayloadHelper.buildIntentPayload(((Application) getApplication()).getDeveloperAddress(),
+            null);
     try {
       mHelper.launchPurchaseFlow(this, Skus.SKU_GAS_ID, RC_REQUEST, mPurchaseFinishedListener,
           payload);
@@ -479,51 +480,15 @@ public class MainActivity extends Activity
   // "Subscribe to infinite gas" button clicked. Explain to user, then start purchase
   // flow for subscription.
   public void onInfiniteGasButtonClicked(View arg0) {
-    if (true) {
-      Toast.makeText(this, "Not Implemented", Toast.LENGTH_SHORT)
-          .show();
-      return;
+    PendingIntent intent = BillingIntentBuilder.buildBuyIntent(this, "donation", "0.1"
+        ,
+        ((Application) getApplication()).getDeveloperAddress(), getPackageName(), BillingIntentBuilder.TransactionData.TYPE_DONATION,
+        "", true);
+    try {
+      startIntentSenderForResult(intent.getIntentSender(), RC_REQUEST, new Intent(), 0, 0, 0);
+    } catch (IntentSender.SendIntentException e) {
+      e.printStackTrace();
     }
-
-    CharSequence[] options;
-    if (!mSubscribedToInfiniteGas || !mAutoRenewEnabled) {
-      // Both subscription options should be available
-      options = new CharSequence[2];
-      options[0] = getString(R.string.subscription_period_monthly);
-      options[1] = getString(R.string.subscription_period_yearly);
-      mFirstChoiceSku = Skus.SKU_INFINITE_GAS_MONTHLY_ID;
-      mSecondChoiceSku = Skus.SKU_INFINITE_GAS_YEARLY_ID;
-    } else {
-      // This is the subscription upgrade/downgrade path, so only one option is valid
-      options = new CharSequence[1];
-      if (mInfiniteGasSku.equals(Skus.SKU_INFINITE_GAS_MONTHLY_ID)) {
-        // Give the option to upgrade to yearly
-        options[0] = getString(R.string.subscription_period_yearly);
-        mFirstChoiceSku = Skus.SKU_INFINITE_GAS_YEARLY_ID;
-      } else {
-        // Give the option to downgrade to monthly
-        options[0] = getString(R.string.subscription_period_monthly);
-        mFirstChoiceSku = Skus.SKU_INFINITE_GAS_MONTHLY_ID;
-      }
-      mSecondChoiceSku = "";
-    }
-
-    int titleResId;
-    if (!mSubscribedToInfiniteGas) {
-      titleResId = R.string.subscription_period_prompt;
-    } else if (!mAutoRenewEnabled) {
-      titleResId = R.string.subscription_resignup_prompt;
-    } else {
-      titleResId = R.string.subscription_update_prompt;
-    }
-
-    Builder builder = new Builder(this);
-    builder.setTitle(titleResId)
-        .setSingleChoiceItems(options, 0 /* checkedItem */, this)
-        .setPositiveButton(R.string.subscription_prompt_continue, this)
-        .setNegativeButton(R.string.subscription_prompt_cancel, this);
-    AlertDialog dialog = builder.create();
-    dialog.show();
   }
 
   // Drive button clicked. Burn gas!
@@ -549,14 +514,14 @@ public class MainActivity extends Activity
     // "Upgrade" button is only visible if the user is not premium
     findViewById(R.id.upgrade_button).setVisibility(mIsPremium ? View.GONE : View.VISIBLE);
 
-    ImageView infiniteGasButton = (ImageView) findViewById(R.id.infinite_gas_button);
-    if (mSubscribedToInfiniteGas) {
-      // If subscription is active, show "Manage Infinite Gas"
-      infiniteGasButton.setImageResource(R.drawable.manage_infinite_gas);
-    } else {
-      // The user does not have infinite gas, show "Get Infinite Gas"
-      infiniteGasButton.setImageResource(R.drawable.get_infinite_gas);
-    }
+    //ImageView infiniteGasButton = (ImageView) findViewById(R.id.infinite_gas_button);
+    //if (mSubscribedToInfiniteGas) {
+    //  // If subscription is active, show "Manage Infinite Gas"
+    //  infiniteGasButton.setImageResource(R.drawable.manage_infinite_gas);
+    //} else {
+    //  // The user does not have infinite gas, show "Get Infinite Gas"
+    //  infiniteGasButton.setImageResource(R.drawable.get_infinite_gas);
+    //}
 
     // update gas gauge to reflect tank status
     if (mSubscribedToInfiniteGas) {

@@ -10,8 +10,8 @@ android {
     applicationId "com.appcoins.trivialdrivesample"
     minSdkVersion 21
     targetSdkVersion 27
-    versionCode 3
-    versionName "1.0.2"
+    versionCode 4
+    versionName "1.1.0"
     multiDexEnabled true
   }
 
@@ -73,7 +73,7 @@ android {
               "\"" + project.APPCOINS_DEV_IAB_BIND_ACTION + "\""
           buildConfigField "String", "IAB_BIND_PACKAGE",
               "\"" + project.APPCOINS_DEV_IAB_BIND_PACKAGE + "\""
-          variant.getMergedFlavor().manifestPlaceholders = [iabPermission: project.APPCOINS_DEV_IAB_PERMISSION]
+          variant.getMergedFlavor().manifestPlaceholders = [iabPermission: project.APPCOINS_IAB_PERMISSION]
         } else {
           buildConfigField "String", "IAB_BIND_ACTION",
               "\"" + project.APPCOINS_IAB_BIND_ACTION + "\""
@@ -100,6 +100,9 @@ android {
 dependencies {
   implementation 'com.android.support:appcompat-v7:27.1.1'
   implementation 'com.google.code.gson:gson:2.8.2'
+  api 'com.asfoundation:appcoins-ads:0.4.5.19b'
+  api "com.asfoundation:appcoins-contract-proxy:0.4.5.19b"
+  implementation "com.google.code.gson:gson:2.8.2"
 }
 
 def renameArtifact(defaultConfig) {
