@@ -22,9 +22,26 @@ public class GenericPaymentIntentBuilder {
   private static final int MAIN_NETWORK_ID = 1;
   private static final int ROPSTEN_NETWORK_ID = 3;
 
+  /**
+   * Method that generates the pending intent to call the wallet for a generic payment that follows
+   * the EIP681.
+   *
+   * @param context The application context.
+   * @param skuId The id for the SKU being purchased.
+   * @param value The value to be transferred.
+   * @param walletAddress The wallet address to transfer the value to.
+   * @param packageName The package name of the application that is the reference of the transfer.
+   * @param transferType The type of the transfer being done. Currently the predefined values are
+   * {@value TransactionData#TYPE_INAPP} and {@value TransactionData#TYPE_DONATION}, but any value
+   * can be applied.
+   * @param payload The field to add any additional information to be included the transaction.
+   * @param debug The field used to set the network to be used. If true the network id will be
+   * {@value #ROPSTEN_NETWORK_ID} otherwise it will be {@value #MAIN_NETWORK_ID}
+   *
+   * @return The pending intent needed to call the wallet for a generic transaction.
+   */
   public static PendingIntent buildBuyIntent(Context context, String skuId, String value,
-      String developerAddress, String packageName, String paymentType, String payload,
-      boolean debug) {
+      String walletAddress, String packageName, String transferType, String payload, boolean debug) {
     AppCoinsAddressProxySdk proxySdk = new AppCoinsAddressProxyBuilder().createAddressProxySdk();
     int networkId = debug ? ROPSTEN_NETWORK_ID : MAIN_NETWORK_ID;
 
@@ -35,13 +52,13 @@ public class GenericPaymentIntentBuilder {
 
     return Single.zip(getTokenContractAddress, getIabContractAddress,
         (tokenContractAddress, iabContractAddress) -> buildPaymentIntent(context, networkId, skuId,
-            value, tokenContractAddress, iabContractAddress, developerAddress, packageName,
-            paymentType, payload))
+            value, tokenContractAddress, iabContractAddress, walletAddress, packageName,
+            transferType, payload))
         .blockingGet();
   }
 
   private static PendingIntent buildPaymentIntent(Context context, int networkId, String skuId,
-      String value, String tokenContractAddress, String iabContractAddress, String developerAddress,
+      String value, String tokenContractAddress, String iabContractAddress, String walletAddress,
       String packageName, String paymentType, String payload) {
 
     BigDecimal amount = new BigDecimal(value);
@@ -49,7 +66,7 @@ public class GenericPaymentIntentBuilder {
 
     Intent intent = new Intent(Intent.ACTION_VIEW);
     Uri data = Uri.parse(
-        buildUriString(tokenContractAddress, iabContractAddress, amount, developerAddress, skuId,
+        buildUriString(tokenContractAddress, iabContractAddress, amount, walletAddress, skuId,
             networkId, packageName, paymentType, payload));
     intent.setData(data);
 
@@ -57,15 +74,14 @@ public class GenericPaymentIntentBuilder {
   }
 
   private static String buildUriString(String tokenContractAddress, String iabContractAddress,
-      BigDecimal amount, String developerAddress, String skuId, int networkId, String packageName,
+      BigDecimal amount, String walletAddress, String skuId, int networkId, String packageName,
       String paymentType, String payload) {
 
     StringBuilder stringBuilder = new StringBuilder(4);
     try {
       Formatter formatter = new Formatter(stringBuilder);
-      formatter.format(
-          "ethereum:%s@%d/buy?uint256=%s&address=%s&data=%s&iabContractAddress=%s",
-          tokenContractAddress, networkId, amount.toString(), developerAddress,
+      formatter.format("ethereum:%s@%d/buy?uint256=%s&address=%s&data=%s&iabContractAddress=%s",
+          tokenContractAddress, networkId, amount.toString(), walletAddress,
           buildUriData(skuId, packageName, paymentType, payload), iabContractAddress);
     } catch (UnsupportedEncodingException e) {
       throw new RuntimeException("UTF-8 not supported!", e);

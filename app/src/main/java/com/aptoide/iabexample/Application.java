@@ -17,11 +17,11 @@ public class Application extends android.app.Application {
     super.onCreate();
     adsSdk = new AppCoinsAdsBuilder().withDebug(BuildConfig.TEST_NETWORK)
         .createAdvertisementSdk(this);
-    //try {
-    //  adsSdk.init(this);
-    //} catch (PackageManager.NameNotFoundException e) {
-    //  e.printStackTrace();
-    //}
+    try {
+      adsSdk.init(this);
+    } catch (PackageManager.NameNotFoundException e) {
+      e.printStackTrace();
+    }
   }
 
   public String getDeveloperAddress() {

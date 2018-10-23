@@ -10,8 +10,8 @@ android {
     applicationId "com.appcoins.trivialdrivesample"
     minSdkVersion 21
     targetSdkVersion 27
-    versionCode 4
-    versionName "1.1.0"
+    versionCode 5
+    versionName "1.2.0"
     multiDexEnabled true
   }
 
@@ -100,8 +100,7 @@ android {
 dependencies {
   implementation 'com.android.support:appcompat-v7:27.1.1'
   implementation 'com.google.code.gson:gson:2.8.2'
-  api 'com.asfoundation:appcoins-ads:0.4.5.19b'
-  api "com.asfoundation:appcoins-contract-proxy:0.4.5.19b"
+  implementation 'com.blockchainds:appcoins-ads:0.4.6.20b'
   implementation "com.google.code.gson:gson:2.8.2"
 }
 
