@@ -75,8 +75,8 @@
 
             <ImageView
                 android:id="@+id/infinite_gas_button"
-                android:src="@drawable/get_infinite_gas"
-                android:onClick="onInfiniteGasButtonClicked"
+                android:src="@drawable/donate"
+                android:onClick="onDonateButtonClicked"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
         </LinearLayout>

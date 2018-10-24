@@ -105,6 +105,7 @@ public class MainActivity extends Activity
 
   // (arbitrary) request code for the purchase flow
   static final int RC_REQUEST = 10001;
+  static final int RC_DONATE = 10002;
 
   // Listener that's called when we finish querying the items and subscriptions we own
   IabHelper.QueryInventoryFinishedListener mGotInventoryListener =
@@ -347,9 +348,12 @@ public class MainActivity extends Activity
   @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     Log.d(TAG, "onActivityResult(" + requestCode + "," + resultCode + "," + data);
     if (mHelper == null) return;
-
-    // Pass on the activity result to the helper for handling
-    if (!mHelper.handleActivityResult(requestCode, resultCode, data)) {
+    if (requestCode == RC_DONATE) {
+      int msg = resultCode == Activity.RESULT_OK ? R.string.dialog_donation_success_msg
+          : R.string.dialog_donation_fail_msg;
+      alert(getString(msg));
+    } else if (!mHelper.handleActivityResult(requestCode, resultCode, data)) {
+      // Pass on the activity result to the helper for handling
       // not handled, so handle it ourselves (here's where you'd
       // perform any handling of activity results not related to in-app
       // billing...
@@ -479,13 +483,12 @@ public class MainActivity extends Activity
 
   // "Subscribe to infinite gas" button clicked. Explain to user, then start purchase
   // flow for subscription.
-  public void onInfiniteGasButtonClicked(View arg0) {
-    PendingIntent intent = GenericPaymentIntentBuilder.buildBuyIntent(this, "donation", "0.1",
+  public void onDonateButtonClicked(View arg0) {
+    PendingIntent intent = GenericPaymentIntentBuilder.buildBuyIntent(this, "donate", "0.1",
         ((Application) getApplication()).getDeveloperAddress(), getPackageName(),
-        GenericPaymentIntentBuilder.TransactionData.TYPE_DONATION,
-        "", true);
+        GenericPaymentIntentBuilder.TransactionData.TYPE_DONATION, "", true);
     try {
-      startIntentSenderForResult(intent.getIntentSender(), RC_REQUEST, new Intent(), 0, 0, 0);
+      startIntentSenderForResult(intent.getIntentSender(), RC_DONATE, new Intent(), 0, 0, 0);
     } catch (IntentSender.SendIntentException e) {
       e.printStackTrace();
     }
