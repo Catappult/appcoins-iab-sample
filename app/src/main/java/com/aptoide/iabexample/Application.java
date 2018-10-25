@@ -9,7 +9,7 @@ import com.asf.appcoins.sdk.ads.AppCoinsAdsBuilder;
  */
 
 public class Application extends android.app.Application {
-  private final String developerAddress = "0xda99070eb09ab6ab7e49866c390b01d3bca9d516";
+  private final String developerAddress = "0xd133FaB7aBC4711FD328c4aeFBF04256a79B1b40";
 
   private static AppCoinsAds adsSdk;
 
