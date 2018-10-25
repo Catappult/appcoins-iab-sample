@@ -7,6 +7,7 @@ import android.net.Uri;
 import com.asf.appcoins.sdk.contractproxy.AppCoinsAddressProxyBuilder;
 import com.asf.appcoins.sdk.contractproxy.AppCoinsAddressProxySdk;
 import com.google.gson.Gson;
+import com.google.gson.annotations.SerializedName;
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
 import java.io.UnsupportedEncodingException;
@@ -107,13 +108,13 @@ public class GenericPaymentIntentBuilder {
     public static final String TYPE_DONATION = "DONATION";
 
     /** The type o transaction */
-    String type;
+    @SerializedName("type") String type;
     /** The domain/packageName to witch the transaction is to be done */
-    String domain;
+    @SerializedName("domain")String domain;
     /** The skuId of the items being "bought" */
-    String skuId;
+    @SerializedName("skuId")String skuId;
     /** The additional payload to be sent if needed */
-    String payload;
+    @SerializedName("payload")String payload;
 
     public TransactionData(String type, String domain, String skuId, String payload) {
       this.type = type;
