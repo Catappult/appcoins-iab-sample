@@ -484,9 +484,9 @@ public class MainActivity extends Activity
   // "Subscribe to infinite gas" button clicked. Explain to user, then start purchase
   // flow for subscription.
   public void onDonateButtonClicked(View arg0) {
-    PendingIntent intent = GenericPaymentIntentBuilder.buildBuyIntent(this, "donate", "0.1",
+    PendingIntent intent = GenericPaymentIntentBuilder.buildBuyIntent(this, "donate", "1.3",
         ((Application) getApplication()).getDeveloperAddress(), getPackageName(),
-        GenericPaymentIntentBuilder.TransactionData.TYPE_DONATION, "", true);
+        GenericPaymentIntentBuilder.TransactionData.TYPE_DONATION, "", BuildConfig.DEBUG);
     try {
       startIntentSenderForResult(intent.getIntentSender(), RC_DONATE, new Intent(), 0, 0, 0);
     } catch (IntentSender.SendIntentException e) {
