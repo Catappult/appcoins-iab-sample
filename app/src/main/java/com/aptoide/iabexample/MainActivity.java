@@ -486,7 +486,7 @@ public class MainActivity extends Activity
   public void onDonateButtonClicked(View arg0) {
     PendingIntent intent = GenericPaymentIntentBuilder.buildBuyIntent(this, "donate", "1.3",
         ((Application) getApplication()).getDeveloperAddress(), getPackageName(),
-        GenericPaymentIntentBuilder.TransactionData.TYPE_DONATION, "", BuildConfig.DEBUG);
+        GenericPaymentIntentBuilder.TransactionData.TYPE_DONATION, "Tester", BuildConfig.DEBUG);
     try {
       startIntentSenderForResult(intent.getIntentSender(), RC_DONATE, new Intent(), 0, 0, 0);
     } catch (IntentSender.SendIntentException e) {

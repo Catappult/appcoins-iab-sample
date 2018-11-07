@@ -10,8 +10,8 @@ android {
     applicationId "com.appcoins.trivialdrivesample"
     minSdkVersion 21
     targetSdkVersion 27
-    versionCode 6
-    versionName "1.2.1"
+    versionCode 8
+    versionName "1.3.1"
     multiDexEnabled true
   }
 
@@ -73,12 +73,16 @@ android {
               "\"" + project.APPCOINS_DEV_IAB_BIND_ACTION + "\""
           buildConfigField "String", "IAB_BIND_PACKAGE",
               "\"" + project.APPCOINS_DEV_IAB_BIND_PACKAGE + "\""
+          buildConfigField "String", "IAB_WALLET_ADDR",
+              "\"" + project.APPCOINS_DEV_IAB_WALLET_ADDR + "\""
           variant.getMergedFlavor().manifestPlaceholders = [iabPermission: project.APPCOINS_IAB_PERMISSION]
         } else {
           buildConfigField "String", "IAB_BIND_ACTION",
               "\"" + project.APPCOINS_IAB_BIND_ACTION + "\""
           buildConfigField "String", "IAB_BIND_PACKAGE",
               "\"" + project.APPCOINS_IAB_BIND_PACKAGE + "\""
+          buildConfigField "String", "IAB_WALLET_ADDR",
+              "\"" + project.APPCOINS_IAB_WALLET_ADDR + "\""
           variant.getMergedFlavor().manifestPlaceholders = [iabPermission: project.APPCOINS_IAB_PERMISSION]
         }
       }
