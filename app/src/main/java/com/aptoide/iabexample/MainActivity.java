@@ -517,15 +517,6 @@ public class MainActivity extends Activity
     // "Upgrade" button is only visible if the user is not premium
     findViewById(R.id.upgrade_button).setVisibility(mIsPremium ? View.GONE : View.VISIBLE);
 
-    //ImageView infiniteGasButton = (ImageView) findViewById(R.id.infinite_gas_button);
-    //if (mSubscribedToInfiniteGas) {
-    //  // If subscription is active, show "Manage Infinite Gas"
-    //  infiniteGasButton.setImageResource(R.drawable.manage_infinite_gas);
-    //} else {
-    //  // The user does not have infinite gas, show "Get Infinite Gas"
-    //  infiniteGasButton.setImageResource(R.drawable.get_infinite_gas);
-    //}
-
     // update gas gauge to reflect tank status
     if (mSubscribedToInfiniteGas) {
       ((ImageView) findViewById(R.id.gas_gauge)).setImageResource(R.drawable.gas_inf);
@@ -598,13 +589,5 @@ public class MainActivity extends Activity
      */
 
     return true;
-  }
-
-  class DeveloperAddress {
-    String address;
-
-    public DeveloperAddress(String address) {
-      this.address = address;
-    }
   }
 }
