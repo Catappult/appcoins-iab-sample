@@ -281,7 +281,7 @@ public class IabHelper {
         .queryIntentServices(serviceIntent, 0);
     if (intentServices != null && !intentServices.isEmpty()) {
       // service available to handle that Intent
-      mContext.bindService(serviceIntent, mServiceConn, Context.BIND_AUTO_CREATE);
+        mContext.bindService(serviceIntent, mServiceConn, Context.BIND_AUTO_CREATE);
     } else {
       // no service available to handle that Intent
       if (listener != null) {

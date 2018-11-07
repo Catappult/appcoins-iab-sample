@@ -10,8 +10,8 @@ android {
     applicationId "com.appcoins.trivialdrivesample"
     minSdkVersion 21
     targetSdkVersion 27
-    versionCode 3
-    versionName "1.0.2"
+    versionCode 8
+    versionName "1.3.1"
     multiDexEnabled true
   }
 
@@ -73,12 +73,16 @@ android {
               "\"" + project.APPCOINS_DEV_IAB_BIND_ACTION + "\""
           buildConfigField "String", "IAB_BIND_PACKAGE",
               "\"" + project.APPCOINS_DEV_IAB_BIND_PACKAGE + "\""
-          variant.getMergedFlavor().manifestPlaceholders = [iabPermission: project.APPCOINS_DEV_IAB_PERMISSION]
+          buildConfigField "String", "IAB_WALLET_ADDR",
+              "\"" + project.APPCOINS_DEV_IAB_WALLET_ADDR + "\""
+          variant.getMergedFlavor().manifestPlaceholders = [iabPermission: project.APPCOINS_IAB_PERMISSION]
         } else {
           buildConfigField "String", "IAB_BIND_ACTION",
               "\"" + project.APPCOINS_IAB_BIND_ACTION + "\""
           buildConfigField "String", "IAB_BIND_PACKAGE",
               "\"" + project.APPCOINS_IAB_BIND_PACKAGE + "\""
+          buildConfigField "String", "IAB_WALLET_ADDR",
+              "\"" + project.APPCOINS_IAB_WALLET_ADDR + "\""
           variant.getMergedFlavor().manifestPlaceholders = [iabPermission: project.APPCOINS_IAB_PERMISSION]
         }
       }
@@ -100,6 +104,8 @@ android {
 dependencies {
   implementation 'com.android.support:appcompat-v7:27.1.1'
   implementation 'com.google.code.gson:gson:2.8.2'
+  implementation 'com.blockchainds:appcoins-ads:0.4.6.20b'
+  implementation "com.google.code.gson:gson:2.8.2"
 }
 
 def renameArtifact(defaultConfig) {
