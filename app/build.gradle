@@ -63,8 +63,6 @@ android {
 
     appcoinsiab {
       dimension "iab"
-      buildConfigField "String", "IAB_KEY",
-          "\"" + project.APPCOINS_IAB_KEY + "\""
       buildConfigField "String", "IAB_UPDATE_ACTION",
           "\"" + project.APPCOINS_IAB_UPDATE_ACTION + "\""
       applicationVariants.all { variant ->
@@ -75,8 +73,12 @@ android {
               "\"" + project.APPCOINS_DEV_IAB_BIND_PACKAGE + "\""
           buildConfigField "String", "IAB_WALLET_ADDR",
               "\"" + project.APPCOINS_DEV_IAB_WALLET_ADDR + "\""
+          buildConfigField "String", "IAB_KEY",
+              "\"" + project.APPCOINS_DEV_IAB_KEY + "\""
           variant.getMergedFlavor().manifestPlaceholders = [iabPermission: project.APPCOINS_IAB_PERMISSION]
         } else {
+          buildConfigField "String", "IAB_KEY",
+              "\"" + project.APPCOINS_IAB_KEY + "\""
           buildConfigField "String", "IAB_BIND_ACTION",
               "\"" + project.APPCOINS_IAB_BIND_ACTION + "\""
           buildConfigField "String", "IAB_BIND_PACKAGE",
