@@ -109,7 +109,6 @@ public class MainActivity extends Activity
   static final int RC_DONATE = 10002;
   static final int RC_ONE_STEP = 10003;
 
-
   // Listener that's called when we finish querying the items and subscriptions we own
   IabHelper.QueryInventoryFinishedListener mGotInventoryListener =
       new IabHelper.QueryInventoryFinishedListener() {
@@ -495,7 +494,7 @@ public class MainActivity extends Activity
   // flow for subscription.
   public void onDonateButtonClicked(View arg0) {
     setWaitScreen(true);
-    PendingIntent intent = GenericPaymentIntentBuilder.buildBuyIntent(this, "donate", "1.3",
+    PendingIntent intent = GenericPaymentIntentBuilder.buildBuyIntent(this, "donatio", "1.3",
         ((Application) getApplication()).getDeveloperAddress(), getPackageName(),
         GenericPaymentIntentBuilder.TransactionData.TYPE_DONATION, "Tester", BuildConfig.DEBUG);
     try {
@@ -505,17 +504,17 @@ public class MainActivity extends Activity
     }
   }
 
-  // "Subscribe to infinite gas" button clicked. Explain to user, then start purchase
+  // "Buy oil" button clicked. Explain to user, then start purchase
   // flow for subscription.
   public void onBuyOilButtonClicked(View arg0) {
     setWaitScreen(true);
-    String url = "https://apichain.blockchainds.com/transaction/inapp?product=oil&domain="
+    String url = "https://apichain.blockchainds.com/transaction/inapp?product=gas&domain="
         + getPackageName();
     Intent i = new Intent(Intent.ACTION_VIEW);
     i.setData(Uri.parse(url));
 
-    PendingIntent intent = PendingIntent.getActivity(getApplicationContext(), 0, i,
-        PendingIntent.FLAG_UPDATE_CURRENT);
+    PendingIntent intent =
+        PendingIntent.getActivity(getApplicationContext(), 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
     try {
       startIntentSenderForResult(intent.getIntentSender(), RC_ONE_STEP, new Intent(), 0, 0, 0);
     } catch (IntentSender.SendIntentException e) {
@@ -526,14 +525,19 @@ public class MainActivity extends Activity
   // "Subscribe to infinite gas" button clicked. Explain to user, then start purchase
   // flow for subscription.
   public void onBuyAntiFreezeButtonClicked(View arg0) {
-    //PendingIntent intent = GenericPaymentIntentBuilder.buildBuyIntent(this, "donate", "1.3",
-    //    ((Application) getApplication()).getDeveloperAddress(), getPackageName(),
-    //    GenericPaymentIntentBuilder.TransactionData.TYPE_DONATION, "Tester", BuildConfig.DEBUG);
-    //try {
-    //  startIntentSenderForResult(intent.getIntentSender(), RC_DONATE, new Intent(), 0, 0, 0);
-    //} catch (IntentSender.SendIntentException e) {
-    //  e.printStackTrace();
-    //}
+    setWaitScreen(true);
+    String url =
+        "https://apichain-dev.blockchainds.com/transaction/inapp?value=1&currency=eur&to=0xbb83e699f1188baabea820ce02995c97bd9b510f&domain=com.appcoins.trivialdrivesample.test";
+    Intent i = new Intent(Intent.ACTION_VIEW);
+    i.setData(Uri.parse(url));
+
+    PendingIntent intent =
+        PendingIntent.getActivity(getApplicationContext(), 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
+    try {
+      startIntentSenderForResult(intent.getIntentSender(), RC_ONE_STEP, new Intent(), 0, 0, 0);
+    } catch (IntentSender.SendIntentException e) {
+      e.printStackTrace();
+    }
   }
 
   // Drive button clicked. Burn gas!
