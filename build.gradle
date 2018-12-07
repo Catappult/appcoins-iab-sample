@@ -18,8 +18,6 @@ allprojects {
     jcenter()
     google()
     maven { url "https://dl.bintray.com/blockchainds/bds" }
-    maven { url "https://dl.bintray.com/asf/asf" }
-
   }
 }
 
