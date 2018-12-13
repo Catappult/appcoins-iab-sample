@@ -2,17 +2,19 @@ package com.aptoide.iabexample;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.AlertDialog.Builder;
+import android.app.PendingIntent;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.Toast;
+import com.aptoide.iabexample.util.GenericPaymentIntentBuilder;
 import com.aptoide.iabexample.util.IabBroadcastReceiver;
 import com.aptoide.iabexample.util.IabHelper;
 import com.aptoide.iabexample.util.IabResult;
@@ -104,6 +106,8 @@ public class MainActivity extends Activity
 
   // (arbitrary) request code for the purchase flow
   static final int RC_REQUEST = 10001;
+  static final int RC_DONATE = 10002;
+  static final int RC_ONE_STEP = 10003;
 
   // Listener that's called when we finish querying the items and subscriptions we own
   IabHelper.QueryInventoryFinishedListener mGotInventoryListener =
@@ -346,9 +350,19 @@ public class MainActivity extends Activity
   @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     Log.d(TAG, "onActivityResult(" + requestCode + "," + resultCode + "," + data);
     if (mHelper == null) return;
-
-    // Pass on the activity result to the helper for handling
-    if (!mHelper.handleActivityResult(requestCode, resultCode, data)) {
+    if (requestCode == RC_DONATE) {
+      int msg = resultCode == Activity.RESULT_OK ? R.string.dialog_donation_success_msg
+          : R.string.dialog_donation_fail_msg;
+      alert(getString(msg));
+    } else if (requestCode == RC_ONE_STEP) {
+      if (resultCode == Activity.RESULT_OK) {
+        mTank = mTank == TANK_MAX ? TANK_MAX : mTank + 1;
+        saveData();
+        alert("You filled 1/4 tank. Your tank is now " + String.valueOf(mTank) + "/4 full!");
+        updateUi();
+      }
+    } else if (!mHelper.handleActivityResult(requestCode, resultCode, data)) {
+      // Pass on the activity result to the helper for handling
       // not handled, so handle it ourselves (here's where you'd
       // perform any handling of activity results not related to in-app
       // billing...
@@ -442,8 +456,8 @@ public class MainActivity extends Activity
      * TODO: On this payload the developer's wallet address must be added, or the purchase does NOT work.
      */
     String payload =
-          PayloadHelper.buildIntentPayload(((Application) getApplication()).getDeveloperAddress(),
-              null);
+        PayloadHelper.buildIntentPayload(((Application) getApplication()).getDeveloperAddress(),
+            null);
     try {
       mHelper.launchPurchaseFlow(this, Skus.SKU_GAS_ID, RC_REQUEST, mPurchaseFinishedListener,
           payload);
@@ -478,52 +492,54 @@ public class MainActivity extends Activity
 
   // "Subscribe to infinite gas" button clicked. Explain to user, then start purchase
   // flow for subscription.
-  public void onInfiniteGasButtonClicked(View arg0) {
-    if (true) {
-      Toast.makeText(this, "Not Implemented", Toast.LENGTH_SHORT)
-          .show();
-      return;
+  public void onDonateButtonClicked(View arg0) {
+    setWaitScreen(true);
+    PendingIntent intent = GenericPaymentIntentBuilder.buildBuyIntent(this, "donatio", "1.3",
+        ((Application) getApplication()).getDeveloperAddress(), getPackageName(),
+        GenericPaymentIntentBuilder.TransactionData.TYPE_DONATION, "Tester", BuildConfig.DEBUG);
+    try {
+      startIntentSenderForResult(intent.getIntentSender(), RC_DONATE, new Intent(), 0, 0, 0);
+    } catch (IntentSender.SendIntentException e) {
+      e.printStackTrace();
     }
+  }
 
-    CharSequence[] options;
-    if (!mSubscribedToInfiniteGas || !mAutoRenewEnabled) {
-      // Both subscription options should be available
-      options = new CharSequence[2];
-      options[0] = getString(R.string.subscription_period_monthly);
-      options[1] = getString(R.string.subscription_period_yearly);
-      mFirstChoiceSku = Skus.SKU_INFINITE_GAS_MONTHLY_ID;
-      mSecondChoiceSku = Skus.SKU_INFINITE_GAS_YEARLY_ID;
-    } else {
-      // This is the subscription upgrade/downgrade path, so only one option is valid
-      options = new CharSequence[1];
-      if (mInfiniteGasSku.equals(Skus.SKU_INFINITE_GAS_MONTHLY_ID)) {
-        // Give the option to upgrade to yearly
-        options[0] = getString(R.string.subscription_period_yearly);
-        mFirstChoiceSku = Skus.SKU_INFINITE_GAS_YEARLY_ID;
-      } else {
-        // Give the option to downgrade to monthly
-        options[0] = getString(R.string.subscription_period_monthly);
-        mFirstChoiceSku = Skus.SKU_INFINITE_GAS_MONTHLY_ID;
-      }
-      mSecondChoiceSku = "";
+  // "Buy oil" button clicked. Explain to user, then start purchase
+  // flow for subscription.
+  public void onBuyOilButtonClicked(View arg0) {
+    setWaitScreen(true);
+    String url = "https://apichain.blockchainds.com/transaction/inapp?product=gas&domain="
+        + getPackageName();
+    Intent i = new Intent(Intent.ACTION_VIEW);
+    i.setData(Uri.parse(url));
+
+    PendingIntent intent =
+        PendingIntent.getActivity(getApplicationContext(), 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
+    try {
+      startIntentSenderForResult(intent.getIntentSender(), RC_ONE_STEP, new Intent(), 0, 0, 0);
+    } catch (IntentSender.SendIntentException e) {
+      e.printStackTrace();
     }
+  }
 
-    int titleResId;
-    if (!mSubscribedToInfiniteGas) {
-      titleResId = R.string.subscription_period_prompt;
-    } else if (!mAutoRenewEnabled) {
-      titleResId = R.string.subscription_resignup_prompt;
-    } else {
-      titleResId = R.string.subscription_update_prompt;
+  // "Subscribe to infinite gas" button clicked. Explain to user, then start purchase
+  // flow for subscription.
+  public void onBuyAntiFreezeButtonClicked(View arg0) {
+    setWaitScreen(true);
+    String url =
+        "https://apichain.blockchainds.com/transaction/inapp?value=1&currency=eur"
+            + "&to=0xbb83e699f1188baabea820ce02995c97bd9b510f"
+            + "&domain=com.appcoins.trivialdrivesample.test";
+    Intent i = new Intent(Intent.ACTION_VIEW);
+    i.setData(Uri.parse(url));
+
+    PendingIntent intent =
+        PendingIntent.getActivity(getApplicationContext(), 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
+    try {
+      startIntentSenderForResult(intent.getIntentSender(), RC_ONE_STEP, new Intent(), 0, 0, 0);
+    } catch (IntentSender.SendIntentException e) {
+      e.printStackTrace();
     }
-
-    Builder builder = new Builder(this);
-    builder.setTitle(titleResId)
-        .setSingleChoiceItems(options, 0 /* checkedItem */, this)
-        .setPositiveButton(R.string.subscription_prompt_continue, this)
-        .setNegativeButton(R.string.subscription_prompt_cancel, this);
-    AlertDialog dialog = builder.create();
-    dialog.show();
   }
 
   // Drive button clicked. Burn gas!
@@ -548,15 +564,6 @@ public class MainActivity extends Activity
 
     // "Upgrade" button is only visible if the user is not premium
     findViewById(R.id.upgrade_button).setVisibility(mIsPremium ? View.GONE : View.VISIBLE);
-
-    ImageView infiniteGasButton = (ImageView) findViewById(R.id.infinite_gas_button);
-    if (mSubscribedToInfiniteGas) {
-      // If subscription is active, show "Manage Infinite Gas"
-      infiniteGasButton.setImageResource(R.drawable.manage_infinite_gas);
-    } else {
-      // The user does not have infinite gas, show "Get Infinite Gas"
-      infiniteGasButton.setImageResource(R.drawable.get_infinite_gas);
-    }
 
     // update gas gauge to reflect tank status
     if (mSubscribedToInfiniteGas) {
@@ -630,13 +637,5 @@ public class MainActivity extends Activity
      */
 
     return true;
-  }
-
-  class DeveloperAddress {
-    String address;
-
-    public DeveloperAddress(String address) {
-      this.address = address;
-    }
   }
 }

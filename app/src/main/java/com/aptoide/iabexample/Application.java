@@ -1,14 +1,27 @@
 package com.aptoide.iabexample;
 
+import android.content.pm.PackageManager;
+import com.asf.appcoins.sdk.ads.AppCoinsAds;
+import com.asf.appcoins.sdk.ads.AppCoinsAdsBuilder;
+
 /**
  * Created by neuro on 12-03-2018.
  */
 
 public class Application extends android.app.Application {
-  private final String developerAddress = "0xd133fab7abc4711fd328c4aefbf04256a79b1b40";
+  private final String developerAddress = BuildConfig.IAB_WALLET_ADDR;
+
+  private static AppCoinsAds adsSdk;
 
   @Override public void onCreate() {
     super.onCreate();
+    adsSdk = new AppCoinsAdsBuilder().withDebug(BuildConfig.TEST_NETWORK)
+        .createAdvertisementSdk(this);
+    try {
+      adsSdk.init(this);
+    } catch (PackageManager.NameNotFoundException e) {
+      e.printStackTrace();
+    }
   }
 
   public String getDeveloperAddress() {
