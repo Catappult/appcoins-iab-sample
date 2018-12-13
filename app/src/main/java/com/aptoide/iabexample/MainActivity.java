@@ -527,7 +527,9 @@ public class MainActivity extends Activity
   public void onBuyAntiFreezeButtonClicked(View arg0) {
     setWaitScreen(true);
     String url =
-        "https://apichain-dev.blockchainds.com/transaction/inapp?value=1&currency=eur&to=0xbb83e699f1188baabea820ce02995c97bd9b510f&domain=com.appcoins.trivialdrivesample.test";
+        "https://apichain.blockchainds.com/transaction/inapp?value=1&currency=eur"
+            + "&to=0xbb83e699f1188baabea820ce02995c97bd9b510f"
+            + "&domain=com.appcoins.trivialdrivesample.test";
     Intent i = new Intent(Intent.ACTION_VIEW);
     i.setData(Uri.parse(url));
 
