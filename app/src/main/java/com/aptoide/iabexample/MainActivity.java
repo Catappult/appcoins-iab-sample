@@ -401,7 +401,7 @@ public class MainActivity extends Activity
        */
       String payload =
           PayloadHelper.buildIntentPayload(((Application) getApplication()).getDeveloperAddress(),
-              null);
+              "developer payload", "orderId=" + System.currentTimeMillis());
 
       setWaitScreen(true);
       Log.d(TAG, "Launching purchase flow for gas subscription.");
@@ -453,11 +453,12 @@ public class MainActivity extends Activity
     /* TODO: for security, generate your payload here for verification. See the comments on
      *        verifyDeveloperPayload() for more info. Since this is a SAMPLE, we just use
      *        an empty string, but on a production app you should carefully generate this.
-     * TODO: On this payload the developer's wallet address must be added, or the purchase does NOT work.
+     * TODO: On this payload the developer's wallet address must be added, or the purchase does
+     * NOT work.
      */
     String payload =
         PayloadHelper.buildIntentPayload(((Application) getApplication()).getDeveloperAddress(),
-            null);
+            "developer payload", "orderId=" + System.currentTimeMillis());
     try {
       mHelper.launchPurchaseFlow(this, Skus.SKU_GAS_ID, RC_REQUEST, mPurchaseFinishedListener,
           payload);
@@ -475,11 +476,12 @@ public class MainActivity extends Activity
     /* TODO: for security, generate your payload here for verification. See the comments on
      *        verifyDeveloperPayload() for more info. Since this is a SAMPLE, we just use
      *        an empty string, but on a production app you should carefully generate this.
-     * TODO: On this payload the developer's wallet address must be added, or the purchase does NOT work.
+     * TODO: On this payload the developer's wallet address must be added, or the purchase does
+     * NOT work.
      */
     String payload =
         PayloadHelper.buildIntentPayload(((Application) getApplication()).getDeveloperAddress(),
-            null);
+            "developer payload", "orderId=" + System.currentTimeMillis());
 
     try {
       mHelper.launchPurchaseFlow(this, Skus.SKU_PREMIUM_ID, RC_REQUEST, mPurchaseFinishedListener,
@@ -526,10 +528,10 @@ public class MainActivity extends Activity
   // flow for subscription.
   public void onBuyAntiFreezeButtonClicked(View arg0) {
     setWaitScreen(true);
-    String url =
-        "https://apichain.blockchainds.com/transaction/inapp?value=1&currency=eur"
-            + "&to=0xbb83e699f1188baabea820ce02995c97bd9b510f"
-            + "&domain=" + getPackageName();
+    String url = "https://apichain.blockchainds.com/transaction/inapp?value=1&currency=eur"
+        + "&to=0xbb83e699f1188baabea820ce02995c97bd9b510f"
+        + "&domain="
+        + getPackageName();
     Intent i = new Intent(Intent.ACTION_VIEW);
     i.setData(Uri.parse(url));
 
