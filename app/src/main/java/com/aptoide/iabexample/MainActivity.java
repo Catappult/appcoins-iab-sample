@@ -397,11 +397,11 @@ public class MainActivity extends Activity
        * TODO: for security, generate your payload here for verification. See the comments on
        *        verifyDeveloperPayload() for more info. Since this is a SAMPLE, we just use
        *        an empty string, but on a production app you should carefully generate this.
-       * TODO: On this payload the developer's wallet address must be added, or the purchase does NOT work.
+       * TODO: On this payload the developer's wallet address must be added, or the purchase does
+       * NOT work.
        */
-      String payload =
-          PayloadHelper.buildIntentPayload(((Application) getApplication()).getDeveloperAddress(),
-              "developer payload", "orderId=" + System.currentTimeMillis());
+      String payload = PayloadHelper.buildIntentPayload("orderId=" + System.currentTimeMillis(),
+          "developer payload");
 
       setWaitScreen(true);
       Log.d(TAG, "Launching purchase flow for gas subscription.");
@@ -456,9 +456,8 @@ public class MainActivity extends Activity
      * TODO: On this payload the developer's wallet address must be added, or the purchase does
      * NOT work.
      */
-    String payload =
-        PayloadHelper.buildIntentPayload(((Application) getApplication()).getDeveloperAddress(),
-            "developer payload", "orderId=" + System.currentTimeMillis());
+    String payload = PayloadHelper.buildIntentPayload("orderId=" + System.currentTimeMillis(),
+        "developer payload: gas");
     try {
       mHelper.launchPurchaseFlow(this, Skus.SKU_GAS_ID, RC_REQUEST, mPurchaseFinishedListener,
           payload);
@@ -479,9 +478,8 @@ public class MainActivity extends Activity
      * TODO: On this payload the developer's wallet address must be added, or the purchase does
      * NOT work.
      */
-    String payload =
-        PayloadHelper.buildIntentPayload(((Application) getApplication()).getDeveloperAddress(),
-            "developer payload", "orderId=" + System.currentTimeMillis());
+    String payload = PayloadHelper.buildIntentPayload("orderId=" + System.currentTimeMillis(),
+        "developer payload: premium");
 
     try {
       mHelper.launchPurchaseFlow(this, Skus.SKU_PREMIUM_ID, RC_REQUEST, mPurchaseFinishedListener,
