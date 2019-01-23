@@ -401,7 +401,7 @@ public class MainActivity extends Activity
        * NOT work.
        */
       String payload = PayloadHelper.buildIntentPayload("orderId=" + System.currentTimeMillis(),
-          "developer payload");
+          "developer payload", null);
 
       setWaitScreen(true);
       Log.d(TAG, "Launching purchase flow for gas subscription.");
@@ -457,7 +457,7 @@ public class MainActivity extends Activity
      * NOT work.
      */
     String payload = PayloadHelper.buildIntentPayload("orderId=" + System.currentTimeMillis(),
-        "developer payload: gas");
+        "developer payload: gas", null);
     try {
       mHelper.launchPurchaseFlow(this, Skus.SKU_GAS_ID, RC_REQUEST, mPurchaseFinishedListener,
           payload);
@@ -479,7 +479,7 @@ public class MainActivity extends Activity
      * NOT work.
      */
     String payload = PayloadHelper.buildIntentPayload("orderId=" + System.currentTimeMillis(),
-        "developer payload: premium");
+        "developer payload: premium", null);
 
     try {
       mHelper.launchPurchaseFlow(this, Skus.SKU_PREMIUM_ID, RC_REQUEST, mPurchaseFinishedListener,
@@ -507,6 +507,16 @@ public class MainActivity extends Activity
   // "Buy oil" button clicked. Explain to user, then start purchase
   // flow for subscription.
   public void onBuyOilButtonClicked(View arg0) {
+    if (mSubscribedToInfiniteGas) {
+      complain("No need! You're subscribed to infinite gas. Isn't that awesome?");
+      return;
+    }
+
+    if (mTank >= TANK_MAX) {
+      complain("Your tank is full. Drive around a bit!");
+      return;
+    }
+
     setWaitScreen(true);
     String url = "https://apichain.blockchainds.com/transaction/inapp?product=gas&domain="
         + getPackageName();
@@ -525,20 +535,35 @@ public class MainActivity extends Activity
   // "Subscribe to infinite gas" button clicked. Explain to user, then start purchase
   // flow for subscription.
   public void onBuyAntiFreezeButtonClicked(View arg0) {
-    setWaitScreen(true);
-    String url = "https://apichain.blockchainds.com/transaction/inapp?value=1&currency=eur"
-        + "&to=0xbb83e699f1188baabea820ce02995c97bd9b510f"
-        + "&domain="
-        + getPackageName();
-    Intent i = new Intent(Intent.ACTION_VIEW);
-    i.setData(Uri.parse(url));
+    if (mSubscribedToInfiniteGas) {
+      complain("No need! You're subscribed to infinite gas. Isn't that awesome?");
+      return;
+    }
 
-    PendingIntent intent =
-        PendingIntent.getActivity(getApplicationContext(), 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
+    if (mTank >= TANK_MAX) {
+      complain("Your tank is full. Drive around a bit!");
+      return;
+    }
+
+    // launch the gas purchase UI flow.
+    // We will be notified of completion via mPurchaseFinishedListener
+    setWaitScreen(true);
+    Log.d(TAG, "Launching purchase flow for gas.");
+
+    /* TODO: for security, generate your payload here for verification. See the comments on
+     *        verifyDeveloperPayload() for more info. Since this is a SAMPLE, we just use
+     *        an empty string, but on a production app you should carefully generate this.
+     * TODO: On this payload the developer's wallet address must be added, or the purchase does
+     * NOT work.
+     */
+    String payload = PayloadHelper.buildIntentPayload("orderId=" + System.currentTimeMillis(),
+        "developer payload: gas", "UNITY");
     try {
-      startIntentSenderForResult(intent.getIntentSender(), RC_ONE_STEP, new Intent(), 0, 0, 0);
-    } catch (IntentSender.SendIntentException e) {
-      e.printStackTrace();
+      mHelper.launchPurchaseFlow(this, Skus.SKU_GAS_ID, RC_REQUEST, mPurchaseFinishedListener,
+          payload);
+    } catch (IabHelper.IabAsyncInProgressException e) {
+      complain("Error launching purchase flow. Another async operation in progress.");
+      setWaitScreen(false);
     }
   }
 
