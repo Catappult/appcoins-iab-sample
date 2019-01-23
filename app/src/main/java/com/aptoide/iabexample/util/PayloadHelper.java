@@ -40,7 +40,7 @@ public class PayloadHelper {
     if (orderReference != null) {
       builder.appendQueryParameter(ORDER_PARAMETER, orderReference);
     }
-    if (orderReference != null) {
+    if (origin != null) {
       builder.appendQueryParameter(ORIGIN_PARAMETER, origin);
     }
     return builder.toString();
