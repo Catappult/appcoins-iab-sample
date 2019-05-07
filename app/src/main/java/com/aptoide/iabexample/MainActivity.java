@@ -140,8 +140,15 @@ public class MainActivity extends Activity
       List<Purchase> gasMonthlyList = getSku(purchases, Skus.SKU_INFINITE_GAS_MONTHLY_ID);
       List<Purchase> gasYearlyList = getSku(purchases, Skus.SKU_INFINITE_GAS_YEARLY_ID);
 
-      Purchase gasMonthly = gasMonthlyList.get(0);
-      Purchase gasYearly = gasYearlyList.get(0);
+      Purchase gasMonthly = null;
+      if(gasMonthlyList.size() > 0){
+        gasMonthly = gasMonthlyList.get(0);
+      }
+
+      Purchase gasYearly = null;
+      if(gasYearlyList.size() > 0){
+        gasYearly = gasYearlyList.get(0);
+      }
 
       if (gasMonthly != null && gasMonthly.isAutoRenewing()) {
         mInfiniteGasSku = Skus.SKU_INFINITE_GAS_MONTHLY_ID;
@@ -278,12 +285,9 @@ public class MainActivity extends Activity
 
     String base64EncodedPublicKey = BuildConfig.IAB_KEY;
 
-    if (base64EncodedPublicKey.contains("CONSTRUCT_YOUR")) {
-      throw new RuntimeException(
-          "Please put your app's public key in MainActivity.java. See README.");
-    }
     cab = CatapultBillingAppCoinsFactory.BuildAppcoinsBilling(getApplicationContext(),
         base64EncodedPublicKey);
+
     cab.startConnection(appCoinsBillingStateListener);
   }
 
@@ -301,6 +305,7 @@ public class MainActivity extends Activity
   }
 
   @Override public void onClick(DialogInterface dialog, int id) {
+    /*
     if (id == 0) {
       mSelectedSubscriptionPeriod = mFirstChoiceSku;
     } else if (id == 1) {
@@ -335,6 +340,7 @@ public class MainActivity extends Activity
       // There are only four buttons, this should not happen
       Log.e(TAG, "Unknown button clicked in subscription dialog: " + id);
     }
+    */
   }
 
   void saveData() {
@@ -385,7 +391,7 @@ public class MainActivity extends Activity
       return;
     }
 
-    setWaitScreen(true);
+    //setWaitScreen(true);
 
     Log.d(TAG, "Launching purchase flow for gas.");
 
