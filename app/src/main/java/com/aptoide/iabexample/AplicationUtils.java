@@ -5,13 +5,15 @@ import android.content.Intent;
 import android.util.Log;
 import com.appcoins.sdk.android_appcoins_billing.helpers.Utils;
 import com.aptoide.iabexample.util.Security;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class AplicationUtils {
 
   private final static String DEBUG_TAG = "CatapultAppcoinsBilling";
 
-  public static boolean handleActivityResult(String signature, String itemType, int resultCode,
-      Intent data, PurchaseFinishedListener purchaseFinishedListener) {
+  public static boolean handleActivityResult(String signature, int resultCode, Intent data,
+      PurchaseFinishedListener purchaseFinishedListener) {
 
     if (data == null) {
       logError("Null data in IAB activity result.");
@@ -34,33 +36,50 @@ public class AplicationUtils {
         logError("BUG: either purchaseData or dataSignature is null.");
         logDebug("Extras: " + data.getExtras()
             .toString());
+        return false;
+      }
 
-        if (verifySignature(signature, purchaseData, dataSignature)) {
-          //purchaseFinishedListener.onPurchaseFinished(responseCode, null);
-          return true;
-        } else {
-          //purchaseFinishedListener.onPurchaseFinished(responseCode, null);
+      if (verifySignature(signature, purchaseData, dataSignature)) {
+        JSONObject purchaseDataJSON = null;
+        try {
+          purchaseDataJSON = new JSONObject(purchaseData);
+          purchaseFinishedListener.onPurchaseFinished(responseCode,
+              getTokenFromJSON(purchaseDataJSON), getSkuFromJSON(purchaseDataJSON));
+        } catch (JSONException e) {
+          e.printStackTrace();
           return false;
         }
-      }
-    } else if (resultCode == Activity.RESULT_OK) {
-      // result code was OK, but in-app billing response was not OK.
-      logDebug("Result code was OK but in-app billing response was not OK: " + getResponseDesc(
-          responseCode));
-      //purchaseFinishedListener.onPurchaseFinished(resultCode, null);
-    } else if (resultCode == Activity.RESULT_CANCELED) {
 
-      logDebug("Purchase canceled - Response: " + getResponseDesc(responseCode));
-      //purchaseFinishedListener.onPurchaseFinished(resultCode, null);
-    } else {
-      logError("Purchase failed. Result code: "
-          + Integer.toString(resultCode)
-          + ". Response: "
-          + getResponseDesc(responseCode));
-      //purchaseFinishedListener.onPurchaseFinished(resultCode, null);
-    }
-    return true;
+        return true;
+      } else {
+        //purchaseFinishedListener.onPurchaseFinished(responseCode, null);
+        return false;
+      }
+
+  } else if(resultCode ==Activity.RESULT_OK)
+
+  {
+    // result code was OK, but in-app billing response was not OK.
+    logDebug("Result code was OK but in-app billing response was not OK: " + getResponseDesc(
+        responseCode));
+    //purchaseFinishedListener.onPurchaseFinished(resultCode, null);
+  } else if(resultCode ==Activity.RESULT_CANCELED)
+
+  {
+
+    logDebug("Purchase canceled - Response: " + getResponseDesc(responseCode));
+    //purchaseFinishedListener.onPurchaseFinished(resultCode, null);
+  } else
+
+  {
+    logError("Purchase failed. Result code: "
+        + Integer.toString(resultCode)
+        + ". Response: "
+        + getResponseDesc(responseCode));
+    //purchaseFinishedListener.onPurchaseFinished(resultCode, null);
   }
+    return true;
+}
 
   static boolean verifySignature(String signature, String purchaseData, String dataSignature) {
 
@@ -98,16 +117,13 @@ public class AplicationUtils {
     Log.e(DEBUG_TAG, "In-app billing error: " + msg);
   }
 
-  /*
-  static String getToken(Bundle bundle){
-    for (String key : bundle.keySet()) {
-      Object value = bundle.get(key);
-      if (value != null) {
-        Log.d("Message Key", key);
-        Log.d("Message value", value.toString());
-      }
+  static String getTokenFromJSON(JSONObject data) {
+    return data.optString("purchaseToken");
   }
-  */
+
+  static String getSkuFromJSON(JSONObject data) {
+    return data.optString("productId");
+  }
 
   public static String getResponseDesc(int code) {
     String[] iab_msgs = ("0:OK/1:User Canceled/2:Unknown/"

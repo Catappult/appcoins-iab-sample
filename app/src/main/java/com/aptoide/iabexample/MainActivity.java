@@ -7,7 +7,7 @@ import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.text.TextUtils;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -107,7 +107,7 @@ public class MainActivity extends Activity
   IabHelper mHelper;
   // Provides purchase notification while this app is running
   IabBroadcastReceiver mBroadcastReceiver;
-
+  Handler handler;
   SkuType lastItem;
 
   // (arbitrary) request code for the purchase flow
@@ -141,12 +141,12 @@ public class MainActivity extends Activity
       List<Purchase> gasYearlyList = getSku(purchases, Skus.SKU_INFINITE_GAS_YEARLY_ID);
 
       Purchase gasMonthly = null;
-      if(gasMonthlyList.size() > 0){
+      if (gasMonthlyList.size() > 0) {
         gasMonthly = gasMonthlyList.get(0);
       }
 
       Purchase gasYearly = null;
-      if(gasYearlyList.size() > 0){
+      if (gasYearlyList.size() > 0) {
         gasYearly = gasYearlyList.get(0);
       }
 
@@ -179,7 +179,34 @@ public class MainActivity extends Activity
               .getToken(), consumeResponseListener);
         }
       }
-      updateUi();
+
+      handler.post(() -> updateUi());
+    }
+  };
+
+  PurchaseFinishedListener purchaseFinishedListener = new PurchaseFinishedListener() {
+    @Override public void onPurchaseFinished(int responseCode, String token, String sku) {
+      Log.d("HERE","tou no purchase finished"+sku);
+      if (sku.equals(Skus.SKU_GAS_ID)) {
+        Log.d(TAG, "Purchase is gas. Starting gas consumption.");
+        cab.consumeAsync(token, consumeResponseListener);
+      } else if (sku.equals(Skus.SKU_PREMIUM_ID)) {
+        Log.d(TAG, "Purchase is premium upgrade. Congratulating user.");
+        alert("Thank you for upgrading to premium!");
+        mIsPremium = true;
+        updateUi();
+      } else if (sku.equals(Skus.SKU_INFINITE_GAS_MONTHLY_ID) || sku.equals(
+          Skus.SKU_INFINITE_GAS_YEARLY_ID)) {
+        // bought the infinite gas subscription
+        Log.d(TAG, "Infinite gas subscription purchased.");
+        alert("Thank you for subscribing to infinite gas!");
+        mSubscribedToInfiniteGas = true;
+        mAutoRenewEnabled = true;
+        mInfiniteGasSku = sku;
+        mTank = TANK_MAX;
+        updateUi();
+        setWaitScreen(false);
+      }
     }
   };
 
@@ -198,7 +225,7 @@ public class MainActivity extends Activity
       } else {
         complain("Error while consuming token: " + purchaseToken);
       }
-      updateUi();
+      handler.post(() -> updateUi());
       setWaitScreen(false);
       Log.d(TAG, "End consumption flow.");
     }
@@ -268,6 +295,8 @@ public class MainActivity extends Activity
         return;
       }
       callSkuDetails();
+      updateUi();
+
       Log.d(TAG, "Setup successful. Querying inventory.");
     }
 
@@ -278,7 +307,7 @@ public class MainActivity extends Activity
 
   @Override public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-
+    handler = new Handler();
     setContentView(R.layout.activity_main);
 
     loadData();
@@ -416,7 +445,8 @@ public class MainActivity extends Activity
         alert("You filled 1/4 tank. Your tank is now " + String.valueOf(mTank) + "/4 full!");
         updateUi();
       }
-    } else if (!mHelper.handleActivityResult(requestCode, resultCode, data)) {
+    } else if (!AplicationUtils.handleActivityResult(BuildConfig.IAB_KEY, resultCode, data,
+        purchaseFinishedListener)) {
       super.onActivityResult(requestCode, resultCode, data);
     } else {
       Log.d(TAG, "onActivityResult handled ");
