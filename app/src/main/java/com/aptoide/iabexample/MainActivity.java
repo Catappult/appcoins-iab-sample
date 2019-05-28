@@ -186,7 +186,7 @@ public class MainActivity extends Activity
 
   PurchaseFinishedListener purchaseFinishedListener = new PurchaseFinishedListener() {
     @Override public void onPurchaseFinished(int responseCode, String token, String sku) {
-      Log.d("HERE", "tou no purchase finished" + sku);
+      Log.d("HERE","tou no purchase finished"+sku);
       if (sku.equals(Skus.SKU_GAS_ID)) {
         Log.d(TAG, "Purchase is gas. Starting gas consumption.");
         cab.consumeAsync(token, consumeResponseListener);
@@ -267,9 +267,8 @@ public class MainActivity extends Activity
     bld.setMessage(message);
     bld.setNeutralButton("OK", null);
     Log.d(TAG, "Showing alert dialog: " + message);
-    handler.post(() -> bld.create()
-        .show());
-
+    bld.create()
+        .show();
   }
 
   public void updateUi() {
