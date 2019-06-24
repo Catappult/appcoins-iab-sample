@@ -31,6 +31,7 @@ import com.appcoins.sdk.billing.SkuDetailsResponseListener;
 import com.aptoide.iabexample.util.GenericPaymentIntentBuilder;
 import com.aptoide.iabexample.util.IabBroadcastReceiver;
 import com.aptoide.iabexample.util.IabHelper;
+import com.aptoide.iabexample.util.PayloadHelper;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -452,26 +453,21 @@ public class MainActivity extends Activity
   }
 
   public void onBuyAntiFreezeButtonClicked(View arg0) {
-    if (mSubscribedToInfiniteGas) {
-      complain("No need! You're subscribed to infinite gas. Isn't that awesome?");
-      return;
-    }
-
-    if (mTank >= TANK_MAX) {
-      complain("Your tank is full. Drive around a bit!");
-      return;
-    }
-
-    // launch the gas purchase UI flow.
-    // We will be notified of completion via mPurchaseFinishedListener
     setWaitScreen(true);
-    Log.d(TAG, "Launching purchase flow for Anti Freeze.");
+    String url = "https://apichain.blockchainds.com/transaction/inapp?value=1&currency=eur"
+        + "&to=0xbb83e699f1188baabea820ce02995c97bd9b510f"
+        + "&domain="
+        + getPackageName();
+    Intent i = new Intent(Intent.ACTION_VIEW);
+    i.setData(Uri.parse(url));
 
-    BillingFlowParams billingFlowParams =
-        new BillingFlowParams(Skus.SKU_GAS_ID, SkuType.inapp.toString(), RC_REQUEST, null, null,
-            null);
-
-    cab.launchBillingFlow(this, billingFlowParams);
+    PendingIntent intent =
+        PendingIntent.getActivity(getApplicationContext(), 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
+    try {
+      startIntentSenderForResult(intent.getIntentSender(), RC_ONE_STEP, new Intent(), 0, 0, 0);
+    } catch (IntentSender.SendIntentException e) {
+      e.printStackTrace();
+    }
   }
 
   public void onDonateButtonClicked(View arg0) {
@@ -484,6 +480,25 @@ public class MainActivity extends Activity
     } catch (IntentSender.SendIntentException e) {
       e.printStackTrace();
     }
+  }
+
+  // User clicked the "Upgrade to Premium" button.
+  public void onUpgradeAppButtonClicked(View arg0) {
+    Log.d(TAG, "Upgrade button clicked; launching purchase flow for upgrade.");
+    setWaitScreen(true);
+
+    String payload = PayloadHelper.buildIntentPayload("orderId=" + System.currentTimeMillis(),
+        "developer payload: premium", null);
+
+
+
+    Log.d(TAG, "Launching purchase flow for gas.");
+
+    BillingFlowParams billingFlowParams =
+        new BillingFlowParams(Skus.SKU_PREMIUM_ID, SkuType.inapp.toString(), RC_REQUEST, null, null,
+            null);
+
+    cab.launchBillingFlow(this, billingFlowParams);
   }
 
   @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
