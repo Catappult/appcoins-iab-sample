@@ -2,12 +2,16 @@ package com.aptoide.iabexample;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.PendingIntent;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -23,6 +27,7 @@ import com.appcoins.sdk.billing.PurchasesResult;
 import com.appcoins.sdk.billing.SkuDetails;
 import com.appcoins.sdk.billing.SkuDetailsParams;
 import com.appcoins.sdk.billing.SkuDetailsResponseListener;
+import com.aptoide.iabexample.util.GenericPaymentIntentBuilder;
 import com.aptoide.iabexample.util.IabBroadcastReceiver;
 import com.aptoide.iabexample.util.IabHelper;
 import java.util.ArrayList;
@@ -186,7 +191,7 @@ public class MainActivity extends Activity
 
   PurchaseFinishedListener purchaseFinishedListener = new PurchaseFinishedListener() {
     @Override public void onPurchaseFinished(int responseCode, String token, String sku) {
-      Log.d("HERE","tou no purchase finished"+sku);
+      Log.d("HERE", "tou no purchase finished" + sku);
       if (sku.equals(Skus.SKU_GAS_ID)) {
         Log.d(TAG, "Purchase is gas. Starting gas consumption.");
         cab.consumeAsync(token, consumeResponseListener);
@@ -267,8 +272,8 @@ public class MainActivity extends Activity
     bld.setMessage(message);
     bld.setNeutralButton("OK", null);
     Log.d(TAG, "Showing alert dialog: " + message);
-    bld.create()
-        .show();
+    new Handler(Looper.getMainLooper()).post(() -> bld.create()
+        .show());
   }
 
   public void updateUi() {
@@ -309,7 +314,6 @@ public class MainActivity extends Activity
     super.onCreate(savedInstanceState);
     handler = new Handler();
     setContentView(R.layout.activity_main);
-
     loadData();
 
     String base64EncodedPublicKey = BuildConfig.IAB_KEY;
@@ -334,7 +338,7 @@ public class MainActivity extends Activity
   }
 
   @Override public void onClick(DialogInterface dialog, int id) {
-    /*
+
     if (id == 0) {
       mSelectedSubscriptionPeriod = mFirstChoiceSku;
     } else if (id == 1) {
@@ -369,7 +373,6 @@ public class MainActivity extends Activity
       // There are only four buttons, this should not happen
       Log.e(TAG, "Unknown button clicked in subscription dialog: " + id);
     }
-    */
   }
 
   void saveData() {
@@ -431,9 +434,64 @@ public class MainActivity extends Activity
     cab.launchBillingFlow(this, billingFlowParams);
   }
 
+  public void onBuyOilButtonClicked(View arg0) {
+    if (mSubscribedToInfiniteGas) {
+      complain("No need! You're subscribed to infinite gas. Isn't that awesome?");
+      return;
+    }
+
+    if (mTank >= TANK_MAX) {
+      complain("Your tank is full. Drive around a bit!");
+      return;
+    }
+
+    setWaitScreen(true);
+    BillingFlowParams billingFlowParams =
+        new BillingFlowParams(Skus.SKU_GAS_ID, SkuType.inapp.toString(), RC_REQUEST, null, null,
+            null);
+
+    cab.launchBillingFlow(this, billingFlowParams);
+  }
+
+  public void onBuyAntiFreezeButtonClicked(View arg0) {
+    if (mSubscribedToInfiniteGas) {
+      complain("No need! You're subscribed to infinite gas. Isn't that awesome?");
+      return;
+    }
+
+    if (mTank >= TANK_MAX) {
+      complain("Your tank is full. Drive around a bit!");
+      return;
+    }
+
+    // launch the gas purchase UI flow.
+    // We will be notified of completion via mPurchaseFinishedListener
+    setWaitScreen(true);
+    Log.d(TAG, "Launching purchase flow for Anti Freeze.");
+
+    BillingFlowParams billingFlowParams =
+        new BillingFlowParams(Skus.SKU_GAS_ID, SkuType.inapp.toString(), RC_REQUEST, null, null,
+            null);
+
+    cab.launchBillingFlow(this, billingFlowParams);
+  }
+
+  public void onDonateButtonClicked(View arg0) {
+    setWaitScreen(true);
+    PendingIntent intent = GenericPaymentIntentBuilder.buildBuyIntent(this, "donation", "1.3",
+        ((Application) getApplication()).getDeveloperAddress(), getPackageName(),
+        GenericPaymentIntentBuilder.TransactionData.TYPE_DONATION, "Tester", BuildConfig.DEBUG);
+    try {
+      startIntentSenderForResult(intent.getIntentSender(), RC_DONATE, new Intent(), 0, 0, 0);
+    } catch (IntentSender.SendIntentException e) {
+      e.printStackTrace();
+    }
+  }
+
+
   @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     Log.d(TAG, "onActivityResult(" + requestCode + "," + resultCode + "," + data);
-
+    setWaitScreen(false);
     if (requestCode == RC_DONATE) {
       int msg = resultCode == Activity.RESULT_OK ? R.string.dialog_donation_success_msg
           : R.string.dialog_donation_fail_msg;
