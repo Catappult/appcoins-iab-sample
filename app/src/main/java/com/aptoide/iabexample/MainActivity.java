@@ -8,6 +8,7 @@ import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -435,22 +436,19 @@ public class MainActivity extends Activity
   }
 
   public void onBuyOilButtonClicked(View arg0) {
-    if (mSubscribedToInfiniteGas) {
-      complain("No need! You're subscribed to infinite gas. Isn't that awesome?");
-      return;
-    }
-
-    if (mTank >= TANK_MAX) {
-      complain("Your tank is full. Drive around a bit!");
-      return;
-    }
-
     setWaitScreen(true);
-    BillingFlowParams billingFlowParams =
-        new BillingFlowParams(Skus.SKU_GAS_ID, SkuType.inapp.toString(), RC_REQUEST, null, null,
-            null);
+    String url = "https://apichain.blockchainds.com/transaction/inapp?product=gas&domain="
+        + getPackageName();
+    Intent i = new Intent(Intent.ACTION_VIEW);
+    i.setData(Uri.parse(url));
 
-    cab.launchBillingFlow(this, billingFlowParams);
+    PendingIntent intent =
+        PendingIntent.getActivity(getApplicationContext(), 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
+    try {
+      startIntentSenderForResult(intent.getIntentSender(), RC_ONE_STEP, new Intent(), 0, 0, 0);
+    } catch (IntentSender.SendIntentException e) {
+      e.printStackTrace();
+    }
   }
 
   public void onBuyAntiFreezeButtonClicked(View arg0) {
@@ -480,14 +478,13 @@ public class MainActivity extends Activity
     setWaitScreen(true);
     PendingIntent intent = GenericPaymentIntentBuilder.buildBuyIntent(this, "donation", "1.3",
         ((Application) getApplication()).getDeveloperAddress(), getPackageName(),
-        GenericPaymentIntentBuilder.TransactionData.TYPE_DONATION, "Tester", BuildConfig.DEBUG);
+        GenericPaymentIntentBuilder.TransactionData.TYPE_DONATION, "Tester", false);
     try {
       startIntentSenderForResult(intent.getIntentSender(), RC_DONATE, new Intent(), 0, 0, 0);
     } catch (IntentSender.SendIntentException e) {
       e.printStackTrace();
     }
   }
-
 
   @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     Log.d(TAG, "onActivityResult(" + requestCode + "," + resultCode + "," + data);
