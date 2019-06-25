@@ -217,7 +217,8 @@ public class IabHelper {
           logDebug("Checking for in-app billing 3 support.");
 
           // check for in-app billing v3 support
-          int response = mService.isBillingSupported(3, "com.aptoide.trivialdrivesample", ITEM_TYPE_INAPP);
+          int response =
+              mService.isBillingSupported(3, "com.aptoide.trivialdrivesample", ITEM_TYPE_INAPP);
           if (response != BILLING_RESPONSE_RESULT_OK) {
             if (listener != null) {
               listener.onIabSetupFinished(
@@ -281,7 +282,7 @@ public class IabHelper {
         .queryIntentServices(serviceIntent, 0);
     if (intentServices != null && !intentServices.isEmpty()) {
       // service available to handle that Intent
-        mContext.bindService(serviceIntent, mServiceConn, Context.BIND_AUTO_CREATE);
+      mContext.bindService(serviceIntent, mServiceConn, Context.BIND_AUTO_CREATE);
     } else {
       // no service available to handle that Intent
       if (listener != null) {
@@ -481,6 +482,11 @@ public class IabHelper {
     }
   }
 
+  private boolean isSuccess(int responseCode) {
+    return responseCode == BILLING_RESPONSE_RESULT_OK
+        || responseCode == BILLING_RESPONSE_RESULT_ITEM_ALREADY_OWNED;
+  }
+
   /**
    * Handles an activity result that's part of the purchase flow in in-app billing. If you
    * are calling {@link #launchPurchaseFlow}, then you must call this method from your
@@ -517,7 +523,7 @@ public class IabHelper {
     String dataSignature = data.getStringExtra(RESPONSE_INAPP_SIGNATURE);
     String id = data.getStringExtra(RESPONSE_INAPP_PURCHASE_ID);
 
-    if (resultCode == Activity.RESULT_OK && responseCode == BILLING_RESPONSE_RESULT_OK) {
+    if (resultCode == Activity.RESULT_OK && isSuccess(responseCode)) {
       logDebug("Successful resultcode from purchase activity.");
       logDebug("Purchase data: " + purchaseData);
       logDebug("Data signature: " + dataSignature);
@@ -594,13 +600,15 @@ public class IabHelper {
   /**
    * Queries the inventory. This will query all owned items from the server, as well as
    * information on additional skus, if specified. This method may block or take long to execute.
-   * Do not call from a UI thread. For that, use the non-blocking version {@link #queryInventoryAsync}.
+   * Do not call from a UI thread. For that, use the non-blocking version {@link
+   * #queryInventoryAsync}.
    *
    * @param querySkuDetails if true, SKU details (price, description, etc) will be queried as well
    * as purchase information.
    * @param moreItemSkus additional PRODUCT skus to query information on, regardless of ownership.
    * Ignored if null or if querySkuDetails is false.
-   * @param moreSubsSkus additional SUBSCRIPTIONS skus to query information on, regardless of ownership.
+   * @param moreSubsSkus additional SUBSCRIPTIONS skus to query information on, regardless of
+   * ownership.
    * Ignored if null or if querySkuDetails is false.
    *
    * @throws IabException if a problem occurs while refreshing the inventory.
@@ -967,8 +975,7 @@ public class IabHelper {
           ownedItems.getStringArrayList(RESPONSE_INAPP_PURCHASE_DATA_LIST);
       ArrayList<String> signatureList =
           ownedItems.getStringArrayList(RESPONSE_INAPP_SIGNATURE_LIST);
-      ArrayList<String> idsList =
-          ownedItems.getStringArrayList(RESPONSE_INAPP_PURCHASE_ID_LIST);
+      ArrayList<String> idsList = ownedItems.getStringArrayList(RESPONSE_INAPP_PURCHASE_ID_LIST);
 
       for (int i = 0; i < purchaseDataList.size(); ++i) {
         String purchaseData = purchaseDataList.get(i);
