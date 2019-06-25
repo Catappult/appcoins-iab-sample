@@ -207,7 +207,14 @@ public class MainActivity extends Activity
             // bought 1/4 tank of gas. So consume it.
             Log.d(TAG, "Purchase is gas. Starting gas consumption.");
             try {
-              mHelper.consumeAsync(purchase, mConsumeFinishedListener);
+              if (result.isItemAlreadyOwened()) {
+                List<Purchase> purchases = new ArrayList<>();
+                purchases.add(purchase);
+                mHelper.consumeAsync(purchases, mConsumeFinishedListener);
+                Log.d(TAG, "Consumed previously bought gas");
+              } else {
+                mHelper.consumeAsync(purchase, mConsumeFinishedListener);
+              }
             } catch (IabHelper.IabAsyncInProgressException e) {
               complain("Error consuming gas. Another async operation in progress.");
               setWaitScreen(false);
@@ -518,8 +525,8 @@ public class MainActivity extends Activity
     }
 
     setWaitScreen(true);
-    String url = "https://apichain.blockchainds.com/transaction/inapp?product=gas&domain="
-        + getPackageName();
+    String url =
+        "https://apichain-dev.blockchainds.com/transaction/inapp?value=5&currency=USD&domain=com.appcoins.trivialdrivesample.test";
     Intent i = new Intent(Intent.ACTION_VIEW);
     i.setData(Uri.parse(url));
 

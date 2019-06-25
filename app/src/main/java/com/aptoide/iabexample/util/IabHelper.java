@@ -556,9 +556,13 @@ public class IabHelper {
         return true;
       }
 
-      if (mPurchaseListener != null) {
+      if (mPurchaseListener != null && responseCode == BILLING_RESPONSE_RESULT_OK) {
         mPurchaseListener.onIabPurchaseFinished(
             new IabResult(BILLING_RESPONSE_RESULT_OK, "Success"), purchase);
+      } else if (mPurchaseListener != null
+          && responseCode == BILLING_RESPONSE_RESULT_ITEM_ALREADY_OWNED) {
+        mPurchaseListener.onIabPurchaseFinished(
+            new IabResult(BILLING_RESPONSE_RESULT_ITEM_ALREADY_OWNED, "Success"), purchase);
       }
     } else if (resultCode == Activity.RESULT_OK) {
       // result code was OK, but in-app billing response was not OK.
@@ -799,11 +803,11 @@ public class IabHelper {
    * @param purchases The list of PurchaseInfo objects representing the purchases to consume.
    * @param listener The listener to notify when the consumption operation finishes.
    */
-  public void consumeAsync(List<Purchase> purchases, OnConsumeMultiFinishedListener listener)
+  public void consumeAsync(List<Purchase> purchases, OnConsumeFinishedListener listener)
       throws IabAsyncInProgressException {
     checkNotDisposed();
     checkSetupDone("consume");
-    consumeAsyncInternal(purchases, null, listener);
+    consumeAsyncInternal(purchases, listener, null);
   }
 
   /**
