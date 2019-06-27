@@ -16,18 +16,19 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
-import com.appcoins.sdk.android_appcoins_billing.AppcoinsBillingClient;
-import com.appcoins.sdk.android_appcoins_billing.helpers.CatapultBillingAppCoinsFactory;
-import com.appcoins.sdk.android_appcoins_billing.helpers.Utils;
-import com.appcoins.sdk.android_appcoins_billing.types.SkuType;
 import com.appcoins.sdk.billing.AppCoinsBillingStateListener;
+import com.appcoins.sdk.billing.AppcoinsBillingClient;
 import com.appcoins.sdk.billing.BillingFlowParams;
 import com.appcoins.sdk.billing.ConsumeResponseListener;
 import com.appcoins.sdk.billing.Purchase;
 import com.appcoins.sdk.billing.PurchasesResult;
+import com.appcoins.sdk.billing.ResponseCode;
 import com.appcoins.sdk.billing.SkuDetails;
 import com.appcoins.sdk.billing.SkuDetailsParams;
 import com.appcoins.sdk.billing.SkuDetailsResponseListener;
+import com.appcoins.sdk.billing.helpers.CatapultBillingAppCoinsFactory;
+import com.appcoins.sdk.billing.helpers.Utils;
+import com.appcoins.sdk.billing.types.SkuType;
 import com.aptoide.iabexample.util.GenericPaymentIntentBuilder;
 import com.aptoide.iabexample.util.IabBroadcastReceiver;
 import com.aptoide.iabexample.util.IabHelper;
@@ -130,7 +131,7 @@ public class MainActivity extends Activity
       Log.d(TAG, "Query inventory finished.");
 
       // Is it a failure?
-      if (responseCode != Utils.BILLING_RESPONSE_RESULT_OK) {
+      if (responseCode != ResponseCode.OK.getValue()) {
         complain("Failed to query inventory: " + responseCode);
         return;
       }
@@ -221,7 +222,7 @@ public class MainActivity extends Activity
     @Override public void onConsumeResponse(int responseCode, String purchaseToken) {
       Log.d(TAG, "Consumption finished. Purchase: " + purchaseToken + ", result: " + responseCode);
 
-      if (responseCode == Utils.BILLING_RESPONSE_RESULT_OK) {
+      if (responseCode == ResponseCode.OK.getValue()) {
 
         Log.d(TAG, "Consumption successful. Provisioning.");
 
@@ -297,7 +298,7 @@ public class MainActivity extends Activity
 
   AppCoinsBillingStateListener appCoinsBillingStateListener = new AppCoinsBillingStateListener() {
     @Override public void onBillingSetupFinished(int responseCode) {
-      if (responseCode != Utils.BILLING_RESPONSE_RESULT_OK) {
+      if (responseCode != ResponseCode.OK.getValue()) {
         complain("Problem setting up in-app billing: " + responseCode);
         return;
       }
@@ -320,7 +321,7 @@ public class MainActivity extends Activity
 
     String base64EncodedPublicKey = BuildConfig.IAB_KEY;
 
-    cab = CatapultBillingAppCoinsFactory.BuildAppcoinsBilling(getApplicationContext(),
+    cab = CatapultBillingAppCoinsFactory.BuildAppcoinsBilling(this,
         base64EncodedPublicKey);
 
     cab.startConnection(appCoinsBillingStateListener);

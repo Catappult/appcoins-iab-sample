@@ -3,7 +3,8 @@ package com.aptoide.iabexample;
 import android.app.Activity;
 import android.content.Intent;
 import android.util.Log;
-import com.appcoins.sdk.android_appcoins_billing.helpers.Utils;
+import com.appcoins.sdk.billing.ResponseCode;
+import com.appcoins.sdk.billing.helpers.Utils;
 import com.aptoide.iabexample.util.Security;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -22,11 +23,11 @@ public class AplicationUtils {
     }
 
     int responseCode = getResponseCodeFromIntent(data);
-    String purchaseData = data.getStringExtra(Utils.RESPONSE_INAPP_PURCHASE_DATA);
-    String dataSignature = data.getStringExtra(Utils.RESPONSE_INAPP_SIGNATURE);
-    String id = data.getStringExtra(Utils.RESPONSE_INAPP_PURCHASE_ID);
+    String purchaseData = data.getStringExtra(Utils.RESPONSE_INAPP_PURCHASE_DATA_LIST);
+    String dataSignature = data.getStringExtra(Utils.RESPONSE_INAPP_SIGNATURE_LIST);
+    String id = data.getStringExtra(Utils.RESPONSE_INAPP_PURCHASE_ID_LIST);
 
-    if (resultCode == Activity.RESULT_OK && responseCode == Utils.BILLING_RESPONSE_RESULT_OK) {
+    if (resultCode == Activity.RESULT_OK && responseCode == ResponseCode.OK.getValue()) {
       logDebug("Successful resultcode from purchase activity.");
       logDebug("Purchase data: " + purchaseData);
       logDebug("Data signature: " + dataSignature);
@@ -92,10 +93,10 @@ public class AplicationUtils {
 
   static int getResponseCodeFromIntent(Intent i) {
     Object o = i.getExtras()
-        .get(com.appcoins.sdk.android_appcoins_billing.helpers.Utils.RESPONSE_CODE);
+        .get(Utils.RESPONSE_CODE);
     if (o == null) {
       logError("Intent with no response code, assuming OK (known issue)");
-      return com.appcoins.sdk.android_appcoins_billing.helpers.Utils.BILLING_RESPONSE_RESULT_OK;
+      return ResponseCode.OK.getValue();
     } else if (o instanceof Integer) {
       return ((Integer) o).intValue();
     } else if (o instanceof Long) {

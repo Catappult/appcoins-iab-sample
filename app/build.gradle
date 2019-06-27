@@ -106,8 +106,10 @@ android {
 dependencies {
   implementation 'com.android.support:appcompat-v7:27.1.1'
   implementation 'com.google.code.gson:gson:2.8.2'
-  implementation 'com.blockchainds:appcoins-ads:0.4.6.20b'
-  implementation 'com.blockchainds:android-appcoins-billing:0.4.8.23b.dev'
+  implementation 'com.blockchainds:appcoins-ads:0.5.0.24b.dev'
+  implementation 'com.blockchainds:android-appcoins-billing:0.5.0.24b.dev'
+  implementation 'com.blockchainds:appcoins-contract-proxy:0.4.6.20b'
+
 }
 
 def renameArtifact(defaultConfig) {
