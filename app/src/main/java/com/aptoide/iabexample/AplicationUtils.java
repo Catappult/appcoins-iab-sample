@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.util.Log;
 import com.appcoins.sdk.billing.ResponseCode;
 import com.appcoins.sdk.billing.helpers.Utils;
+import com.aptoide.iabexample.util.PurchaseFinishedListener;
 import com.aptoide.iabexample.util.Security;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -12,6 +13,9 @@ import org.json.JSONObject;
 public class AplicationUtils {
 
   private final static String DEBUG_TAG = "CatapultAppcoinsBilling";
+  public static final String RESPONSE_INAPP_PURCHASE_DATA = "INAPP_PURCHASE_DATA";
+  public static final String RESPONSE_INAPP_SIGNATURE = "INAPP_DATA_SIGNATURE";
+  public static final String RESPONSE_INAPP_PURCHASE_ID = "INAPP_PURCHASE_ID";
 
   public static boolean handleActivityResult(String signature, int resultCode, Intent data,
       PurchaseFinishedListener purchaseFinishedListener) {
@@ -23,9 +27,9 @@ public class AplicationUtils {
     }
 
     int responseCode = getResponseCodeFromIntent(data);
-    String purchaseData = data.getStringExtra(Utils.RESPONSE_INAPP_PURCHASE_DATA_LIST);
-    String dataSignature = data.getStringExtra(Utils.RESPONSE_INAPP_SIGNATURE_LIST);
-    String id = data.getStringExtra(Utils.RESPONSE_INAPP_PURCHASE_ID_LIST);
+    String purchaseData = data.getStringExtra(RESPONSE_INAPP_PURCHASE_DATA);
+    String dataSignature = data.getStringExtra(RESPONSE_INAPP_SIGNATURE);
+    String id = data.getStringExtra(RESPONSE_INAPP_PURCHASE_ID);
 
     if (resultCode == Activity.RESULT_OK && responseCode == ResponseCode.OK.getValue()) {
       logDebug("Successful resultcode from purchase activity.");

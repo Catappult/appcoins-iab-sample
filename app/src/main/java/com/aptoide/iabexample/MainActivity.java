@@ -27,12 +27,11 @@ import com.appcoins.sdk.billing.SkuDetails;
 import com.appcoins.sdk.billing.SkuDetailsParams;
 import com.appcoins.sdk.billing.SkuDetailsResponseListener;
 import com.appcoins.sdk.billing.helpers.CatapultBillingAppCoinsFactory;
-import com.appcoins.sdk.billing.helpers.Utils;
 import com.appcoins.sdk.billing.types.SkuType;
 import com.aptoide.iabexample.util.GenericPaymentIntentBuilder;
 import com.aptoide.iabexample.util.IabBroadcastReceiver;
-import com.aptoide.iabexample.util.IabHelper;
-import com.aptoide.iabexample.util.PayloadHelper;
+import com.aptoide.iabexample.util.PurchaseFinishedListener;
+import com.aptoide.iabexample.util.Skus;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -111,10 +110,8 @@ public class MainActivity extends Activity
   String mSelectedSubscriptionPeriod = "";
   // Current amount of gas in tank, in units
   int mTank;
-  // The helper object
-  IabHelper mHelper;
+
   // Provides purchase notification while this app is running
-  IabBroadcastReceiver mBroadcastReceiver;
   Handler handler;
   SkuType lastItem;
 
@@ -321,8 +318,7 @@ public class MainActivity extends Activity
 
     String base64EncodedPublicKey = BuildConfig.IAB_KEY;
 
-    cab = CatapultBillingAppCoinsFactory.BuildAppcoinsBilling(this,
-        base64EncodedPublicKey);
+    cab = CatapultBillingAppCoinsFactory.BuildAppcoinsBilling(this, base64EncodedPublicKey);
 
     cab.startConnection(appCoinsBillingStateListener);
   }
@@ -426,7 +422,7 @@ public class MainActivity extends Activity
       return;
     }
 
-    //setWaitScreen(true);
+    setWaitScreen(true);
 
     Log.d(TAG, "Launching purchase flow for gas.");
 
@@ -439,8 +435,16 @@ public class MainActivity extends Activity
 
   public void onBuyOilButtonClicked(View arg0) {
     setWaitScreen(true);
-    String url = "https://apichain.blockchainds.com/transaction/inapp?product=gas&domain="
-        + getPackageName();
+
+    String path;
+
+    if (BuildConfig.DEBUG) {
+      path = BuildConfig.WS_SERVICE_DEV;
+    } else {
+      path = BuildConfig.WS_SERVICE;
+    }
+
+    String url = path + "transaction/inapp?product=gas&domain=" + getPackageName();
     Intent i = new Intent(Intent.ACTION_VIEW);
     i.setData(Uri.parse(url));
 
@@ -455,7 +459,16 @@ public class MainActivity extends Activity
 
   public void onBuyAntiFreezeButtonClicked(View arg0) {
     setWaitScreen(true);
-    String url = "https://apichain.blockchainds.com/transaction/inapp?value=1&currency=eur"
+    String path;
+
+    if (BuildConfig.DEBUG) {
+      path = BuildConfig.WS_SERVICE_DEV;
+    } else {
+      path = BuildConfig.WS_SERVICE;
+    }
+
+    String url = path
+        + "transaction/inapp?value=1&currency=eur"
         + "&to=0xbb83e699f1188baabea820ce02995c97bd9b510f"
         + "&domain="
         + getPackageName();
@@ -475,7 +488,8 @@ public class MainActivity extends Activity
     setWaitScreen(true);
     PendingIntent intent = GenericPaymentIntentBuilder.buildBuyIntent(this, "donation", "1.3",
         ((Application) getApplication()).getDeveloperAddress(), getPackageName(),
-        GenericPaymentIntentBuilder.TransactionData.TYPE_DONATION, "Tester", false);
+        GenericPaymentIntentBuilder.TransactionData.TYPE_DONATION, "Tester",
+        BuildConfig.TEST_NETWORK);
     try {
       startIntentSenderForResult(intent.getIntentSender(), RC_DONATE, new Intent(), 0, 0, 0);
     } catch (IntentSender.SendIntentException e) {
@@ -487,11 +501,6 @@ public class MainActivity extends Activity
   public void onUpgradeAppButtonClicked(View arg0) {
     Log.d(TAG, "Upgrade button clicked; launching purchase flow for upgrade.");
     setWaitScreen(true);
-
-    String payload = PayloadHelper.buildIntentPayload("orderId=" + System.currentTimeMillis(),
-        "developer payload: premium", null);
-
-
 
     Log.d(TAG, "Launching purchase flow for gas.");
 

@@ -1,6 +1,4 @@
-package com.aptoide.iabexample;
-
-import com.aptoide.iabexample.util.Purchase;
+package com.aptoide.iabexample.util;
 
 public interface PurchaseFinishedListener {
   void onPurchaseFinished(int responseCode, String token,String sku);

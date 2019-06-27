@@ -75,6 +75,10 @@ android {
               "\"" + project.APPCOINS_DEV_IAB_WALLET_ADDR + "\""
           buildConfigField "String", "IAB_KEY",
               "\"" + project.APPCOINS_DEV_IAB_KEY + "\""
+          buildConfigField "String", "WS_SERVICE_DEV",
+              "\"" + project.WS_SERVICE_DEV + "\""
+          buildConfigField "String", "WS_SERVICE",
+              "\"" + project.WS_SERVICE + "\""
           variant.getMergedFlavor().manifestPlaceholders = [iabPermission: project.APPCOINS_IAB_PERMISSION]
         } else {
           buildConfigField "String", "IAB_KEY",
@@ -85,6 +89,10 @@ android {
               "\"" + project.APPCOINS_IAB_BIND_PACKAGE + "\""
           buildConfigField "String", "IAB_WALLET_ADDR",
               "\"" + project.APPCOINS_IAB_WALLET_ADDR + "\""
+          buildConfigField "String", "WS_SERVICE_DEV",
+              "\"" + project.WS_SERVICE_DEV + "\""
+          buildConfigField "String", "WS_SERVICE",
+              "\"" + project.WS_SERVICE + "\""
           variant.getMergedFlavor().manifestPlaceholders = [iabPermission: project.APPCOINS_IAB_PERMISSION]
         }
       }
