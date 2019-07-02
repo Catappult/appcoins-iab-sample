@@ -8,6 +8,7 @@ import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -300,6 +301,7 @@ public class MainActivity extends Activity
     // enable debug logging (for a production application, you should set this to false).
     mHelper.enableDebugLogging(true);
 
+
     // Start setup. This is asynchronous and the specified listener
     // will be called once setup completes.
     Log.d(TAG, "Starting setup.");
@@ -337,13 +339,6 @@ public class MainActivity extends Activity
         complain("Error querying inventory. Another async operation in progress.");
       }
     });
-
-    updateUi();
-  }
-
-  @Override protected void onResume() {
-    super.onResume();
-
     setWaitScreen(false);
   }
 
@@ -518,7 +513,7 @@ public class MainActivity extends Activity
     }
 
     setWaitScreen(true);
-    String url = "https://apichain.blockchainds.com/transaction/inapp?product=gas&domain="
+    String url = "https://apichain.blockchainds.com/transaction/inapp?value=1&domain="
         + getPackageName();
     Intent i = new Intent(Intent.ACTION_VIEW);
     i.setData(Uri.parse(url));

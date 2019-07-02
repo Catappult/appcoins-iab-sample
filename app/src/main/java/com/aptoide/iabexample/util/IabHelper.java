@@ -198,7 +198,10 @@ public class IabHelper {
   public void startSetup(final OnIabSetupFinishedListener listener) {
     // If already set up, can't do it again.
     checkNotDisposed();
-    if (mSetupDone) throw new IllegalStateException("IAB helper is already set up.");
+    if (mSetupDone) {
+      (new IllegalStateException("IAB helper is already set up.")).printStackTrace();
+      return;
+    }
 
     // Connection to IAB service
     logDebug("Starting in-app billing setup.");
@@ -206,6 +209,7 @@ public class IabHelper {
       @Override public void onServiceDisconnected(ComponentName name) {
         logDebug("Billing service disconnected.");
         mService = null;
+        mSetupDone = false;
       }
 
       @Override public void onServiceConnected(ComponentName name, IBinder service) {
@@ -217,7 +221,7 @@ public class IabHelper {
           logDebug("Checking for in-app billing 3 support.");
 
           // check for in-app billing v3 support
-          int response = mService.isBillingSupported(3, "com.aptoide.trivialdrivesample", ITEM_TYPE_INAPP);
+          int response = mService.isBillingSupported(3, packageName, ITEM_TYPE_INAPP);
           if (response != BILLING_RESPONSE_RESULT_OK) {
             if (listener != null) {
               listener.onIabSetupFinished(
