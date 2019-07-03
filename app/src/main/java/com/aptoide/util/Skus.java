@@ -1,4 +1,4 @@
-package com.aptoide.iabexample.util;
+package com.aptoide.util;
 
 /**
  * Created by neuro on 21-03-2018.

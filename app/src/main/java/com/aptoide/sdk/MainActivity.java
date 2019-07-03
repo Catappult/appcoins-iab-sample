@@ -1,4 +1,4 @@
-package com.aptoide.iabexample;
+package com.aptoide.sdk;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -28,10 +28,12 @@ import com.appcoins.sdk.billing.SkuDetailsParams;
 import com.appcoins.sdk.billing.SkuDetailsResponseListener;
 import com.appcoins.sdk.billing.helpers.CatapultBillingAppCoinsFactory;
 import com.appcoins.sdk.billing.types.SkuType;
-import com.aptoide.iabexample.util.GenericPaymentIntentBuilder;
-import com.aptoide.iabexample.util.IabBroadcastReceiver;
-import com.aptoide.iabexample.util.PurchaseFinishedListener;
-import com.aptoide.iabexample.util.Skus;
+import com.aptoide.iabexample.BuildConfig;
+import com.aptoide.iabexample.R;
+import com.aptoide.util.GenericPaymentIntentBuilder;
+import com.aptoide.util.IabBroadcastReceiver;
+import com.aptoide.util.PurchaseFinishedListener;
+import com.aptoide.util.Skus;
 import java.util.ArrayList;
 import java.util.List;
 

@@ -1,12 +1,12 @@
-package com.aptoide.iabexample;
+package com.aptoide.sdk;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.util.Log;
 import com.appcoins.sdk.billing.ResponseCode;
 import com.appcoins.sdk.billing.helpers.Utils;
-import com.aptoide.iabexample.util.PurchaseFinishedListener;
-import com.aptoide.iabexample.util.Security;
+import com.aptoide.util.PurchaseFinishedListener;
+import com.aptoide.util.Security;
 import org.json.JSONException;
 import org.json.JSONObject;
 

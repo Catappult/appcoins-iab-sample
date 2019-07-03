@@ -1,4 +1,4 @@
-package com.aptoide.iabexample.util;
+package com.aptoide.util;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

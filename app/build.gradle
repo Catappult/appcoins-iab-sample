@@ -98,6 +98,10 @@ android {
       }
     }
 
+    appcoinssdk{
+      dimension "iab"
+    }
+
     mainNetwork {
       dimension "network"
       buildConfigField "boolean", "TEST_NETWORK", "false"
