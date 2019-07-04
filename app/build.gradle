@@ -63,6 +63,7 @@ android {
 
     appcoinsiab {
       dimension "iab"
+      applicationId = "com.aptoide.iabexample"
       buildConfigField "String", "IAB_UPDATE_ACTION",
           "\"" + project.APPCOINS_IAB_UPDATE_ACTION + "\""
       applicationVariants.all { variant ->
@@ -100,6 +101,40 @@ android {
 
     appcoinssdk{
       dimension "iab"
+      applicationId = "com.aptoide.sdk"
+      buildConfigField "String", "IAB_UPDATE_ACTION",
+          "\"" + project.APPCOINS_IAB_UPDATE_ACTION + "\""
+      applicationVariants.all { variant ->
+        if (variant.buildType.getName().equalsIgnoreCase("debug")) {
+          buildConfigField "String", "IAB_BIND_ACTION",
+              "\"" + project.APPCOINS_DEV_IAB_BIND_ACTION + "\""
+          buildConfigField "String", "IAB_BIND_PACKAGE",
+              "\"" + project.APPCOINS_DEV_IAB_BIND_PACKAGE + "\""
+          buildConfigField "String", "IAB_WALLET_ADDR",
+              "\"" + project.APPCOINS_DEV_IAB_WALLET_ADDR + "\""
+          buildConfigField "String", "IAB_KEY",
+              "\"" + project.APPCOINS_DEV_IAB_KEY + "\""
+          buildConfigField "String", "WS_SERVICE_DEV",
+              "\"" + project.WS_SERVICE_DEV + "\""
+          buildConfigField "String", "WS_SERVICE",
+              "\"" + project.WS_SERVICE + "\""
+          variant.getMergedFlavor().manifestPlaceholders = [iabPermission: project.APPCOINS_IAB_PERMISSION]
+        } else {
+          buildConfigField "String", "IAB_KEY",
+              "\"" + project.APPCOINS_IAB_KEY + "\""
+          buildConfigField "String", "IAB_BIND_ACTION",
+              "\"" + project.APPCOINS_IAB_BIND_ACTION + "\""
+          buildConfigField "String", "IAB_BIND_PACKAGE",
+              "\"" + project.APPCOINS_IAB_BIND_PACKAGE + "\""
+          buildConfigField "String", "IAB_WALLET_ADDR",
+              "\"" + project.APPCOINS_IAB_WALLET_ADDR + "\""
+          buildConfigField "String", "WS_SERVICE_DEV",
+              "\"" + project.WS_SERVICE_DEV + "\""
+          buildConfigField "String", "WS_SERVICE",
+              "\"" + project.WS_SERVICE + "\""
+          variant.getMergedFlavor().manifestPlaceholders = [iabPermission: project.APPCOINS_IAB_PERMISSION]
+        }
+      }
     }
 
     mainNetwork {

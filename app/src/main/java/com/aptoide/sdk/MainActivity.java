@@ -313,6 +313,7 @@ public class MainActivity extends Activity
   };
 
   @Override public void onCreate(Bundle savedInstanceState) {
+    Log.d("Flavour:","Flavour User: SDK");
     super.onCreate(savedInstanceState);
     handler = new Handler();
     setContentView(R.layout.activity_main);

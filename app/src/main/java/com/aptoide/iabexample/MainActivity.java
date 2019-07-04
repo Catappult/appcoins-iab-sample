@@ -274,7 +274,7 @@ public class MainActivity extends Activity
 
   @Override public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-
+    Log.d("Flavour:","Flavour User: IABexample");
     setContentView(R.layout.activity_main);
 
     // load game data
