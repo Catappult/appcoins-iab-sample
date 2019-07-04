@@ -1,4 +1,4 @@
-package com.aptoide.util;
+package com.aptoide.iabexample.utilssdk;
 
 import android.text.TextUtils;
 import android.util.Base64;

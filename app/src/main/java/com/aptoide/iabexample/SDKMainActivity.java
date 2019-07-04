@@ -1,4 +1,4 @@
-package com.aptoide.sdk;
+package com.aptoide.iabexample;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -28,12 +28,11 @@ import com.appcoins.sdk.billing.SkuDetailsParams;
 import com.appcoins.sdk.billing.SkuDetailsResponseListener;
 import com.appcoins.sdk.billing.helpers.CatapultBillingAppCoinsFactory;
 import com.appcoins.sdk.billing.types.SkuType;
-import com.aptoide.iabexample.BuildConfig;
-import com.aptoide.iabexample.R;
-import com.aptoide.util.GenericPaymentIntentBuilder;
-import com.aptoide.util.IabBroadcastReceiver;
-import com.aptoide.util.PurchaseFinishedListener;
-import com.aptoide.util.Skus;
+import com.aptoide.iabexample.utilssdk.AplicationUtils;
+import com.aptoide.iabexample.utilssdk.GenericPaymentIntentBuilder;
+import com.aptoide.iabexample.utilssdk.IabBroadcastReceiver;
+import com.aptoide.iabexample.utilssdk.PurchaseFinishedListener;
+import com.aptoide.iabexample.utilssdk.Skus;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -88,7 +87,7 @@ import java.util.List;
  * we have to apply its effects to our world and consume it. This
  * is also very important!
  */
-public class MainActivity extends Activity
+public class SDKMainActivity extends Activity
     implements IabBroadcastReceiver.IabBroadcastListener, OnClickListener {
   // Debug tag, for logging
   static final String TAG = "TrivialDrive";

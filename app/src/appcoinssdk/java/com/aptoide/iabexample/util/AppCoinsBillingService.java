@@ -1,20 +1,20 @@
-package com.aptoide.iabexample.utilssdk;
+package com.aptoide.iabexample.util;
 
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
-import com.android.vending.billing.IInAppBillingService;
+import com.appcoins.billing.AppcoinsBilling;
 import java.util.List;
 
 /**
  * Created by marcelobenites on 02/11/16.
  */
-class GoogleBillingService implements BillingService {
+class AppCoinsBillingService implements BillingService {
 
-  private IInAppBillingService service;
+  private final AppcoinsBilling service;
 
-  public GoogleBillingService(IBinder service) {
-    this.service = IInAppBillingService.Stub.asInterface(service);
+  public AppCoinsBillingService(IBinder service) {
+    this.service = AppcoinsBilling.Stub.asInterface(service);
   }
 
   @Override public int isBillingSupported(int apiVersion, String packageName, String type)
@@ -43,15 +43,9 @@ class GoogleBillingService implements BillingService {
     return service.consumePurchase(apiVersion, packageName, purchaseToken);
   }
 
-  @Override public int stub(int apiVersion, String packageName, String type)
-      throws RemoteException {
-    return service.stub(apiVersion, packageName, type);
-  }
-
   @Override
   public Bundle getBuyIntentToReplaceSkus(int apiVersion, String packageName, List<String> oldSkus,
       String newSku, String type, String developerPayload) throws RemoteException {
-    return service.getBuyIntentToReplaceSkus(apiVersion, packageName, oldSkus, newSku, type,
-        developerPayload);
+    return new Bundle();
   }
 }

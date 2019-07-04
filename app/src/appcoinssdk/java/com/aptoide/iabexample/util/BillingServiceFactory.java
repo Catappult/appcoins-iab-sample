@@ -1,4 +1,4 @@
-package com.aptoide.iabexample.utilssdk;
+package com.aptoide.iabexample.util;
 
 import android.os.IBinder;
 
@@ -9,6 +9,6 @@ import android.os.IBinder;
 public class BillingServiceFactory {
 
   public static BillingService create(final IBinder service) {
-    return new GoogleBillingService(service);
+    return new AppCoinsBillingService(service);
   }
 }

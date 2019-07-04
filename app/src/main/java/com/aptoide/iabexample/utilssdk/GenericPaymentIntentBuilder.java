@@ -1,4 +1,4 @@
-package com.aptoide.util;
+package com.aptoide.iabexample.utilssdk;
 
 import android.app.PendingIntent;
 import android.content.Context;

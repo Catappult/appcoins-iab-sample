@@ -1,12 +1,10 @@
-package com.aptoide.sdk;
+package com.aptoide.iabexample.utilssdk;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.util.Log;
 import com.appcoins.sdk.billing.ResponseCode;
 import com.appcoins.sdk.billing.helpers.Utils;
-import com.aptoide.util.PurchaseFinishedListener;
-import com.aptoide.util.Security;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -61,30 +59,30 @@ public class AplicationUtils {
         return false;
       }
 
-  } else if(resultCode ==Activity.RESULT_OK)
+    } else if(resultCode ==Activity.RESULT_OK)
 
-  {
-    // result code was OK, but in-app billing response was not OK.
-    logDebug("Result code was OK but in-app billing response was not OK: " + getResponseDesc(
-        responseCode));
-    //purchaseFinishedListener.onPurchaseFinished(resultCode, null);
-  } else if(resultCode ==Activity.RESULT_CANCELED)
+    {
+      // result code was OK, but in-app billing response was not OK.
+      logDebug("Result code was OK but in-app billing response was not OK: " + getResponseDesc(
+          responseCode));
+      //purchaseFinishedListener.onPurchaseFinished(resultCode, null);
+    } else if(resultCode ==Activity.RESULT_CANCELED)
 
-  {
+    {
 
-    logDebug("Purchase canceled - Response: " + getResponseDesc(responseCode));
-    //purchaseFinishedListener.onPurchaseFinished(resultCode, null);
-  } else
+      logDebug("Purchase canceled - Response: " + getResponseDesc(responseCode));
+      //purchaseFinishedListener.onPurchaseFinished(resultCode, null);
+    } else
 
-  {
-    logError("Purchase failed. Result code: "
-        + Integer.toString(resultCode)
-        + ". Response: "
-        + getResponseDesc(responseCode));
-    //purchaseFinishedListener.onPurchaseFinished(resultCode, null);
-  }
+    {
+      logError("Purchase failed. Result code: "
+          + Integer.toString(resultCode)
+          + ". Response: "
+          + getResponseDesc(responseCode));
+      //purchaseFinishedListener.onPurchaseFinished(resultCode, null);
+    }
     return true;
-}
+  }
 
   static boolean verifySignature(String signature, String purchaseData, String dataSignature) {
 
