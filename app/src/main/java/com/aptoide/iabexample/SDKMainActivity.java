@@ -438,15 +438,7 @@ public class SDKMainActivity extends Activity
   public void onBuyOilButtonClicked(View arg0) {
     setWaitScreen(true);
 
-    String path;
-
-    if (BuildConfig.DEBUG) {
-      path = BuildConfig.WS_SERVICE_DEV;
-    } else {
-      path = BuildConfig.WS_SERVICE;
-    }
-
-    String url = path + "transaction/inapp?product=gas&domain=" + getPackageName();
+    String url = BuildConfig.BACKEND_HOST + "transaction/inapp?product=gas&domain=" + getPackageName();
     Intent i = new Intent(Intent.ACTION_VIEW);
     i.setData(Uri.parse(url));
 
@@ -461,15 +453,8 @@ public class SDKMainActivity extends Activity
 
   public void onBuyAntiFreezeButtonClicked(View arg0) {
     setWaitScreen(true);
-    String path;
 
-    if (BuildConfig.DEBUG) {
-      path = BuildConfig.WS_SERVICE_DEV;
-    } else {
-      path = BuildConfig.WS_SERVICE;
-    }
-
-    String url = path
+    String url = BuildConfig.BACKEND_HOST
         + "transaction/inapp?value=1&currency=eur"
         + "&to=0xbb83e699f1188baabea820ce02995c97bd9b510f"
         + "&domain="

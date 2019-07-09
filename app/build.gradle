@@ -77,10 +77,8 @@ android {
               "\"" + project.APPCOINS_DEV_IAB_WALLET_ADDR + "\""
           buildConfigField "String", "IAB_KEY",
               "\"" + project.APPCOINS_DEV_IAB_KEY + "\""
-          buildConfigField "String", "WS_SERVICE_DEV",
-              "\"" + project.WS_SERVICE_DEV + "\""
-          buildConfigField "String", "WS_SERVICE",
-              "\"" + project.WS_SERVICE + "\""
+          buildConfigField "String", "BACKEND_HOST",
+              "\"" + project.BACK_END_HOST_DEV + "\""
           if (variant.productFlavors.get(0).name.equals("appcoinssdk")) {
             variant.getMergedFlavor().manifestPlaceholders =
                 [iabPermission: project.APPCOINS_IAB_PERMISSION, MainActivityLaunch: "com.aptoide.iabexample.SDKMainActivity"]
@@ -94,10 +92,8 @@ android {
               "\"" + project.APPCOINS_IAB_BIND_PACKAGE + "\""
           buildConfigField "String", "IAB_WALLET_ADDR",
               "\"" + project.APPCOINS_IAB_WALLET_ADDR + "\""
-          buildConfigField "String", "WS_SERVICE_DEV",
-              "\"" + project.WS_SERVICE_DEV + "\""
-          buildConfigField "String", "WS_SERVICE",
-              "\"" + project.WS_SERVICE + "\""
+          buildConfigField "String", "BACKEND_HOST",
+              "\"" + project.BACK_END_HOST_PROD + "\""
           if (variant.productFlavors.get(0).name.equals("appcoinssdk")) {
             variant.getMergedFlavor().manifestPlaceholders =
                 [iabPermission: project.APPCOINS_IAB_PERMISSION, MainActivityLaunch: "com.aptoide.iabexample.SDKMainActivity"]
@@ -121,10 +117,6 @@ android {
               "\"" + project.APPCOINS_DEV_IAB_WALLET_ADDR + "\""
           buildConfigField "String", "IAB_KEY",
               "\"" + project.APPCOINS_DEV_IAB_KEY + "\""
-          buildConfigField "String", "WS_SERVICE_DEV",
-              "\"" + project.WS_SERVICE_DEV + "\""
-          buildConfigField "String", "WS_SERVICE",
-              "\"" + project.WS_SERVICE + "\""
 
           if (variant.productFlavors.get(0).name.equals("appcoinsiab")) {
             variant.getMergedFlavor().manifestPlaceholders =
@@ -139,10 +131,6 @@ android {
               "\"" + project.APPCOINS_IAB_BIND_PACKAGE + "\""
           buildConfigField "String", "IAB_WALLET_ADDR",
               "\"" + project.APPCOINS_IAB_WALLET_ADDR + "\""
-          buildConfigField "String", "WS_SERVICE_DEV",
-              "\"" + project.WS_SERVICE_DEV + "\""
-          buildConfigField "String", "WS_SERVICE",
-              "\"" + project.WS_SERVICE + "\""
           if (variant.productFlavors.get(0).name.equals("appcoinsiab")) {
             variant.getMergedFlavor().manifestPlaceholders =
                 [iabPermission: project.APPCOINS_IAB_PERMISSION, MainActivityLaunch: "com.aptoide.iabexample.MainActivity"]
