@@ -64,6 +64,7 @@ android {
 
     appcoinssdk {
       dimension "iab"
+      applicationId = "com.aptoide.iabexample"
       buildConfigField "String", "IAB_UPDATE_ACTION",
           "\"" + project.APPCOINS_IAB_UPDATE_ACTION + "\""
       applicationVariants.all { variant ->
@@ -103,6 +104,7 @@ android {
 
     appcoinsiab {
       dimension "iab"
+      applicationId = "com.aptoide.iabexample"
       buildConfigField "String", "IAB_UPDATE_ACTION",
           "\"" + project.APPCOINS_IAB_UPDATE_ACTION + "\""
       applicationVariants.all { variant ->
@@ -155,7 +157,7 @@ android {
 dependencies {
   implementation 'com.android.support:appcompat-v7:27.1.1'
   implementation 'com.google.code.gson:gson:2.8.2'
-  implementation 'com.blockchainds:appcoins-ads:0.5.0.25b.dev'
+  implementation 'com.blockchainds:appcoins-ads:0.5.0.24b.dev'
   implementation 'com.blockchainds:android-appcoins-billing:0.5.0.24b.dev'
   implementation 'com.blockchainds:appcoins-contract-proxy:0.4.6.20b'
 }
