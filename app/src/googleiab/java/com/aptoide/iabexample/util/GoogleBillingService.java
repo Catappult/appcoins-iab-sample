@@ -1,4 +1,4 @@
-package com.aptoide.iabexample.utilssdk;
+package com.aptoide.iabexample.util;
 
 import android.os.Bundle;
 import android.os.IBinder;

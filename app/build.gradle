@@ -64,7 +64,6 @@ android {
 
     appcoinssdk {
       dimension "iab"
-      applicationId = "com.aptoide.iabexample"
       buildConfigField "String", "IAB_UPDATE_ACTION",
           "\"" + project.APPCOINS_IAB_UPDATE_ACTION + "\""
       applicationVariants.all { variant ->
@@ -104,7 +103,6 @@ android {
 
     appcoinsiab {
       dimension "iab"
-      applicationId = "com.aptoide.iabexample"
       buildConfigField "String", "IAB_UPDATE_ACTION",
           "\"" + project.APPCOINS_IAB_UPDATE_ACTION + "\""
       applicationVariants.all { variant ->
