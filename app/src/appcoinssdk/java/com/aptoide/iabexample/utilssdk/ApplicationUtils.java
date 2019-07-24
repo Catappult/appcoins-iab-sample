@@ -5,22 +5,31 @@ import android.content.Intent;
 import android.util.Log;
 import com.appcoins.sdk.billing.ResponseCode;
 import com.appcoins.sdk.billing.helpers.Utils;
-import org.json.JSONException;
+import com.aptoide.iabexample.util.Security;
 import org.json.JSONObject;
 
-public class AplicationUtils {
+public class ApplicationUtils {
 
-  private final static String DEBUG_TAG = "CatapultAppcoinsBilling";
   public static final String RESPONSE_INAPP_PURCHASE_DATA = "INAPP_PURCHASE_DATA";
   public static final String RESPONSE_INAPP_SIGNATURE = "INAPP_DATA_SIGNATURE";
   public static final String RESPONSE_INAPP_PURCHASE_ID = "INAPP_PURCHASE_ID";
+
+  // IAB Helper error codes
+  public static final int IABHELPER_VERIFICATION_FAILED = -1003;
+  public static final int IABHELPER_USER_CANCELLED = -1005;
+  public static final int IABHELPER_UNKNOWN_PURCHASE_RESPONSE = -1006;
+  public static final int IABHELPER_UNKNOWN_ERROR = -1008;
+  public static final int IABHELPER_BAD_RESPONSE = -1002;
+
+  private final static String TAG = ApplicationUtils.class.getSimpleName();
 
   public static boolean handleActivityResult(String signature, int resultCode, Intent data,
       PurchaseFinishedListener purchaseFinishedListener) {
 
     if (data == null) {
       logError("Null data in IAB activity result.");
-      //purchaseFinishedListener.onPurchaseFinished(resultCode, null);
+      purchaseFinishedListener.onPurchaseFinished(resultCode, "Null data in IAB result", null,
+          null);
       return false;
     }
 
@@ -39,6 +48,9 @@ public class AplicationUtils {
         logError("BUG: either purchaseData or dataSignature is null.");
         logDebug("Extras: " + data.getExtras()
             .toString());
+        purchaseFinishedListener.onPurchaseFinished(IABHELPER_UNKNOWN_ERROR,
+            "IAB returned null purchaseData or dataSignature", null, null);
+
         return false;
       }
 
@@ -47,45 +59,42 @@ public class AplicationUtils {
         try {
           purchaseDataJSON = new JSONObject(purchaseData);
           purchaseFinishedListener.onPurchaseFinished(responseCode,
-              getTokenFromJSON(purchaseDataJSON), getSkuFromJSON(purchaseDataJSON));
-        } catch (JSONException e) {
+              "Purchase signature successfully verified.", getTokenFromJSON(purchaseDataJSON),
+              getSkuFromJSON(purchaseDataJSON));
+        } catch (Exception e) {
           e.printStackTrace();
+          purchaseFinishedListener.onPurchaseFinished(IABHELPER_BAD_RESPONSE,
+              "Failed to parse purchase data.", null, null);
           return false;
         }
-
         return true;
       } else {
-        //purchaseFinishedListener.onPurchaseFinished(responseCode, null);
+        purchaseFinishedListener.onPurchaseFinished(IABHELPER_VERIFICATION_FAILED,
+            "Signature verification failed for sku:", null, null);
         return false;
       }
-
-    } else if(resultCode ==Activity.RESULT_OK)
-
-    {
+    } else if (resultCode == Activity.RESULT_OK) {
       // result code was OK, but in-app billing response was not OK.
       logDebug("Result code was OK but in-app billing response was not OK: " + getResponseDesc(
           responseCode));
-      //purchaseFinishedListener.onPurchaseFinished(resultCode, null);
-    } else if(resultCode ==Activity.RESULT_CANCELED)
-
-    {
+      purchaseFinishedListener.onPurchaseFinished(resultCode,
+          "Result code was OK but in-app billing response was not OK: " + getResponseDesc(
+              responseCode), null, null);
+    } else if (resultCode == Activity.RESULT_CANCELED) {
 
       logDebug("Purchase canceled - Response: " + getResponseDesc(responseCode));
-      //purchaseFinishedListener.onPurchaseFinished(resultCode, null);
-    } else
-
-    {
-      logError("Purchase failed. Result code: "
-          + Integer.toString(resultCode)
-          + ". Response: "
-          + getResponseDesc(responseCode));
-      //purchaseFinishedListener.onPurchaseFinished(resultCode, null);
+      purchaseFinishedListener.onPurchaseFinished(IABHELPER_USER_CANCELLED,
+          "Purchase canceled - Response: " + getResponseDesc(responseCode), null, null);
+    } else {
+      logError("Purchase failed. Result code: " + resultCode + ". Response: " + getResponseDesc(
+          responseCode));
+      purchaseFinishedListener.onPurchaseFinished(IABHELPER_UNKNOWN_PURCHASE_RESPONSE,
+          "Purchase canceled - Response: " + getResponseDesc(responseCode), null, null);
     }
     return true;
   }
 
   static boolean verifySignature(String signature, String purchaseData, String dataSignature) {
-
     if (!Security.verifyPurchase(signature, purchaseData, dataSignature)) {
       logError("Purchase signature verification FAILED");
       return false;
@@ -113,11 +122,11 @@ public class AplicationUtils {
   }
 
   static void logDebug(String msg) {
-    Log.d(DEBUG_TAG, msg);
+    Log.d(TAG, msg);
   }
 
   static void logError(String msg) {
-    Log.e(DEBUG_TAG, "In-app billing error: " + msg);
+    Log.e(TAG, "In-app billing error: " + msg);
   }
 
   static String getTokenFromJSON(JSONObject data) {
@@ -149,10 +158,10 @@ public class AplicationUtils {
       if (index >= 0 && index < iabhelper_msgs.length) {
         return iabhelper_msgs[index];
       } else {
-        return String.valueOf(code) + ":Unknown IAB Helper Error";
+        return code + ":Unknown IAB Helper Error";
       }
     } else if (code < 0 || code >= iab_msgs.length) {
-      return String.valueOf(code) + ":Unknown";
+      return code + ":Unknown";
     } else {
       return iab_msgs[code];
     }

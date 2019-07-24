@@ -28,9 +28,9 @@ import com.appcoins.sdk.billing.SkuDetailsParams;
 import com.appcoins.sdk.billing.SkuDetailsResponseListener;
 import com.appcoins.sdk.billing.helpers.CatapultBillingAppCoinsFactory;
 import com.appcoins.sdk.billing.types.SkuType;
-import com.aptoide.iabexample.utilssdk.AplicationUtils;
-import com.aptoide.iabexample.utilssdk.GenericPaymentIntentBuilder;
-import com.aptoide.iabexample.utilssdk.IabBroadcastReceiver;
+import com.aptoide.iabexample.util.GenericPaymentIntentBuilder;
+import com.aptoide.iabexample.util.IabBroadcastReceiver;
+import com.aptoide.iabexample.utilssdk.ApplicationUtils;
 import com.aptoide.iabexample.utilssdk.PurchaseFinishedListener;
 import com.aptoide.iabexample.utilssdk.Skus;
 import java.util.ArrayList;
@@ -87,12 +87,16 @@ import java.util.List;
  * we have to apply its effects to our world and consume it. This
  * is also very important!
  */
-public class SDKMainActivity extends Activity
+public class MainActivity extends Activity
     implements IabBroadcastReceiver.IabBroadcastListener, OnClickListener {
   // Debug tag, for logging
   static final String TAG = "TrivialDrive";
   // How many units (1/4 tank is our unit) fill in the tank.
   static final int TANK_MAX = 4;
+  // (arbitrary) request code for the purchase flow
+  static final int RC_REQUEST = 10001;
+  static final int RC_DONATE = 10002;
+  static final int RC_ONE_STEP = 10003;
   // Graphics for the gas gauge
   static int[] TANK_RES_IDS = {
       R.drawable.gas0, R.drawable.gas1, R.drawable.gas2, R.drawable.gas3, R.drawable.gas4
@@ -111,19 +115,29 @@ public class SDKMainActivity extends Activity
   String mSelectedSubscriptionPeriod = "";
   // Current amount of gas in tank, in units
   int mTank;
-
   // Provides purchase notification while this app is running
   Handler handler;
-  SkuType lastItem;
+  ConsumeResponseListener consumeResponseListener = new ConsumeResponseListener() {
+    @Override public void onConsumeResponse(int responseCode, String purchaseToken) {
+      Log.d(TAG, "Consumption finished. Purchase: " + purchaseToken + ", result: " + responseCode);
 
-  // (arbitrary) request code for the purchase flow
-  static final int RC_REQUEST = 10001;
-  static final int RC_DONATE = 10002;
-  static final int RC_ONE_STEP = 10003;
+      if (responseCode == ResponseCode.OK.getValue()) {
 
+        Log.d(TAG, "Consumption successful. Provisioning.");
+
+        mTank = mTank == TANK_MAX ? TANK_MAX : mTank + 1;
+
+        saveData();
+        alert("You filled 1/4 tank. Your tank is now " + mTank + "/4 full!");
+      } else {
+        complain("Error while consuming token: " + purchaseToken);
+      }
+      handler.post(() -> updateUi());
+      setWaitScreen(false);
+      Log.d(TAG, "End consumption flow.");
+    }
+  };
   private AppcoinsBillingClient cab;
-  private AppCoinsBillingStateListener listener;
-
   SkuDetailsResponseListener skuDetailsResponseListener = new SkuDetailsResponseListener() {
     @Override public void onSkuDetailsResponse(int responseCode, List<SkuDetails> skuDetailsList) {
       Log.d(TAG, "Query inventory finished.");
@@ -189,17 +203,25 @@ public class SDKMainActivity extends Activity
       handler.post(() -> updateUi());
     }
   };
-
   PurchaseFinishedListener purchaseFinishedListener = new PurchaseFinishedListener() {
-    @Override public void onPurchaseFinished(int responseCode, String token, String sku) {
-      Log.d("HERE", "tou no purchase finished" + sku);
+    @Override
+    public void onPurchaseFinished(int responseCode, String message, String token, String sku) {
+
+      if (responseCode != ResponseCode.OK.getValue()) {
+        complain("Error purchasing: " + message);
+        setWaitScreen(false);
+        return;
+      }
+
       if (sku.equals(Skus.SKU_GAS_ID)) {
         Log.d(TAG, "Purchase is gas. Starting gas consumption.");
         cab.consumeAsync(token, consumeResponseListener);
+        setWaitScreen(false);
       } else if (sku.equals(Skus.SKU_PREMIUM_ID)) {
         Log.d(TAG, "Purchase is premium upgrade. Congratulating user.");
         alert("Thank you for upgrading to premium!");
         mIsPremium = true;
+        setWaitScreen(false);
         updateUi();
       } else if (sku.equals(Skus.SKU_INFINITE_GAS_MONTHLY_ID) || sku.equals(
           Skus.SKU_INFINITE_GAS_YEARLY_ID)) {
@@ -215,25 +237,20 @@ public class SDKMainActivity extends Activity
       }
     }
   };
-
-  ConsumeResponseListener consumeResponseListener = new ConsumeResponseListener() {
-    @Override public void onConsumeResponse(int responseCode, String purchaseToken) {
-      Log.d(TAG, "Consumption finished. Purchase: " + purchaseToken + ", result: " + responseCode);
-
-      if (responseCode == ResponseCode.OK.getValue()) {
-
-        Log.d(TAG, "Consumption successful. Provisioning.");
-
-        mTank = mTank == TANK_MAX ? TANK_MAX : mTank + 1;
-
-        saveData();
-        alert("You filled 1/4 tank. Your tank is now " + String.valueOf(mTank) + "/4 full!");
-      } else {
-        complain("Error while consuming token: " + purchaseToken);
+  AppCoinsBillingStateListener appCoinsBillingStateListener = new AppCoinsBillingStateListener() {
+    @Override public void onBillingSetupFinished(int responseCode) {
+      if (responseCode != ResponseCode.OK.getValue()) {
+        complain("Problem setting up in-app billing: " + responseCode);
+        return;
       }
-      handler.post(() -> updateUi());
-      setWaitScreen(false);
-      Log.d(TAG, "End consumption flow.");
+      callSkuDetails();
+      updateUi();
+
+      Log.d(TAG, "Setup successful. Querying inventory.");
+    }
+
+    @Override public void onBillingServiceDisconnected() {
+      Log.d("Message: ", "Disconnected");
     }
   };
 
@@ -294,25 +311,8 @@ public class SDKMainActivity extends Activity
     }
   }
 
-  AppCoinsBillingStateListener appCoinsBillingStateListener = new AppCoinsBillingStateListener() {
-    @Override public void onBillingSetupFinished(int responseCode) {
-      if (responseCode != ResponseCode.OK.getValue()) {
-        complain("Problem setting up in-app billing: " + responseCode);
-        return;
-      }
-      callSkuDetails();
-      updateUi();
-
-      Log.d(TAG, "Setup successful. Querying inventory.");
-    }
-
-    @Override public void onBillingServiceDisconnected() {
-      Log.d("Message: ", "Disconnected");
-    }
-  };
-
   @Override public void onCreate(Bundle savedInstanceState) {
-    Log.d("Flavour:","Flavour User: SDK");
+    Log.d("MainActivity", "MAIN ACTIVITY SDK IAB");
     super.onCreate(savedInstanceState);
     handler = new Handler();
     setContentView(R.layout.activity_main);
@@ -325,11 +325,33 @@ public class SDKMainActivity extends Activity
     cab.startConnection(appCoinsBillingStateListener);
   }
 
+  @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    Log.d(TAG, "onActivityResult(" + requestCode + "," + resultCode + "," + data);
+    setWaitScreen(false);
+    if (requestCode == RC_DONATE) {
+      int msg = resultCode == Activity.RESULT_OK ? R.string.dialog_donation_success_msg
+          : R.string.dialog_donation_fail_msg;
+      alert(getString(msg));
+    } else if (requestCode == RC_ONE_STEP) {
+      if (resultCode == Activity.RESULT_OK) {
+        mTank = mTank == TANK_MAX ? TANK_MAX : mTank + 1;
+        saveData();
+        alert("You filled 1/4 tank. Your tank is now " + mTank + "/4 full!");
+        updateUi();
+      }
+    } else if (!ApplicationUtils.handleActivityResult(BuildConfig.IAB_KEY, resultCode, data,
+        purchaseFinishedListener)) {
+      super.onActivityResult(requestCode, resultCode, data);
+    } else {
+      Log.d(TAG, "onActivityResult handled ");
+    }
+  }
+
   void loadData() {
     SharedPreferences sp = getPreferences(MODE_PRIVATE);
     mTank = sp.getInt("tank", 2);
     mIsPremium = sp.getBoolean("mIsPremium", mIsPremium);
-    Log.d(TAG, "Loaded data: tank = " + String.valueOf(mTank));
+    Log.d(TAG, "Loaded data: tank = " + mTank);
   }
 
   @Override public void receivedBroadcast() {
@@ -381,7 +403,7 @@ public class SDKMainActivity extends Activity
     spe.putBoolean("mIsPremium", mIsPremium);
     spe.putInt("tank", mTank);
     spe.apply();
-    Log.d(TAG, "Saved data: tank = " + String.valueOf(mTank));
+    Log.d(TAG, "Saved data: tank = " + mTank);
   }
 
   void callSkuDetails() {
@@ -438,7 +460,8 @@ public class SDKMainActivity extends Activity
   public void onBuyOilButtonClicked(View arg0) {
     setWaitScreen(true);
 
-    String url = BuildConfig.BACKEND_HOST + "transaction/inapp?product=gas&domain=" + getPackageName();
+    String url =
+        BuildConfig.BACKEND_HOST + "transaction/inapp?product=gas&domain=" + getPackageName();
     Intent i = new Intent(Intent.ACTION_VIEW);
     i.setData(Uri.parse(url));
 
@@ -496,27 +519,5 @@ public class SDKMainActivity extends Activity
             null);
 
     cab.launchBillingFlow(this, billingFlowParams);
-  }
-
-  @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-    Log.d(TAG, "onActivityResult(" + requestCode + "," + resultCode + "," + data);
-    setWaitScreen(false);
-    if (requestCode == RC_DONATE) {
-      int msg = resultCode == Activity.RESULT_OK ? R.string.dialog_donation_success_msg
-          : R.string.dialog_donation_fail_msg;
-      alert(getString(msg));
-    } else if (requestCode == RC_ONE_STEP) {
-      if (resultCode == Activity.RESULT_OK) {
-        mTank = mTank == TANK_MAX ? TANK_MAX : mTank + 1;
-        saveData();
-        alert("You filled 1/4 tank. Your tank is now " + String.valueOf(mTank) + "/4 full!");
-        updateUi();
-      }
-    } else if (!AplicationUtils.handleActivityResult(BuildConfig.IAB_KEY, resultCode, data,
-        purchaseFinishedListener)) {
-      super.onActivityResult(requestCode, resultCode, data);
-    } else {
-      Log.d(TAG, "onActivityResult handled ");
-    }
   }
 }

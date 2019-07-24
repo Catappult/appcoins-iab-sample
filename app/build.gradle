@@ -58,14 +58,14 @@ android {
           "\"" + project.GOOGLE_IAB_BIND_PACKAGE + "\""
       buildConfigField "String", "IAB_UPDATE_ACTION",
           "\"" + project.GOOGLE_IAB_UPDATE_ACTION + "\""
-         manifestPlaceholders =
-            [iabPermission: project.GOOGLE_IAB_PERMISSION, MainActivityLaunch: "com.aptoide.iabexample.MainActivity"]
+         manifestPlaceholders = [iabPermission: project.GOOGLE_IAB_PERMISSION]
     }
 
     appcoinssdk {
       dimension "iab"
       buildConfigField "String", "IAB_UPDATE_ACTION",
           "\"" + project.APPCOINS_IAB_UPDATE_ACTION + "\""
+      manifestPlaceholders = [iabPermission: project.APPCOINS_IAB_PERMISSION]
       applicationVariants.all { variant ->
         if (variant.buildType.getName().equalsIgnoreCase("debug")) {
           buildConfigField "String", "IAB_BIND_ACTION",
@@ -78,10 +78,6 @@ android {
               "\"" + project.APPCOINS_DEV_IAB_KEY + "\""
           buildConfigField "String", "BACKEND_HOST",
               "\"" + project.BACK_END_HOST_DEV + "\""
-          if (variant.productFlavors.get(0).name.equals("appcoinssdk")) {
-            variant.getMergedFlavor().manifestPlaceholders =
-                [iabPermission: project.APPCOINS_IAB_PERMISSION, MainActivityLaunch: "com.aptoide.iabexample.SDKMainActivity"]
-          }
         } else {
           buildConfigField "String", "IAB_KEY",
               "\"" + project.APPCOINS_IAB_KEY + "\""
@@ -93,10 +89,6 @@ android {
               "\"" + project.APPCOINS_IAB_WALLET_ADDR + "\""
           buildConfigField "String", "BACKEND_HOST",
               "\"" + project.BACK_END_HOST_PROD + "\""
-          if (variant.productFlavors.get(0).name.equals("appcoinssdk")) {
-            variant.getMergedFlavor().manifestPlaceholders =
-                [iabPermission: project.APPCOINS_IAB_PERMISSION, MainActivityLaunch: "com.aptoide.iabexample.SDKMainActivity"]
-          }
         }
       }
     }
@@ -105,6 +97,7 @@ android {
       dimension "iab"
       buildConfigField "String", "IAB_UPDATE_ACTION",
           "\"" + project.APPCOINS_IAB_UPDATE_ACTION + "\""
+      manifestPlaceholders = [iabPermission: project.APPCOINS_IAB_PERMISSION]
       applicationVariants.all { variant ->
         if (variant.buildType.getName().equalsIgnoreCase("debug")) {
           buildConfigField "String", "IAB_BIND_ACTION",
@@ -115,11 +108,6 @@ android {
               "\"" + project.APPCOINS_DEV_IAB_WALLET_ADDR + "\""
           buildConfigField "String", "IAB_KEY",
               "\"" + project.APPCOINS_DEV_IAB_KEY + "\""
-
-          if (variant.productFlavors.get(0).name.equals("appcoinsiab")) {
-            variant.getMergedFlavor().manifestPlaceholders =
-                [iabPermission: project.APPCOINS_IAB_PERMISSION, MainActivityLaunch: "com.aptoide.iabexample.MainActivity"]
-          }
         } else {
           buildConfigField "String", "IAB_KEY",
               "\"" + project.APPCOINS_IAB_KEY + "\""
@@ -129,10 +117,6 @@ android {
               "\"" + project.APPCOINS_IAB_BIND_PACKAGE + "\""
           buildConfigField "String", "IAB_WALLET_ADDR",
               "\"" + project.APPCOINS_IAB_WALLET_ADDR + "\""
-          if (variant.productFlavors.get(0).name.equals("appcoinsiab")) {
-            variant.getMergedFlavor().manifestPlaceholders =
-                [iabPermission: project.APPCOINS_IAB_PERMISSION, MainActivityLaunch: "com.aptoide.iabexample.MainActivity"]
-          }
         }
       }
     }
