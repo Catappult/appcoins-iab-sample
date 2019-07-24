@@ -338,6 +338,9 @@ public class MainActivity extends Activity
         saveData();
         alert("You filled 1/4 tank. Your tank is now " + mTank + "/4 full!");
         updateUi();
+      }else{
+        ApplicationUtils.handleActivityResult(BuildConfig.IAB_KEY, resultCode, data,
+            purchaseFinishedListener);
       }
     } else if (!ApplicationUtils.handleActivityResult(BuildConfig.IAB_KEY, resultCode, data,
         purchaseFinishedListener)) {
