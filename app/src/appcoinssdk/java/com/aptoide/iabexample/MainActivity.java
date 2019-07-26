@@ -32,7 +32,7 @@ import com.aptoide.iabexample.util.GenericPaymentIntentBuilder;
 import com.aptoide.iabexample.util.IabBroadcastReceiver;
 import com.aptoide.iabexample.utilssdk.ApplicationUtils;
 import com.aptoide.iabexample.utilssdk.PurchaseFinishedListener;
-import com.aptoide.iabexample.utilssdk.Skus;
+import com.aptoide.iabexample.util.Skus;
 import java.util.ArrayList;
 import java.util.List;
 

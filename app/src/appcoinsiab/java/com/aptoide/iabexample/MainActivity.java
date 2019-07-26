@@ -1,4 +1,4 @@
-package com.aptoide.iabexample.util;
+package com.aptoide.iabexample;
 
 import android.app.Activity;
 import android.app.AlertDialog;

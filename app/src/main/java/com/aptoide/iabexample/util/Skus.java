@@ -1,4 +1,4 @@
-package com.aptoide.iabexample.utilssdk;
+package com.aptoide.iabexample.util;
 
 public final class Skus {
 
