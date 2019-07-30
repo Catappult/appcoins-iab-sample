@@ -10,16 +10,16 @@ import org.json.JSONObject;
 
 public class ApplicationUtils {
 
-  public static final String RESPONSE_INAPP_PURCHASE_DATA = "INAPP_PURCHASE_DATA";
-  public static final String RESPONSE_INAPP_SIGNATURE = "INAPP_DATA_SIGNATURE";
-  public static final String RESPONSE_INAPP_PURCHASE_ID = "INAPP_PURCHASE_ID";
+  private static final String RESPONSE_INAPP_PURCHASE_DATA = "INAPP_PURCHASE_DATA";
+  private static final String RESPONSE_INAPP_SIGNATURE = "INAPP_DATA_SIGNATURE";
+  private static final String RESPONSE_INAPP_PURCHASE_ID = "INAPP_PURCHASE_ID";
 
   // IAB Helper error codes
-  public static final int IABHELPER_VERIFICATION_FAILED = -1003;
-  public static final int IABHELPER_USER_CANCELLED = -1005;
-  public static final int IABHELPER_UNKNOWN_PURCHASE_RESPONSE = -1006;
-  public static final int IABHELPER_UNKNOWN_ERROR = -1008;
-  public static final int IABHELPER_BAD_RESPONSE = -1002;
+  private static final int IABHELPER_VERIFICATION_FAILED = -1003;
+  private static final int IABHELPER_USER_CANCELLED = -1005;
+  private static final int IABHELPER_UNKNOWN_PURCHASE_RESPONSE = -1006;
+  private static final int IABHELPER_UNKNOWN_ERROR = -1008;
+  private static final int IABHELPER_BAD_RESPONSE = -1002;
 
   private final static String TAG = ApplicationUtils.class.getSimpleName();
 
@@ -36,7 +36,6 @@ public class ApplicationUtils {
     int responseCode = getResponseCodeFromIntent(data);
     String purchaseData = data.getStringExtra(RESPONSE_INAPP_PURCHASE_DATA);
     String dataSignature = data.getStringExtra(RESPONSE_INAPP_SIGNATURE);
-    String id = data.getStringExtra(RESPONSE_INAPP_PURCHASE_ID);
 
     if (resultCode == Activity.RESULT_OK && responseCode == ResponseCode.OK.getValue()) {
       logDebug("Successful resultcode from purchase activity.");
@@ -121,19 +120,19 @@ public class ApplicationUtils {
     }
   }
 
-  static void logDebug(String msg) {
+  private static void logDebug(String msg) {
     Log.d(TAG, msg);
   }
 
-  static void logError(String msg) {
+  private static void logError(String msg) {
     Log.e(TAG, "In-app billing error: " + msg);
   }
 
-  static String getTokenFromJSON(JSONObject data) {
+  private static String getTokenFromJSON(JSONObject data) {
     return data.optString("purchaseToken");
   }
 
-  static String getSkuFromJSON(JSONObject data) {
+  private static String getSkuFromJSON(JSONObject data) {
     return data.optString("productId");
   }
 
@@ -155,7 +154,7 @@ public class ApplicationUtils {
 
     if (code <= -1000) {
       int index = -1000 - code;
-      if (index >= 0 && index < iabhelper_msgs.length) {
+      if (index < iabhelper_msgs.length) {
         return iabhelper_msgs[index];
       } else {
         return code + ":Unknown IAB Helper Error";

@@ -45,7 +45,7 @@ class AppCoinsBillingService implements BillingService {
 
   @Override
   public Bundle getBuyIntentToReplaceSkus(int apiVersion, String packageName, List<String> oldSkus,
-      String newSku, String type, String developerPayload) throws RemoteException {
+      String newSku, String type, String developerPayload) {
     return new Bundle();
   }
 }

@@ -30,9 +30,9 @@ import com.appcoins.sdk.billing.helpers.CatapultBillingAppCoinsFactory;
 import com.appcoins.sdk.billing.types.SkuType;
 import com.aptoide.iabexample.util.GenericPaymentIntentBuilder;
 import com.aptoide.iabexample.util.IabBroadcastReceiver;
+import com.aptoide.iabexample.util.Skus;
 import com.aptoide.iabexample.utilssdk.ApplicationUtils;
 import com.aptoide.iabexample.utilssdk.PurchaseFinishedListener;
-import com.aptoide.iabexample.util.Skus;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -213,27 +213,31 @@ public class MainActivity extends Activity
         return;
       }
 
-      if (sku.equals(Skus.SKU_GAS_ID)) {
-        Log.d(TAG, "Purchase is gas. Starting gas consumption.");
-        cab.consumeAsync(token, consumeResponseListener);
-        setWaitScreen(false);
-      } else if (sku.equals(Skus.SKU_PREMIUM_ID)) {
-        Log.d(TAG, "Purchase is premium upgrade. Congratulating user.");
-        alert("Thank you for upgrading to premium!");
-        mIsPremium = true;
-        setWaitScreen(false);
-        updateUi();
-      } else if (sku.equals(Skus.SKU_INFINITE_GAS_MONTHLY_ID) || sku.equals(
-          Skus.SKU_INFINITE_GAS_YEARLY_ID)) {
-        // bought the infinite gas subscription
-        Log.d(TAG, "Infinite gas subscription purchased.");
-        alert("Thank you for subscribing to infinite gas!");
-        mSubscribedToInfiniteGas = true;
-        mAutoRenewEnabled = true;
-        mInfiniteGasSku = sku;
-        mTank = TANK_MAX;
-        updateUi();
-        setWaitScreen(false);
+      switch (sku) {
+        case Skus.SKU_GAS_ID:
+          Log.d(TAG, "Purchase is gas. Starting gas consumption.");
+          cab.consumeAsync(token, consumeResponseListener);
+          setWaitScreen(false);
+          break;
+        case Skus.SKU_PREMIUM_ID:
+          Log.d(TAG, "Purchase is premium upgrade. Congratulating user.");
+          alert("Thank you for upgrading to premium!");
+          mIsPremium = true;
+          setWaitScreen(false);
+          updateUi();
+          break;
+        case Skus.SKU_INFINITE_GAS_MONTHLY_ID:
+        case Skus.SKU_INFINITE_GAS_YEARLY_ID:
+          // bought the infinite gas subscription
+          Log.d(TAG, "Infinite gas subscription purchased.");
+          alert("Thank you for subscribing to infinite gas!");
+          mSubscribedToInfiniteGas = true;
+          mAutoRenewEnabled = true;
+          mInfiniteGasSku = sku;
+          mTank = TANK_MAX;
+          updateUi();
+          setWaitScreen(false);
+          break;
       }
     }
   };
@@ -338,7 +342,7 @@ public class MainActivity extends Activity
         saveData();
         alert("You filled 1/4 tank. Your tank is now " + mTank + "/4 full!");
         updateUi();
-      }else{
+      } else {
         ApplicationUtils.handleActivityResult(BuildConfig.IAB_KEY, resultCode, data,
             purchaseFinishedListener);
       }
@@ -457,7 +461,11 @@ public class MainActivity extends Activity
         new BillingFlowParams(Skus.SKU_GAS_ID, SkuType.inapp.toString(), RC_REQUEST, null, null,
             null);
 
-    cab.launchBillingFlow(this, billingFlowParams);
+    int response = cab.launchBillingFlow(this, billingFlowParams);
+
+    if(response != ResponseCode.OK.getValue()){
+      setWaitScreen(false);
+    }
   }
 
   public void onBuyOilButtonClicked(View arg0) {

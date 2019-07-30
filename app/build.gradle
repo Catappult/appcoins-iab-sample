@@ -58,7 +58,7 @@ android {
           "\"" + project.GOOGLE_IAB_BIND_PACKAGE + "\""
       buildConfigField "String", "IAB_UPDATE_ACTION",
           "\"" + project.GOOGLE_IAB_UPDATE_ACTION + "\""
-         manifestPlaceholders = [iabPermission: project.GOOGLE_IAB_PERMISSION]
+      manifestPlaceholders = [iabPermission: project.GOOGLE_IAB_PERMISSION]
     }
 
     appcoinssdk {
@@ -120,8 +120,6 @@ android {
         }
       }
     }
-
-
 
     mainNetwork {
       dimension "network"
