@@ -207,9 +207,10 @@ public class MainActivity extends Activity
     @Override
     public void onPurchaseFinished(int responseCode, String message, String token, String sku) {
 
+      setWaitScreen(false);
+
       if (responseCode != ResponseCode.OK.getValue()) {
         complain("Error purchasing: " + message);
-        setWaitScreen(false);
         return;
       }
 
@@ -217,13 +218,12 @@ public class MainActivity extends Activity
         case Skus.SKU_GAS_ID:
           Log.d(TAG, "Purchase is gas. Starting gas consumption.");
           cab.consumeAsync(token, consumeResponseListener);
-          setWaitScreen(false);
+
           break;
         case Skus.SKU_PREMIUM_ID:
           Log.d(TAG, "Purchase is premium upgrade. Congratulating user.");
           alert("Thank you for upgrading to premium!");
           mIsPremium = true;
-          setWaitScreen(false);
           updateUi();
           break;
         case Skus.SKU_INFINITE_GAS_MONTHLY_ID:
@@ -236,7 +236,6 @@ public class MainActivity extends Activity
           mInfiniteGasSku = sku;
           mTank = TANK_MAX;
           updateUi();
-          setWaitScreen(false);
           break;
       }
     }
@@ -463,7 +462,7 @@ public class MainActivity extends Activity
 
     int response = cab.launchBillingFlow(this, billingFlowParams);
 
-    if(response != ResponseCode.OK.getValue()){
+    if (response != ResponseCode.OK.getValue()) {
       setWaitScreen(false);
     }
   }

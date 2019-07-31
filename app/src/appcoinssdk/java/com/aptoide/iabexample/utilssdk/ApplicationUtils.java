@@ -28,7 +28,7 @@ public class ApplicationUtils {
 
     if (data == null) {
       logError("Null data in IAB activity result.");
-      purchaseFinishedListener.onPurchaseFinished(resultCode, "Null data in IAB result", null,
+      purchaseFinishedListener.onPurchaseFinished(IABHELPER_UNKNOWN_ERROR, "Null data in IAB result", null,
           null);
       return false;
     }
