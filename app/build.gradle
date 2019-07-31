@@ -76,8 +76,6 @@ android {
               "\"" + project.APPCOINS_DEV_IAB_WALLET_ADDR + "\""
           buildConfigField "String", "IAB_KEY",
               "\"" + project.APPCOINS_DEV_IAB_KEY + "\""
-          buildConfigField "String", "BACKEND_HOST",
-              "\"" + project.BACK_END_HOST_DEV + "\""
         } else {
           buildConfigField "String", "IAB_KEY",
               "\"" + project.APPCOINS_IAB_KEY + "\""
@@ -87,8 +85,7 @@ android {
               "\"" + project.APPCOINS_IAB_BIND_PACKAGE + "\""
           buildConfigField "String", "IAB_WALLET_ADDR",
               "\"" + project.APPCOINS_IAB_WALLET_ADDR + "\""
-          buildConfigField "String", "BACKEND_HOST",
-              "\"" + project.BACK_END_HOST_PROD + "\""
+
         }
       }
     }
@@ -124,12 +121,16 @@ android {
     mainNetwork {
       dimension "network"
       buildConfigField "boolean", "TEST_NETWORK", "false"
+      buildConfigField "String", "BACKEND_HOST",
+          "\"" + project.BACK_END_HOST_PROD + "\""
     }
 
     ropstenNetwork {
       dimension "network"
       applicationIdSuffix ".test"
       buildConfigField "boolean", "TEST_NETWORK", "true"
+      buildConfigField "String", "BACKEND_HOST",
+          "\"" + project.BACK_END_HOST_DEV + "\""
     }
   }
 }
