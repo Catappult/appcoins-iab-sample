@@ -320,11 +320,12 @@ public class MainActivity extends Activity
     handler = new Handler();
     setContentView(R.layout.activity_main);
     loadData();
-
     String base64EncodedPublicKey = BuildConfig.IAB_KEY;
-
     cab = CatapultBillingAppCoinsFactory.BuildAppcoinsBilling(this, base64EncodedPublicKey);
+    startConnection();
+  }
 
+  void startConnection() {
     cab.startConnection(appCoinsBillingStateListener);
   }
 
@@ -393,7 +394,17 @@ public class MainActivity extends Activity
       BillingFlowParams billingFlowParams =
           new BillingFlowParams(mSelectedSubscriptionPeriod, SkuType.inapp.toString(), RC_REQUEST,
               null, null, null);
-      cab.launchBillingFlow(this, billingFlowParams);
+
+      if (!cab.isReady()) {
+        startConnection();
+      }
+
+      int response = cab.launchBillingFlow(this, billingFlowParams);
+
+      if (response != ResponseCode.OK.getValue()) {
+        setWaitScreen(false);
+        complain("Error purchasing with response code : " + response);
+      }
 
       mSelectedSubscriptionPeriod = "";
       mFirstChoiceSku = "";
@@ -422,6 +433,10 @@ public class MainActivity extends Activity
     skus.add(Skus.SKU_PREMIUM_ID);
 
     skuDetailsParams.setMoreItemSkus(skus);
+
+    if (!cab.isReady()) {
+      startConnection();
+    }
 
     cab.querySkuDetailsAsync(skuDetailsParams, skuDetailsResponseListener);
   }
@@ -460,10 +475,15 @@ public class MainActivity extends Activity
         new BillingFlowParams(Skus.SKU_GAS_ID, SkuType.inapp.toString(), RC_REQUEST, null, null,
             null);
 
+    if (!cab.isReady()) {
+      startConnection();
+    }
+
     int response = cab.launchBillingFlow(this, billingFlowParams);
 
     if (response != ResponseCode.OK.getValue()) {
       setWaitScreen(false);
+      complain("Error purchasing with response code : " + response);
     }
   }
 
@@ -528,6 +548,15 @@ public class MainActivity extends Activity
         new BillingFlowParams(Skus.SKU_PREMIUM_ID, SkuType.inapp.toString(), RC_REQUEST, null, null,
             null);
 
-    cab.launchBillingFlow(this, billingFlowParams);
+    if (!cab.isReady()) {
+      startConnection();
+    }
+
+    int response = cab.launchBillingFlow(this, billingFlowParams);
+
+    if (response != ResponseCode.OK.getValue()) {
+      setWaitScreen(false);
+      complain("Error purchasing with response code : " + response);
+    }
   }
 }
