@@ -472,7 +472,7 @@ public class MainActivity extends Activity
     Log.d(TAG, "Launching purchase flow for gas.");
 
     BillingFlowParams billingFlowParams =
-        new BillingFlowParams(Skus.SKU_GAS_ID, SkuType.inapp.toString(), RC_REQUEST, null, null,
+        new BillingFlowParams(Skus.SKU_GAS_ID, SkuType.inapp.toString(), RC_REQUEST, "orderId=" + System.currentTimeMillis(), null,
             null);
 
     if (!cab.isReady()) {

@@ -14,9 +14,6 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
-import com.aptoide.iabexample.Application;
-import com.aptoide.iabexample.BuildConfig;
-import com.aptoide.iabexample.R;
 import com.aptoide.iabexample.util.GenericPaymentIntentBuilder;
 import com.aptoide.iabexample.util.IabBroadcastReceiver;
 import com.aptoide.iabexample.util.IabHelper;
@@ -24,6 +21,7 @@ import com.aptoide.iabexample.util.IabResult;
 import com.aptoide.iabexample.util.Inventory;
 import com.aptoide.iabexample.util.PayloadHelper;
 import com.aptoide.iabexample.util.Purchase;
+import com.aptoide.iabexample.util.Skus;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -265,7 +263,7 @@ public class MainActivity extends Activity
             Log.d(TAG, "Consumption successful. Provisioning.");
             mTank = mTank == TANK_MAX ? TANK_MAX : mTank + 1;
             saveData();
-            alert("You filled 1/4 tank. Your tank is now " + String.valueOf(mTank) + "/4 full!");
+            alert("You filled 1/4 tank. Your tank is now " + mTank + "/4 full!");
           } else {
             complain("Error while consuming: " + result);
           }
@@ -368,7 +366,7 @@ public class MainActivity extends Activity
       if (resultCode == Activity.RESULT_OK) {
         mTank = mTank == TANK_MAX ? TANK_MAX : mTank + 1;
         saveData();
-        alert("You filled 1/4 tank. Your tank is now " + String.valueOf(mTank) + "/4 full!");
+        alert("You filled 1/4 tank. Your tank is now " + mTank + "/4 full!");
         updateUi();
       }
     } else if (!mHelper.handleActivityResult(requestCode, resultCode, data)) {
@@ -634,14 +632,14 @@ public class MainActivity extends Activity
     spe.putBoolean("mIsPremium", mIsPremium);
     spe.putInt("tank", mTank);
     spe.apply();
-    Log.d(TAG, "Saved data: tank = " + String.valueOf(mTank));
+    Log.d(TAG, "Saved data: tank = " + mTank);
   }
 
   void loadData() {
     SharedPreferences sp = getPreferences(MODE_PRIVATE);
     mTank = sp.getInt("tank", 2);
     mIsPremium = sp.getBoolean("mIsPremium", mIsPremium);
-    Log.d(TAG, "Loaded data: tank = " + String.valueOf(mTank));
+    Log.d(TAG, "Loaded data: tank = " + mTank);
   }
 
   /** Verifies the developer payload of a purchase. */
