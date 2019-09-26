@@ -8,6 +8,7 @@ import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -527,10 +528,14 @@ public class MainActivity extends Activity
 
     setWaitScreen(true);
     String url =
-        "https://apichain-dev.blockchainds.com/transaction/inapp?value=5&currency=USD&domain=com.appcoins.trivialdrivesample.test";
+        "https://apichain-dev.blockchainds.com/transaction/inapp?value=5&currency=USD&domain=com"
+            + ".appcoins.trivialdrivesample.test";
     Intent i = new Intent(Intent.ACTION_VIEW);
     i.setData(Uri.parse(url));
-
+    String packageName = "com.appcoins.wallet.dev";
+    if (isAppInstalled(packageName)) {
+      i.setPackage(packageName);
+    }
     PendingIntent intent =
         PendingIntent.getActivity(getApplicationContext(), 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
     try {
@@ -538,6 +543,17 @@ public class MainActivity extends Activity
     } catch (IntentSender.SendIntentException e) {
       e.printStackTrace();
     }
+  }
+
+  private boolean isAppInstalled(String packageName) {
+    PackageManager pm = getPackageManager();
+    boolean installed = false;
+    try {
+      pm.getPackageInfo(packageName, PackageManager.GET_ACTIVITIES);
+      installed = true;
+    } catch (PackageManager.NameNotFoundException ignored) {
+    }
+    return installed;
   }
 
   // "Subscribe to infinite gas" button clicked. Explain to user, then start purchase
