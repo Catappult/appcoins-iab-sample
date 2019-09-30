@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -530,30 +531,32 @@ public class MainActivity extends Activity
     String url =
         "https://apichain-dev.blockchainds.com/transaction/inapp?value=5&currency=USD&domain=com"
             + ".appcoins.trivialdrivesample.test";
-    Intent i = new Intent(Intent.ACTION_VIEW);
-    i.setData(Uri.parse(url));
-    String packageName = "com.appcoins.wallet.dev";
-    if (isAppInstalled(packageName)) {
-      i.setPackage(packageName);
-    }
-    PendingIntent intent =
-        PendingIntent.getActivity(getApplicationContext(), 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
+    Intent intent = buildTargetIntent(url);
     try {
-      startIntentSenderForResult(intent.getIntentSender(), RC_ONE_STEP, new Intent(), 0, 0, 0);
-    } catch (IntentSender.SendIntentException e) {
+      startActivityForResult(intent, RC_ONE_STEP);
+    } catch (Exception e) {
       e.printStackTrace();
     }
   }
 
-  private boolean isAppInstalled(String packageName) {
-    PackageManager pm = getPackageManager();
-    boolean installed = false;
-    try {
-      pm.getPackageInfo(packageName, PackageManager.GET_ACTIVITIES);
-      installed = true;
-    } catch (PackageManager.NameNotFoundException ignored) {
+  private Intent buildTargetIntent(String url) {
+    Intent intent = new Intent(Intent.ACTION_VIEW);
+    intent.setData(Uri.parse(url));
+    PackageManager packageManager = getApplicationContext().getPackageManager();
+    List<ResolveInfo> list =
+        packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
+    for (ResolveInfo app : list) {
+      if (app.activityInfo.packageName.equals("cm.aptoide.pt")) {
+        //If there's aptoide installed always choose Aptoide as default to open url
+        intent.setPackage(app.activityInfo.packageName);
+        break;
+      } else if (app.activityInfo.packageName.equals("com.appcoins.wallet.dev")) {
+        //If Aptoide is not installed and wallet is installed then choose Wallet as default to
+        // open url
+        intent.setPackage(app.activityInfo.packageName);
+      }
     }
-    return installed;
+    return intent;
   }
 
   // "Subscribe to infinite gas" button clicked. Explain to user, then start purchase
