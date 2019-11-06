@@ -138,7 +138,9 @@ public class MainActivity extends Activity
       Log.d(TAG, "End consumption flow.");
     }
   };
+
   private AppcoinsBillingClient cab;
+
   SkuDetailsResponseListener skuDetailsResponseListener = new SkuDetailsResponseListener() {
     @Override public void onSkuDetailsResponse(int responseCode, List<SkuDetails> skuDetailsList) {
       Log.d(TAG, "Query inventory finished.");
@@ -204,61 +206,22 @@ public class MainActivity extends Activity
       handler.post(() -> updateUi());
     }
   };
-  /*
-  PurchaseFinishedListener purchaseFinishedListener = new PurchaseFinishedListener() {
-    @Override
-    public void onPurchaseFinished(int responseCode, String message, String token, String sku) {
-
-      setWaitScreen(false);
-
+  AppCoinsBillingStateListener appCoinsBillingStateListener = new AppCoinsBillingStateListener() {
+    @Override public void onBillingSetupFinished(int responseCode) {
       if (responseCode != ResponseCode.OK.getValue()) {
-        complain("Error purchasing: " + message);
+        complain("Problem setting up in-app billing: " + responseCode);
         return;
       }
+      callSkuDetails();
+      updateUi();
 
-      switch (sku) {
-        case Skus.SKU_GAS_ID:
-          Log.d(TAG, "Purchase is gas. Starting gas consumption.");
-          cab.consumeAsync(token, consumeResponseListener);
+      Log.d(TAG, "Setup successful. Querying inventory.");
+    }
 
-          break;
-        case Skus.SKU_PREMIUM_ID:
-          Log.d(TAG, "Purchase is premium upgrade. Congratulating user.");
-          alert("Thank you for upgrading to premium!");
-          mIsPremium = true;
-          updateUi();
-          break;
-        case Skus.SKU_INFINITE_GAS_MONTHLY_ID:
-        case Skus.SKU_INFINITE_GAS_YEARLY_ID:
-          // bought the infinite gas subscription
-          Log.d(TAG, "Infinite gas subscription purchased.");
-          alert("Thank you for subscribing to infinite gas!");
-          mSubscribedToInfiniteGas = true;
-          mAutoRenewEnabled = true;
-          mInfiniteGasSku = sku;
-          mTank = TANK_MAX;
-          updateUi();
-          break;
-      }
+    @Override public void onBillingServiceDisconnected() {
+      Log.d("Message: ", "Disconnected");
     }
   };
-  */ AppCoinsBillingStateListener appCoinsBillingStateListener =
-      new AppCoinsBillingStateListener() {
-        @Override public void onBillingSetupFinished(int responseCode) {
-          if (responseCode != ResponseCode.OK.getValue()) {
-            complain("Problem setting up in-app billing: " + responseCode);
-            return;
-          }
-          callSkuDetails();
-          updateUi();
-
-          Log.d(TAG, "Setup successful. Querying inventory.");
-        }
-
-        @Override public void onBillingServiceDisconnected() {
-          Log.d("Message: ", "Disconnected");
-        }
-      };
 
   private boolean checkSkuExists(List<Purchase> purchases, String sku) {
     for (Purchase purchase : purchases) {
@@ -362,7 +325,8 @@ public class MainActivity extends Activity
             responseCode, ResponseCode.values()[responseCode].name()));
         return;
       }
-    }; cab = CatapultBillingAppCoinsFactory.BuildAppcoinsBilling(this, base64EncodedPublicKey,
+    };
+    cab = CatapultBillingAppCoinsFactory.BuildAppcoinsBilling(this, base64EncodedPublicKey,
         purchasesUpdatedListener);
     startConnection();
   }
