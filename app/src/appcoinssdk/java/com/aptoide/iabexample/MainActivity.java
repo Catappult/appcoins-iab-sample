@@ -22,6 +22,7 @@ import com.appcoins.sdk.billing.BillingFlowParams;
 import com.appcoins.sdk.billing.ConsumeResponseListener;
 import com.appcoins.sdk.billing.Purchase;
 import com.appcoins.sdk.billing.PurchasesResult;
+import com.appcoins.sdk.billing.PurchasesUpdatedListener;
 import com.appcoins.sdk.billing.ResponseCode;
 import com.appcoins.sdk.billing.SkuDetails;
 import com.appcoins.sdk.billing.SkuDetailsParams;
@@ -35,6 +36,7 @@ import com.aptoide.iabexample.utilssdk.ApplicationUtils;
 import com.aptoide.iabexample.utilssdk.PurchaseFinishedListener;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Example game using in-app billing version 4.
@@ -117,6 +119,7 @@ public class MainActivity extends Activity
   int mTank;
   // Provides purchase notification while this app is running
   Handler handler;
+  private String token = null;
   ConsumeResponseListener consumeResponseListener = new ConsumeResponseListener() {
     @Override public void onConsumeResponse(int responseCode, String purchaseToken) {
       Log.d(TAG, "Consumption finished. Purchase: " + purchaseToken + ", result: " + responseCode);
@@ -284,8 +287,10 @@ public class MainActivity extends Activity
   }
 
   void setWaitScreen(boolean set) {
-    findViewById(R.id.screen_main).setVisibility(set ? View.GONE : View.VISIBLE);
-    findViewById(R.id.screen_wait).setVisibility(set ? View.VISIBLE : View.GONE);
+    runOnUiThread(() -> {
+      findViewById(R.id.screen_main).setVisibility(set ? View.GONE : View.VISIBLE);
+      findViewById(R.id.screen_wait).setVisibility(set ? View.VISIBLE : View.GONE);
+    });
   }
 
   void alert(String message) {
@@ -321,7 +326,22 @@ public class MainActivity extends Activity
     setContentView(R.layout.activity_main);
     loadData();
     String base64EncodedPublicKey = BuildConfig.IAB_KEY;
-    cab = CatapultBillingAppCoinsFactory.BuildAppcoinsBilling(this, base64EncodedPublicKey);
+    PurchasesUpdatedListener purchaseFinishedListener = (responseCode, purchases) -> {
+      if (responseCode == ResponseCode.OK.getValue()) {
+        for (Purchase purchase : purchases) {
+          token = purchase.getToken();
+        }
+      } else {
+        new AlertDialog.Builder(this).setMessage(
+            String.format(Locale.ENGLISH, "response code: %d -> %s", responseCode,
+                ResponseCode.values()[responseCode].name()))
+            .setPositiveButton(android.R.string.ok, (dialog, which) -> dialog.dismiss())
+            .create()
+            .show();
+      }
+    };
+    cab = CatapultBillingAppCoinsFactory.BuildAppcoinsBilling(this, base64EncodedPublicKey,
+        purchaseFinishedListener);
     startConnection();
   }
 
@@ -392,8 +412,8 @@ public class MainActivity extends Activity
       setWaitScreen(true);
       Log.d(TAG, "Launching purchase flow for gas subscription.");
       BillingFlowParams billingFlowParams =
-          new BillingFlowParams(mSelectedSubscriptionPeriod, SkuType.inapp.toString(), RC_REQUEST,
-              null, null, null);
+          new BillingFlowParams(mSelectedSubscriptionPeriod, SkuType.inapp.toString(), null, null,
+              null);
 
       if (!cab.isReady()) {
         startConnection();
@@ -472,8 +492,8 @@ public class MainActivity extends Activity
     Log.d(TAG, "Launching purchase flow for gas.");
 
     BillingFlowParams billingFlowParams =
-        new BillingFlowParams(Skus.SKU_GAS_ID, SkuType.inapp.toString(), RC_REQUEST, "orderId=" + System.currentTimeMillis(), null,
-            null);
+        new BillingFlowParams(Skus.SKU_GAS_ID, SkuType.inapp.toString(),
+            "orderId=" + System.currentTimeMillis(), null, null);
 
     if (!cab.isReady()) {
       startConnection();
@@ -545,8 +565,7 @@ public class MainActivity extends Activity
     Log.d(TAG, "Launching purchase flow for gas.");
 
     BillingFlowParams billingFlowParams =
-        new BillingFlowParams(Skus.SKU_PREMIUM_ID, SkuType.inapp.toString(), RC_REQUEST, null, null,
-            null);
+        new BillingFlowParams(Skus.SKU_PREMIUM_ID, SkuType.inapp.toString(), null, null, null);
 
     if (!cab.isReady()) {
       startConnection();
