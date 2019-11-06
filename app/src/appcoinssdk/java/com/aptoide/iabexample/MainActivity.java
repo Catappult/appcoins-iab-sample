@@ -32,8 +32,6 @@ import com.appcoins.sdk.billing.types.SkuType;
 import com.aptoide.iabexample.util.GenericPaymentIntentBuilder;
 import com.aptoide.iabexample.util.IabBroadcastReceiver;
 import com.aptoide.iabexample.util.Skus;
-import com.aptoide.iabexample.utilssdk.ApplicationUtils;
-import com.aptoide.iabexample.utilssdk.PurchaseFinishedListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -206,6 +204,7 @@ public class MainActivity extends Activity
       handler.post(() -> updateUi());
     }
   };
+  /*
   PurchaseFinishedListener purchaseFinishedListener = new PurchaseFinishedListener() {
     @Override
     public void onPurchaseFinished(int responseCode, String message, String token, String sku) {
@@ -243,22 +242,23 @@ public class MainActivity extends Activity
       }
     }
   };
-  AppCoinsBillingStateListener appCoinsBillingStateListener = new AppCoinsBillingStateListener() {
-    @Override public void onBillingSetupFinished(int responseCode) {
-      if (responseCode != ResponseCode.OK.getValue()) {
-        complain("Problem setting up in-app billing: " + responseCode);
-        return;
-      }
-      callSkuDetails();
-      updateUi();
+  */ AppCoinsBillingStateListener appCoinsBillingStateListener =
+      new AppCoinsBillingStateListener() {
+        @Override public void onBillingSetupFinished(int responseCode) {
+          if (responseCode != ResponseCode.OK.getValue()) {
+            complain("Problem setting up in-app billing: " + responseCode);
+            return;
+          }
+          callSkuDetails();
+          updateUi();
 
-      Log.d(TAG, "Setup successful. Querying inventory.");
-    }
+          Log.d(TAG, "Setup successful. Querying inventory.");
+        }
 
-    @Override public void onBillingServiceDisconnected() {
-      Log.d("Message: ", "Disconnected");
-    }
-  };
+        @Override public void onBillingServiceDisconnected() {
+          Log.d("Message: ", "Disconnected");
+        }
+      };
 
   private boolean checkSkuExists(List<Purchase> purchases, String sku) {
     for (Purchase purchase : purchases) {
@@ -326,22 +326,44 @@ public class MainActivity extends Activity
     setContentView(R.layout.activity_main);
     loadData();
     String base64EncodedPublicKey = BuildConfig.IAB_KEY;
-    PurchasesUpdatedListener purchaseFinishedListener = (responseCode, purchases) -> {
+    PurchasesUpdatedListener purchasesUpdatedListener = (responseCode, purchases) -> {
       if (responseCode == ResponseCode.OK.getValue()) {
+        String sku;
         for (Purchase purchase : purchases) {
           token = purchase.getToken();
+          sku = purchase.getSku();
+
+          switch (sku) {
+            case Skus.SKU_GAS_ID:
+              Log.d(TAG, "Purchase is gas. Starting gas consumption.");
+              cab.consumeAsync(token, consumeResponseListener);
+              break;
+            case Skus.SKU_PREMIUM_ID:
+              Log.d(TAG, "Purchase is premium upgrade. Congratulating user.");
+              alert("Thank you for upgrading to premium!");
+              mIsPremium = true;
+              updateUi();
+              break;
+            case Skus.SKU_INFINITE_GAS_MONTHLY_ID:
+            case Skus.SKU_INFINITE_GAS_YEARLY_ID:
+              // bought the infinite gas subscription
+              Log.d(TAG, "Infinite gas subscription purchased.");
+              alert("Thank you for subscribing to infinite gas!");
+              mSubscribedToInfiniteGas = true;
+              mAutoRenewEnabled = true;
+              mInfiniteGasSku = sku;
+              mTank = TANK_MAX;
+              updateUi();
+              break;
+          }
         }
       } else {
-        new AlertDialog.Builder(this).setMessage(
-            String.format(Locale.ENGLISH, "response code: %d -> %s", responseCode,
-                ResponseCode.values()[responseCode].name()))
-            .setPositiveButton(android.R.string.ok, (dialog, which) -> dialog.dismiss())
-            .create()
-            .show();
+        complain("Error purchasing: " + String.format(Locale.ENGLISH, "response code: %d -> %s",
+            responseCode, ResponseCode.values()[responseCode].name()));
+        return;
       }
-    };
-    cab = CatapultBillingAppCoinsFactory.BuildAppcoinsBilling(this, base64EncodedPublicKey,
-        purchaseFinishedListener);
+    }; cab = CatapultBillingAppCoinsFactory.BuildAppcoinsBilling(this, base64EncodedPublicKey,
+        purchasesUpdatedListener);
     startConnection();
   }
 
@@ -352,6 +374,7 @@ public class MainActivity extends Activity
   @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     Log.d(TAG, "onActivityResult(" + requestCode + "," + resultCode + "," + data);
     setWaitScreen(false);
+
     if (requestCode == RC_DONATE) {
       int msg = resultCode == Activity.RESULT_OK ? R.string.dialog_donation_success_msg
           : R.string.dialog_donation_fail_msg;
@@ -363,11 +386,9 @@ public class MainActivity extends Activity
         alert("You filled 1/4 tank. Your tank is now " + mTank + "/4 full!");
         updateUi();
       } else {
-        ApplicationUtils.handleActivityResult(BuildConfig.IAB_KEY, resultCode, data,
-            purchaseFinishedListener);
+        cab.onActivityResult(requestCode, resultCode, data);
       }
-    } else if (!ApplicationUtils.handleActivityResult(BuildConfig.IAB_KEY, resultCode, data,
-        purchaseFinishedListener)) {
+    } else if (cab.onActivityResult(requestCode, resultCode, data)) {
       super.onActivityResult(requestCode, resultCode, data);
     } else {
       Log.d(TAG, "onActivityResult handled ");
