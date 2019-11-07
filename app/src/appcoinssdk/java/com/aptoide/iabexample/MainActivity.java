@@ -289,41 +289,44 @@ public class MainActivity extends Activity
     setContentView(R.layout.activity_main);
     loadData();
     String base64EncodedPublicKey = BuildConfig.IAB_KEY;
-    PurchasesUpdatedListener purchasesUpdatedListener = (responseCode, purchases) -> {
-      if (responseCode == ResponseCode.OK.getValue()) {
-        String sku;
-        for (Purchase purchase : purchases) {
-          token = purchase.getToken();
-          sku = purchase.getSku();
+    PurchasesUpdatedListener purchasesUpdatedListener = new PurchasesUpdatedListener() {
+      @Override public void onPurchasesUpdated(int responseCode, List<Purchase> purchases) {
+        if (responseCode == ResponseCode.OK.getValue()) {
+          String sku;
+          for (Purchase purchase : purchases) {
+            token = purchase.getToken();
+            sku = purchase.getSku();
 
-          switch (sku) {
-            case Skus.SKU_GAS_ID:
-              Log.d(TAG, "Purchase is gas. Starting gas consumption.");
-              cab.consumeAsync(token, consumeResponseListener);
-              break;
-            case Skus.SKU_PREMIUM_ID:
-              Log.d(TAG, "Purchase is premium upgrade. Congratulating user.");
-              alert("Thank you for upgrading to premium!");
-              mIsPremium = true;
-              updateUi();
-              break;
-            case Skus.SKU_INFINITE_GAS_MONTHLY_ID:
-            case Skus.SKU_INFINITE_GAS_YEARLY_ID:
-              // bought the infinite gas subscription
-              Log.d(TAG, "Infinite gas subscription purchased.");
-              alert("Thank you for subscribing to infinite gas!");
-              mSubscribedToInfiniteGas = true;
-              mAutoRenewEnabled = true;
-              mInfiniteGasSku = sku;
-              mTank = TANK_MAX;
-              updateUi();
-              break;
+            switch (sku) {
+              case Skus.SKU_GAS_ID:
+                Log.d(TAG, "Purchase is gas. Starting gas consumption.");
+                cab.consumeAsync(token, consumeResponseListener);
+                break;
+              case Skus.SKU_PREMIUM_ID:
+                Log.d(TAG, "Purchase is premium upgrade. Congratulating user.");
+                MainActivity.this.alert("Thank you for upgrading to premium!");
+                mIsPremium = true;
+                MainActivity.this.updateUi();
+                break;
+              case Skus.SKU_INFINITE_GAS_MONTHLY_ID:
+              case Skus.SKU_INFINITE_GAS_YEARLY_ID:
+                // bought the infinite gas subscription
+                Log.d(TAG, "Infinite gas subscription purchased.");
+                MainActivity.this.alert("Thank you for subscribing to infinite gas!");
+                mSubscribedToInfiniteGas = true;
+                mAutoRenewEnabled = true;
+                mInfiniteGasSku = sku;
+                mTank = TANK_MAX;
+                MainActivity.this.updateUi();
+                break;
+            }
           }
+        } else {
+          MainActivity.this.complain(
+              "Error purchasing: " + String.format(Locale.ENGLISH, "response code: %d -> %s",
+                  responseCode, ResponseCode.values()[responseCode].name()));
+          return;
         }
-      } else {
-        complain("Error purchasing: " + String.format(Locale.ENGLISH, "response code: %d -> %s",
-            responseCode, ResponseCode.values()[responseCode].name()));
-        return;
       }
     };
     cab = CatapultBillingAppCoinsFactory.BuildAppcoinsBilling(this, base64EncodedPublicKey,
