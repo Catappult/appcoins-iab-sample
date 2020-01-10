@@ -22,6 +22,11 @@ allprojects {
   }
 }
 
+project.ext {
+  sdkDev = "0.5.2.35b.dev"
+  sdk = "0.5.2.35b"
+}
+
 task wrapper(type: Wrapper) {
   gradleVersion = '4.6'
   distributionUrl = "https://services.gradle.org/distributions/gradle-${gradleVersion}-all.zip"
