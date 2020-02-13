@@ -516,18 +516,18 @@ public class MainActivity extends Activity
     setWaitScreen(true);
 
     String url = BuildConfig.BACKEND_HOST
-        + "transaction/inapp?value=1&currency=eur"
-        + "&to=0xbb83e699f1188baabea820ce02995c97bd9b510f"
+        + "transaction/inapp?value=0.25&currency=EUR"
         + "&domain="
         + getPackageName();
     Intent i = new Intent(Intent.ACTION_VIEW);
     i.setData(Uri.parse(url));
+    i.setPackage("com.appcoins.wallet");
 
     PendingIntent intent =
         PendingIntent.getActivity(getApplicationContext(), 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
     try {
       startIntentSenderForResult(intent.getIntentSender(), RC_ONE_STEP, new Intent(), 0, 0, 0);
-    } catch (IntentSender.SendIntentException e) {
+    } catch (Exception e) {
       e.printStackTrace();
     }
   }

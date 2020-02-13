@@ -10,8 +10,8 @@ android {
     applicationId "com.appcoins.trivialdrivesample"
     minSdkVersion 21
     targetSdkVersion 27
-    versionCode 16
-    versionName "1.4.0"
+    versionCode 17
+    versionName "1.4.1"
     multiDexEnabled true
   }
 
@@ -138,9 +138,9 @@ android {
 dependencies {
   implementation 'com.android.support:appcompat-v7:27.1.1'
   implementation 'com.google.code.gson:gson:2.8.2'
-  implementation 'com.blockchainds:appcoins-ads:0.5.1.32b'
-  implementation 'com.blockchainds:android-appcoins-billing:0.5.1.32b'
-  implementation 'com.blockchainds:appcoins-contract-proxy:0.5.1.32b'
+  implementation 'com.blockchainds:appcoins-ads:0.5.2.35b'
+  implementation 'com.blockchainds:android-appcoins-billing:0.5.2.35b'
+  implementation 'com.blockchainds:appcoins-contract-proxy:0.5.2.35b'
 }
 
 def renameArtifact(defaultConfig) {
