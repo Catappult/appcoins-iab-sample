@@ -31,7 +31,9 @@ import com.appcoins.sdk.billing.helpers.CatapultBillingAppCoinsFactory;
 import com.appcoins.sdk.billing.types.SkuType;
 import com.aptoide.iabexample.util.GenericPaymentIntentBuilder;
 import com.aptoide.iabexample.util.IabBroadcastReceiver;
+import com.aptoide.iabexample.util.PurchaseService;
 import com.aptoide.iabexample.util.Skus;
+import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -117,6 +119,7 @@ public class MainActivity extends Activity
   int mTank;
   // Provides purchase notification while this app is running
   Handler handler;
+  PurchaseService purchasesService;
   private String token = null;
   ConsumeResponseListener consumeResponseListener = new ConsumeResponseListener() {
     @Override public void onConsumeResponse(int responseCode, String purchaseToken) {
@@ -198,8 +201,8 @@ public class MainActivity extends Activity
         Log.d(TAG, "We have gas. Consuming it.");
         List<Purchase> gasList = getSku(purchases, Skus.SKU_GAS_ID);
         if (gasList.size() > 0) {
-          cab.consumeAsync(gasList.get(0)
-              .getToken(), consumeResponseListener);
+          Purchase purchase = gasList.get(0);
+          purchasesService.verifyPurchase(purchase.getSku(),purchase.getToken());
         }
       }
 
@@ -286,6 +289,50 @@ public class MainActivity extends Activity
     Log.d("MainActivity", "MAIN ACTIVITY SDK IAB");
     super.onCreate(savedInstanceState);
     handler = new Handler();
+    // bought the infinite gas subscription
+    PurchaseService.PurchaseValidatorListener purchaseValidatorListener =
+        new PurchaseService.PurchaseValidatorListener() {
+          @Override
+          public void onPurchaseValidationResult(String sku, String token, boolean isValid) {
+            if (isValid) {
+              switch (sku) {
+                case Skus.SKU_GAS_ID:
+                  Log.d(TAG, "Purchase is gas. Starting gas consumption.");
+                  cab.consumeAsync(token, consumeResponseListener);
+                  break;
+                case Skus.SKU_PREMIUM_ID:
+                  Log.d(TAG, "Purchase is premium upgrade. Congratulating user.");
+                  MainActivity.this.alert("Thank you for upgrading to premium!");
+                  mIsPremium = true;
+                  MainActivity.this.updateUi();
+                  break;
+                case Skus.SKU_INFINITE_GAS_MONTHLY_ID:
+                case Skus.SKU_INFINITE_GAS_YEARLY_ID:
+                  // bought the infinite gas subscription
+                  Log.d(TAG, "Infinite gas subscription purchased.");
+                  MainActivity.this.alert("Thank you for subscribing to infinite gas!");
+                  mSubscribedToInfiniteGas = true;
+                  mAutoRenewEnabled = true;
+                  mInfiniteGasSku = sku;
+                  mTank = TANK_MAX;
+                  MainActivity.this.updateUi();
+                  break;
+              }
+            } else {
+              MainActivity.this.complain(
+                  "Invalid purchase for sku " + sku + " purchase token: " + token);
+            }
+          }
+
+          @Override
+          public void onPurchaseValidationError(String sku, String token, Throwable error) {
+            MainActivity.this.complain(error.getMessage());
+          }
+        };
+
+    purchasesService =
+        new PurchaseService("https://validators.aptoide.com", BuildConfig.APPLICATION_ID,
+            purchaseValidatorListener, new Gson());
     setContentView(R.layout.activity_main);
     loadData();
     String base64EncodedPublicKey = BuildConfig.IAB_KEY;
@@ -296,30 +343,7 @@ public class MainActivity extends Activity
           for (Purchase purchase : purchases) {
             token = purchase.getToken();
             sku = purchase.getSku();
-
-            switch (sku) {
-              case Skus.SKU_GAS_ID:
-                Log.d(TAG, "Purchase is gas. Starting gas consumption.");
-                cab.consumeAsync(token, consumeResponseListener);
-                break;
-              case Skus.SKU_PREMIUM_ID:
-                Log.d(TAG, "Purchase is premium upgrade. Congratulating user.");
-                MainActivity.this.alert("Thank you for upgrading to premium!");
-                mIsPremium = true;
-                MainActivity.this.updateUi();
-                break;
-              case Skus.SKU_INFINITE_GAS_MONTHLY_ID:
-              case Skus.SKU_INFINITE_GAS_YEARLY_ID:
-                // bought the infinite gas subscription
-                Log.d(TAG, "Infinite gas subscription purchased.");
-                MainActivity.this.alert("Thank you for subscribing to infinite gas!");
-                mSubscribedToInfiniteGas = true;
-                mAutoRenewEnabled = true;
-                mInfiniteGasSku = sku;
-                mTank = TANK_MAX;
-                MainActivity.this.updateUi();
-                break;
-            }
+            purchasesService.verifyPurchase(sku, purchase.getToken());
           }
         } else {
           MainActivity.this.complain(
