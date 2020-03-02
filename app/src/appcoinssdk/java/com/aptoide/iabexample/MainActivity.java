@@ -16,18 +16,18 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
-import com.appcoins.sdk.billing.AppCoinsBillingStateListener;
 import com.appcoins.sdk.billing.AppcoinsBillingClient;
 import com.appcoins.sdk.billing.BillingFlowParams;
-import com.appcoins.sdk.billing.ConsumeResponseListener;
 import com.appcoins.sdk.billing.Purchase;
 import com.appcoins.sdk.billing.PurchasesResult;
 import com.appcoins.sdk.billing.PurchasesUpdatedListener;
 import com.appcoins.sdk.billing.ResponseCode;
 import com.appcoins.sdk.billing.SkuDetails;
 import com.appcoins.sdk.billing.SkuDetailsParams;
-import com.appcoins.sdk.billing.SkuDetailsResponseListener;
 import com.appcoins.sdk.billing.helpers.CatapultBillingAppCoinsFactory;
+import com.appcoins.sdk.billing.listeners.AppCoinsBillingStateListener;
+import com.appcoins.sdk.billing.listeners.ConsumeResponseListener;
+import com.appcoins.sdk.billing.listeners.SkuDetailsResponseListener;
 import com.appcoins.sdk.billing.types.SkuType;
 import com.aptoide.iabexample.util.GenericPaymentIntentBuilder;
 import com.aptoide.iabexample.util.IabBroadcastReceiver;
@@ -202,7 +202,7 @@ public class MainActivity extends Activity
         List<Purchase> gasList = getSku(purchases, Skus.SKU_GAS_ID);
         if (gasList.size() > 0) {
           Purchase purchase = gasList.get(0);
-          purchasesService.verifyPurchase(purchase.getSku(),purchase.getToken());
+          purchasesService.verifyPurchase(purchase.getSku(), purchase.getToken());
         }
       }
 
