@@ -11,3 +11,6 @@
 /app/mainNetwork
 /app/release
 /app/ropstenNetwork
+app/appcoinsiabRopstenNetwork/
+app/appcoinssdkMainNetwork/
+app/appcoinssdkRopstenNetwork/
