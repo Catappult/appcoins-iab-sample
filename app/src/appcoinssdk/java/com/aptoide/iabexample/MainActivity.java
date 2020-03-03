@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -431,16 +432,28 @@ public class MainActivity extends Activity
         startConnection();
       }
 
-      int response = cab.launchBillingFlow(this, billingFlowParams);
+      ResponseListener responseListener = responseCode -> {
+        if (responseCode != ResponseCode.OK.getValue()) {
+          setWaitScreen(false);
+          complain("Error purchasing with response code : " + responseCode);
+        }
 
-      if (response != ResponseCode.OK.getValue()) {
-        setWaitScreen(false);
-        complain("Error purchasing with response code : " + response);
-      }
+        mSelectedSubscriptionPeriod = "";
+        mFirstChoiceSku = "";
+        mSecondChoiceSku = "";
+      };
 
-      mSelectedSubscriptionPeriod = "";
-      mFirstChoiceSku = "";
-      mSecondChoiceSku = "";
+      Activity activity = this;
+      AsyncTask<Object, Object, Integer> asyncTask = new AsyncTask<Object, Object, Integer>() {
+        @Override protected Integer doInBackground(Object[] objects) {
+          return cab.launchBillingFlow(activity, billingFlowParams);
+        }
+
+        @Override protected void onPostExecute(Integer integer) {
+          responseListener.onResponse(integer);
+        }
+      };
+      asyncTask.execute();
     } else if (id != DialogInterface.BUTTON_NEGATIVE) {
       // There are only four buttons, this should not happen
       Log.e(TAG, "Unknown button clicked in subscription dialog: " + id);
@@ -511,12 +524,21 @@ public class MainActivity extends Activity
       startConnection();
     }
 
-    int response = cab.launchBillingFlow(this, billingFlowParams);
+    ResponseListener responseListener = responseCode -> {
+      if (responseCode != ResponseCode.OK.getValue()) {
+        setWaitScreen(false);
+        complain("Error purchasing with response code : " + responseCode);
+      }
 
-    if (response != ResponseCode.OK.getValue()) {
-      setWaitScreen(false);
-      complain("Error purchasing with response code : " + response);
-    }
+      mSelectedSubscriptionPeriod = "";
+      mFirstChoiceSku = "";
+      mSecondChoiceSku = "";
+    };
+
+    Activity activity = this;
+    Thread thread = new Thread(
+        () -> responseListener.onResponse(cab.launchBillingFlow(activity, billingFlowParams)));
+    thread.start();
   }
 
   public void onBuyOilButtonClicked(View arg0) {
@@ -589,5 +611,9 @@ public class MainActivity extends Activity
       setWaitScreen(false);
       complain("Error purchasing with response code : " + response);
     }
+  }
+
+  public interface ResponseListener {
+    void onResponse(int responseCode);
   }
 }
