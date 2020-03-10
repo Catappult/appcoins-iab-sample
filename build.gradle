@@ -19,14 +19,15 @@ allprojects {
     jcenter()
     google()
     maven { url "https://dl.bintray.com/blockchainds/bds" }
+    maven { url "https://dl.bintray.com/blockchainds/bds-stage" }
   }
 }
 
 project.ext {
-  sdkDev = "0.5.4.0.dev"
-  sdk = "0.5.4.1"
-  iabDev = "0.5.4.0.dev"
-  iab = "0.5.4.1"
+  sdkDev = "0.5.5.2.dev"
+  sdk = "0.5.5.3"
+  iabDev = "0.5.5.2.dev"
+  iab = "0.5.5.3"
 }
 
 wrapper {

@@ -1,7 +1,6 @@
 package com.aptoide.iabexample.util;
 
 import android.util.Log;
-import com.appcoins.sdk.billing.BuildConfig;
 import com.google.gson.Gson;
 import java.io.DataOutputStream;
 import java.io.InputStreamReader;
@@ -26,51 +25,47 @@ public class PurchaseService {
   }
 
   public void verifyPurchase(String sku, String token) {
-    if (!BuildConfig.DEBUG) {
-      Thread thread = new Thread(() -> {
-        HttpURLConnection conn = null;
-        try {
-          URL url = new URL(baseHost + "/purchase/" + applicationPackageName + "/check");
-          conn = (HttpURLConnection) url.openConnection();
-          conn.setRequestMethod("POST");
-          conn.setRequestProperty("Content-Type", "application/json;charset=UTF-8");
-          conn.setRequestProperty("Accept", "application/json");
-          conn.setDoOutput(true);
-          conn.setDoInput(true);
-          JSONObject jsonParam = new JSONObject();
-          jsonParam.put("token", token);
-          jsonParam.put("product", sku);
-          Log.i("JSON", jsonParam.toString());
-          DataOutputStream os = new DataOutputStream(conn.getOutputStream());
-          os.writeBytes(jsonParam.toString());
-          os.flush();
-          os.close();
+    Thread thread = new Thread(() -> {
+      HttpURLConnection conn = null;
+      try {
+        URL url = new URL(baseHost + "/purchase/" + applicationPackageName + "/check");
+        conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("POST");
+        conn.setRequestProperty("Content-Type", "application/json;charset=UTF-8");
+        conn.setRequestProperty("Accept", "application/json");
+        conn.setDoOutput(true);
+        conn.setDoInput(true);
+        JSONObject jsonParam = new JSONObject();
+        jsonParam.put("token", token);
+        jsonParam.put("product", sku);
+        Log.i("JSON", jsonParam.toString());
+        DataOutputStream os = new DataOutputStream(conn.getOutputStream());
+        os.writeBytes(jsonParam.toString());
+        os.flush();
+        os.close();
 
-          int responseCode = conn.getResponseCode();
-          if (responseCode == 200) {
-            PurchaseVerificationResponse purchaseVerificationResponse =
-                gson.fromJson(new InputStreamReader(conn.getInputStream()),
-                    PurchaseVerificationResponse.class);
-            Log.i(TAG, purchaseVerificationResponse.toString());
-            listener.onPurchaseValidationResult(sku, token, purchaseVerificationResponse.getStatus()
-                == PurchaseVerificationResponse.Status.SUCCESS);
-          } else {
-            listener.onPurchaseValidationError(sku, token, new Exception(
-                "Response code: " + responseCode + "\n" + "Message: " + conn.getResponseMessage()));
-          }
-        } catch (Exception e) {
-          listener.onPurchaseValidationError(sku, token, e);
-          e.printStackTrace();
-        } finally {
-          if (conn != null) {
-            conn.disconnect();
-          }
+        int responseCode = conn.getResponseCode();
+        if (responseCode == 200) {
+          PurchaseVerificationResponse purchaseVerificationResponse =
+              gson.fromJson(new InputStreamReader(conn.getInputStream()),
+                  PurchaseVerificationResponse.class);
+          Log.i(TAG, purchaseVerificationResponse.toString());
+          listener.onPurchaseValidationResult(sku, token, purchaseVerificationResponse.getStatus()
+              == PurchaseVerificationResponse.Status.SUCCESS);
+        } else {
+          listener.onPurchaseValidationError(sku, token, new Exception(
+              "Response code: " + responseCode + "\n" + "Message: " + conn.getResponseMessage()));
         }
-      });
-      thread.start();
-    } else {
-      listener.onPurchaseValidationResult(sku, token, true);
-    }
+      } catch (Exception e) {
+        listener.onPurchaseValidationError(sku, token, e);
+        e.printStackTrace();
+      } finally {
+        if (conn != null) {
+          conn.disconnect();
+        }
+      }
+    });
+    thread.start();
   }
 
   public interface PurchaseValidatorListener {

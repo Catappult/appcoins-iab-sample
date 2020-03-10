@@ -121,7 +121,6 @@ public class MainActivity extends Activity
   // Provides purchase notification while this app is running
   Handler handler;
   PurchaseService purchasesService;
-  private String token = null;
   ConsumeResponseListener consumeResponseListener = new ConsumeResponseListener() {
     @Override public void onConsumeResponse(int responseCode, String purchaseToken) {
       Log.d(TAG, "Consumption finished. Purchase: " + purchaseToken + ", result: " + responseCode);
@@ -142,7 +141,7 @@ public class MainActivity extends Activity
       Log.d(TAG, "End consumption flow.");
     }
   };
-
+  private String token = null;
   private AppcoinsBillingClient cab;
 
   SkuDetailsResponseListener skuDetailsResponseListener = new SkuDetailsResponseListener() {
@@ -330,10 +329,15 @@ public class MainActivity extends Activity
             MainActivity.this.complain(error.getMessage());
           }
         };
-
+    String baseHost;
+    if (BuildConfig.DEBUG) {
+      baseHost = "https://validators-dev.aptoide.com";
+    } else {
+      baseHost = "https://validators.aptoide.com";
+    }
     purchasesService =
-        new PurchaseService("https://validators.aptoide.com", BuildConfig.APPLICATION_ID,
-            purchaseValidatorListener, new Gson());
+        new PurchaseService(baseHost, BuildConfig.APPLICATION_ID, purchaseValidatorListener,
+            new Gson());
     setContentView(R.layout.activity_main);
     loadData();
     String base64EncodedPublicKey = BuildConfig.IAB_KEY;
@@ -359,10 +363,6 @@ public class MainActivity extends Activity
     startConnection();
   }
 
-  void startConnection() {
-    cab.startConnection(appCoinsBillingStateListener);
-  }
-
   @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     Log.d(TAG, "onActivityResult(" + requestCode + "," + resultCode + "," + data);
     setWaitScreen(false);
@@ -385,6 +385,10 @@ public class MainActivity extends Activity
     } else {
       Log.d(TAG, "onActivityResult handled ");
     }
+  }
+
+  void startConnection() {
+    cab.startConnection(appCoinsBillingStateListener);
   }
 
   void loadData() {
