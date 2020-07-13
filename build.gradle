@@ -5,6 +5,7 @@ buildscript {
     jcenter()
     google()
   }
+
   dependencies {
     classpath 'com.android.tools.build:gradle:3.2.0'
 
@@ -18,10 +19,16 @@ allprojects {
     jcenter()
     google()
     maven { url "https://dl.bintray.com/blockchainds/bds" }
+    maven { url "https://dl.bintray.com/blockchainds/bds-stage" }
   }
 }
 
-task wrapper(type: Wrapper) {
+project.ext {
+  sdkDev = "0.6.3.1.dev"
+  sdk = "0.6.3.1.staging"
+}
+
+wrapper {
   gradleVersion = '4.6'
   distributionUrl = "https://services.gradle.org/distributions/gradle-${gradleVersion}-all.zip"
 }

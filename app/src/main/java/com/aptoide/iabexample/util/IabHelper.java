@@ -189,105 +189,40 @@ public class IabHelper {
   }
 
   /**
-   * Starts the setup process. This will start up the setup process asynchronously.
-   * You will be notified through the listener when the setup process is complete.
-   * This method is safe to call from a UI thread.
+   * Returns a human-readable description for the given response code.
    *
-   * @param listener The listener to notify when the setup process is complete.
+   * @param code The response code
+   *
+   * @return A human-readable string explaining the result code.
+   * It also includes the result code numerically.
    */
-  public void startSetup(final OnIabSetupFinishedListener listener) {
-    // If already set up, can't do it again.
-    checkNotDisposed();
-    if (mSetupDone) throw new IllegalStateException("IAB helper is already set up.");
+  public static String getResponseDesc(int code) {
+    String[] iab_msgs = ("0:OK/1:User Canceled/2:Unknown/"
+        + "3:Billing Unavailable/4:Item unavailable/"
+        + "5:Developer Error/6:Error/7:Item Already Owned/"
+        + "8:Item not owned").split("/");
+    String[] iabhelper_msgs = ("0:OK/-1001:Remote exception during initialization/"
+        + "-1002:Bad response received/"
+        + "-1003:Purchase signature verification failed/"
+        + "-1004:Send intent failed/"
+        + "-1005:User cancelled/"
+        + "-1006:Unknown purchase response/"
+        + "-1007:Missing token/"
+        + "-1008:Unknown error/"
+        + "-1009:Subscriptions not available/"
+        + "-1010:Invalid consumption attempt").split("/");
 
-    // Connection to IAB service
-    logDebug("Starting in-app billing setup.");
-    mServiceConn = new ServiceConnection() {
-      @Override public void onServiceDisconnected(ComponentName name) {
-        logDebug("Billing service disconnected.");
-        mService = null;
+    if (code <= IABHELPER_ERROR_BASE) {
+      int index = IABHELPER_ERROR_BASE - code;
+      if (index >= 0 && index < iabhelper_msgs.length) {
+        return iabhelper_msgs[index];
+      } else {
+        return code + ":Unknown IAB Helper Error";
       }
-
-      @Override public void onServiceConnected(ComponentName name, IBinder service) {
-        if (mDisposed) return;
-        logDebug("Billing service connected.");
-        mService = BillingServiceFactory.create(service);
-        String packageName = mContext.getPackageName();
-        try {
-          logDebug("Checking for in-app billing 3 support.");
-
-          // check for in-app billing v3 support
-          int response = mService.isBillingSupported(3, "com.aptoide.trivialdrivesample", ITEM_TYPE_INAPP);
-          if (response != BILLING_RESPONSE_RESULT_OK) {
-            if (listener != null) {
-              listener.onIabSetupFinished(
-                  new IabResult(response, "Error checking for billing v3 support."));
-            }
-
-            // if in-app purchases aren't supported, neither are subscriptions
-            mSubscriptionsSupported = false;
-            mSubscriptionUpdateSupported = false;
-            return;
-          } else {
-            logDebug("In-app billing version 3 supported for " + packageName);
-          }
-
-          // Check for v5 subscriptions support. This is needed for
-          // getBuyIntentToReplaceSku which allows for subscription update
-          response = mService.isBillingSupported(5, packageName, ITEM_TYPE_SUBS);
-          if (response == BILLING_RESPONSE_RESULT_OK) {
-            logDebug("Subscription re-signup AVAILABLE.");
-            mSubscriptionUpdateSupported = true;
-          } else {
-            logDebug("Subscription re-signup not available.");
-            mSubscriptionUpdateSupported = false;
-          }
-
-          if (mSubscriptionUpdateSupported) {
-            mSubscriptionsSupported = true;
-          } else {
-            // check for v3 subscriptions support
-            response = mService.isBillingSupported(3, packageName, ITEM_TYPE_SUBS);
-            if (response == BILLING_RESPONSE_RESULT_OK) {
-              logDebug("Subscriptions AVAILABLE.");
-              mSubscriptionsSupported = true;
-            } else {
-              logDebug("Subscriptions NOT AVAILABLE. Response: " + response);
-              mSubscriptionsSupported = false;
-              mSubscriptionUpdateSupported = false;
-            }
-          }
-
-          mSetupDone = true;
-        } catch (RemoteException e) {
-          if (listener != null) {
-            listener.onIabSetupFinished(new IabResult(IABHELPER_REMOTE_EXCEPTION,
-                "RemoteException while setting up in-app billing."));
-          }
-          e.printStackTrace();
-          return;
-        }
-
-        if (listener != null) {
-          listener.onIabSetupFinished(
-              new IabResult(BILLING_RESPONSE_RESULT_OK, "Setup successful."));
-        }
-      }
-    };
-
-    Intent serviceIntent = new Intent(BuildConfig.IAB_BIND_ACTION);
-    serviceIntent.setPackage(BuildConfig.IAB_BIND_PACKAGE);
-    List<ResolveInfo> intentServices = mContext.getPackageManager()
-        .queryIntentServices(serviceIntent, 0);
-    if (intentServices != null && !intentServices.isEmpty()) {
-      // service available to handle that Intent
-        mContext.bindService(serviceIntent, mServiceConn, Context.BIND_AUTO_CREATE);
+    } else if (code < 0 || code >= iab_msgs.length) {
+      return code + ":Unknown";
     } else {
-      // no service available to handle that Intent
-      if (listener != null) {
-        listener.onIabSetupFinished(new IabResult(BILLING_RESPONSE_RESULT_BILLING_UNAVAILABLE,
-            "Billing service unavailable on device."));
-      }
+      return iab_msgs[code];
     }
   }
 
@@ -481,106 +416,115 @@ public class IabHelper {
     }
   }
 
+  private boolean isSuccess(int responseCode) {
+    return responseCode == BILLING_RESPONSE_RESULT_OK
+        || responseCode == BILLING_RESPONSE_RESULT_ITEM_ALREADY_OWNED;
+  }
+
   /**
-   * Handles an activity result that's part of the purchase flow in in-app billing. If you
-   * are calling {@link #launchPurchaseFlow}, then you must call this method from your
-   * Activity's {@link android.app.Activity@onActivityResult} method. This method
-   * MUST be called from the UI thread of the Activity.
+   * Starts the setup process. This will start up the setup process asynchronously.
+   * You will be notified through the listener when the setup process is complete.
+   * This method is safe to call from a UI thread.
    *
-   * @param requestCode The requestCode as you received it.
-   * @param resultCode The resultCode as you received it.
-   * @param data The data (Intent) as you received it.
-   *
-   * @return Returns true if the result was related to a purchase flow and was handled;
-   * false if the result was not related to a purchase, in which case you should
-   * handle it normally.
+   * @param listener The listener to notify when the setup process is complete.
    */
-  public boolean handleActivityResult(int requestCode, int resultCode, Intent data) {
-    IabResult result;
-    if (requestCode != mRequestCode) return false;
-
+  public void startSetup(final OnIabSetupFinishedListener listener) {
+    // If already set up, can't do it again.
     checkNotDisposed();
-    checkSetupDone("handleActivityResult");
-
-    // end of async purchase operation that started on launchPurchaseFlow
-    flagEndAsync();
-
-    if (data == null) {
-      logError("Null data in IAB activity result.");
-      result = new IabResult(IABHELPER_BAD_RESPONSE, "Null data in IAB result");
-      if (mPurchaseListener != null) mPurchaseListener.onIabPurchaseFinished(result, null);
-      return true;
+    if (mSetupDone) {
+      (new IllegalStateException("IAB helper is already set up.")).printStackTrace();
+      return;
     }
+    // Connection to IAB service
+    logDebug("Starting in-app billing setup.");
+    mServiceConn = new ServiceConnection() {
+      @Override public void onServiceConnected(ComponentName name, IBinder service) {
+        if (mDisposed) return;
+        logDebug("Billing service connected.");
+        mService = BillingServiceFactory.create(service);
+        String packageName = mContext.getPackageName();
+        try {
+          logDebug("Checking for in-app billing 3 support.");
 
-    int responseCode = getResponseCodeFromIntent(data);
-    String purchaseData = data.getStringExtra(RESPONSE_INAPP_PURCHASE_DATA);
-    String dataSignature = data.getStringExtra(RESPONSE_INAPP_SIGNATURE);
-    String id = data.getStringExtra(RESPONSE_INAPP_PURCHASE_ID);
+          // check for in-app billing v3 support
+          int response = mService.isBillingSupported(3, packageName, ITEM_TYPE_INAPP);
+          if (response != BILLING_RESPONSE_RESULT_OK) {
+            if (listener != null) {
+              listener.onIabSetupFinished(
+                  new IabResult(response, "Error checking for billing v3 support."));
+            }
 
-    if (resultCode == Activity.RESULT_OK && responseCode == BILLING_RESPONSE_RESULT_OK) {
-      logDebug("Successful resultcode from purchase activity.");
-      logDebug("Purchase data: " + purchaseData);
-      logDebug("Data signature: " + dataSignature);
-      logDebug("Extras: " + data.getExtras());
-      logDebug("Expected item type: " + mPurchasingItemType);
+            // if in-app purchases aren't supported, neither are subscriptions
+            mSubscriptionsSupported = false;
+            mSubscriptionUpdateSupported = false;
+            return;
+          } else {
+            logDebug("In-app billing version 3 supported for " + packageName);
+          }
 
-      if (purchaseData == null || dataSignature == null) {
-        logError("BUG: either purchaseData or dataSignature is null.");
-        logDebug("Extras: " + data.getExtras()
-            .toString());
-        result = new IabResult(IABHELPER_UNKNOWN_ERROR,
-            "IAB returned null purchaseData or dataSignature");
-        if (mPurchaseListener != null) mPurchaseListener.onIabPurchaseFinished(result, null);
-        return true;
-      }
+          // Check for v5 subscriptions support. This is needed for
+          // getBuyIntentToReplaceSku which allows for subscription update
+          response = mService.isBillingSupported(5, packageName, ITEM_TYPE_SUBS);
+          if (response == BILLING_RESPONSE_RESULT_OK) {
+            logDebug("Subscription re-signup AVAILABLE.");
+            mSubscriptionUpdateSupported = true;
+          } else {
+            logDebug("Subscription re-signup not available.");
+            mSubscriptionUpdateSupported = false;
+          }
 
-      Purchase purchase = null;
-      try {
-        purchase = new Purchase(id, mPurchasingItemType, purchaseData, dataSignature);
-        String sku = purchase.getSku();
+          if (mSubscriptionUpdateSupported) {
+            mSubscriptionsSupported = true;
+          } else {
+            // check for v3 subscriptions support
+            response = mService.isBillingSupported(3, packageName, ITEM_TYPE_SUBS);
+            if (response == BILLING_RESPONSE_RESULT_OK) {
+              logDebug("Subscriptions AVAILABLE.");
+              mSubscriptionsSupported = true;
+            } else {
+              logDebug("Subscriptions NOT AVAILABLE. Response: " + response);
+              mSubscriptionsSupported = false;
+              mSubscriptionUpdateSupported = false;
+            }
+          }
 
-        // Verify signature
-        if (!Security.verifyPurchase(mSignatureBase64, purchaseData, dataSignature)) {
-          logError("Purchase signature verification FAILED for sku " + sku);
-          result = new IabResult(IABHELPER_VERIFICATION_FAILED,
-              "Signature verification failed for sku " + sku);
-          if (mPurchaseListener != null) mPurchaseListener.onIabPurchaseFinished(result, purchase);
-          return true;
+          mSetupDone = true;
+        } catch (RemoteException e) {
+          if (listener != null) {
+            listener.onIabSetupFinished(new IabResult(IABHELPER_REMOTE_EXCEPTION,
+                "RemoteException while setting up in-app billing."));
+          }
+          e.printStackTrace();
+          return;
         }
-        logDebug("Purchase signature successfully verified.");
-      } catch (JSONException e) {
-        logError("Failed to parse purchase data.");
-        e.printStackTrace();
-        result = new IabResult(IABHELPER_BAD_RESPONSE, "Failed to parse purchase data.");
-        if (mPurchaseListener != null) mPurchaseListener.onIabPurchaseFinished(result, null);
-        return true;
+
+        if (listener != null) {
+          listener.onIabSetupFinished(
+              new IabResult(BILLING_RESPONSE_RESULT_OK, "Setup successful."));
+        }
       }
 
-      if (mPurchaseListener != null) {
-        mPurchaseListener.onIabPurchaseFinished(
-            new IabResult(BILLING_RESPONSE_RESULT_OK, "Success"), purchase);
+      @Override public void onServiceDisconnected(ComponentName name) {
+        logDebug("Billing service disconnected.");
+        mService = null;
+        mSetupDone = false;
       }
-    } else if (resultCode == Activity.RESULT_OK) {
-      // result code was OK, but in-app billing response was not OK.
-      logDebug("Result code was OK but in-app billing response was not OK: " + getResponseDesc(
-          responseCode));
-      if (mPurchaseListener != null) {
-        result = new IabResult(responseCode, "Problem purchashing item.");
-        mPurchaseListener.onIabPurchaseFinished(result, null);
-      }
-    } else if (resultCode == Activity.RESULT_CANCELED) {
-      logDebug("Purchase canceled - Response: " + getResponseDesc(responseCode));
-      result = new IabResult(IABHELPER_USER_CANCELLED, "User canceled.");
-      if (mPurchaseListener != null) mPurchaseListener.onIabPurchaseFinished(result, null);
+    };
+
+    Intent serviceIntent = new Intent(BuildConfig.IAB_BIND_ACTION);
+    serviceIntent.setPackage(BuildConfig.IAB_BIND_PACKAGE);
+    List<ResolveInfo> intentServices = mContext.getPackageManager()
+        .queryIntentServices(serviceIntent, 0);
+    if (intentServices != null && !intentServices.isEmpty()) {
+      // service available to handle that Intent
+      mContext.bindService(serviceIntent, mServiceConn, Context.BIND_AUTO_CREATE);
     } else {
-      logError("Purchase failed. Result code: "
-          + Integer.toString(resultCode)
-          + ". Response: "
-          + getResponseDesc(responseCode));
-      result = new IabResult(IABHELPER_UNKNOWN_PURCHASE_RESPONSE, "Unknown purchase response.");
-      if (mPurchaseListener != null) mPurchaseListener.onIabPurchaseFinished(result, null);
+      // no service available to handle that Intent
+      if (listener != null) {
+        listener.onIabSetupFinished(new IabResult(BILLING_RESPONSE_RESULT_BILLING_UNAVAILABLE,
+            "Billing service unavailable on device."));
+      }
     }
-    return true;
   }
 
   public Inventory queryInventory() throws IabException {
@@ -590,13 +534,15 @@ public class IabHelper {
   /**
    * Queries the inventory. This will query all owned items from the server, as well as
    * information on additional skus, if specified. This method may block or take long to execute.
-   * Do not call from a UI thread. For that, use the non-blocking version {@link #queryInventoryAsync}.
+   * Do not call from a UI thread. For that, use the non-blocking version {@link
+   * #queryInventoryAsync}.
    *
    * @param querySkuDetails if true, SKU details (price, description, etc) will be queried as well
    * as purchase information.
    * @param moreItemSkus additional PRODUCT skus to query information on, regardless of ownership.
    * Ignored if null or if querySkuDetails is false.
-   * @param moreSubsSkus additional SUBSCRIPTIONS skus to query information on, regardless of ownership.
+   * @param moreSubsSkus additional SUBSCRIPTIONS skus to query information on, regardless of
+   * ownership.
    * Ignored if null or if querySkuDetails is false.
    *
    * @throws IabException if a problem occurs while refreshing the inventory.
@@ -799,49 +745,115 @@ public class IabHelper {
    * @param purchases The list of PurchaseInfo objects representing the purchases to consume.
    * @param listener The listener to notify when the consumption operation finishes.
    */
-  public void consumeAsync(List<Purchase> purchases, OnConsumeMultiFinishedListener listener)
+  public void consumeAsync(List<Purchase> purchases, OnConsumeFinishedListener listener)
       throws IabAsyncInProgressException {
     checkNotDisposed();
     checkSetupDone("consume");
-    consumeAsyncInternal(purchases, null, listener);
+    consumeAsyncInternal(purchases, listener, null);
   }
 
   /**
-   * Returns a human-readable description for the given response code.
+   * Handles an activity result that's part of the purchase flow in in-app billing. If you
+   * are calling {@link #launchPurchaseFlow}, then you must call this method from your
+   * Activity's {@link android.app.Activity@onActivityResult} method. This method
+   * MUST be called from the UI thread of the Activity.
    *
-   * @param code The response code
+   * @param requestCode The requestCode as you received it.
+   * @param resultCode The resultCode as you received it.
+   * @param data The data (Intent) as you received it.
    *
-   * @return A human-readable string explaining the result code.
-   * It also includes the result code numerically.
+   * @return Returns true if the result was related to a purchase flow and was handled;
+   * false if the result was not related to a purchase, in which case you should
+   * handle it normally.
    */
-  public static String getResponseDesc(int code) {
-    String[] iab_msgs = ("0:OK/1:User Canceled/2:Unknown/"
-        + "3:Billing Unavailable/4:Item unavailable/"
-        + "5:Developer Error/6:Error/7:Item Already Owned/"
-        + "8:Item not owned").split("/");
-    String[] iabhelper_msgs = ("0:OK/-1001:Remote exception during initialization/"
-        + "-1002:Bad response received/"
-        + "-1003:Purchase signature verification failed/"
-        + "-1004:Send intent failed/"
-        + "-1005:User cancelled/"
-        + "-1006:Unknown purchase response/"
-        + "-1007:Missing token/"
-        + "-1008:Unknown error/"
-        + "-1009:Subscriptions not available/"
-        + "-1010:Invalid consumption attempt").split("/");
+  public boolean handleActivityResult(int requestCode, int resultCode, Intent data) {
+    IabResult result;
+    if (requestCode != mRequestCode) return false;
 
-    if (code <= IABHELPER_ERROR_BASE) {
-      int index = IABHELPER_ERROR_BASE - code;
-      if (index >= 0 && index < iabhelper_msgs.length) {
-        return iabhelper_msgs[index];
-      } else {
-        return String.valueOf(code) + ":Unknown IAB Helper Error";
-      }
-    } else if (code < 0 || code >= iab_msgs.length) {
-      return String.valueOf(code) + ":Unknown";
-    } else {
-      return iab_msgs[code];
+    checkNotDisposed();
+    checkSetupDone("handleActivityResult");
+
+    // end of async purchase operation that started on launchPurchaseFlow
+    flagEndAsync();
+
+    if (data == null) {
+      logError("Null data in IAB activity result.");
+      result = new IabResult(IABHELPER_BAD_RESPONSE, "Null data in IAB result");
+      if (mPurchaseListener != null) mPurchaseListener.onIabPurchaseFinished(result, null);
+      return true;
     }
+
+    int responseCode = getResponseCodeFromIntent(data);
+    String purchaseData = data.getStringExtra(RESPONSE_INAPP_PURCHASE_DATA);
+    String dataSignature = data.getStringExtra(RESPONSE_INAPP_SIGNATURE);
+    String id = data.getStringExtra(RESPONSE_INAPP_PURCHASE_ID);
+
+    if (resultCode == Activity.RESULT_OK && isSuccess(responseCode)) {
+      logDebug("Successful resultcode from purchase activity.");
+      logDebug("Purchase data: " + purchaseData);
+      logDebug("Data signature: " + dataSignature);
+      logDebug("Extras: " + data.getExtras());
+      logDebug("Expected item type: " + mPurchasingItemType);
+
+      if (purchaseData == null || dataSignature == null) {
+        logError("BUG: either purchaseData or dataSignature is null.");
+        logDebug("Extras: " + data.getExtras()
+            .toString());
+        result = new IabResult(IABHELPER_UNKNOWN_ERROR,
+            "IAB returned null purchaseData or dataSignature");
+        if (mPurchaseListener != null) mPurchaseListener.onIabPurchaseFinished(result, null);
+        return true;
+      }
+
+      Purchase purchase = null;
+      try {
+        purchase = new Purchase(id, mPurchasingItemType, purchaseData, dataSignature);
+        String sku = purchase.getSku();
+
+        // Verify signature
+        if (!Security.verifyPurchase(mSignatureBase64, purchaseData, dataSignature)) {
+          logError("Purchase signature verification FAILED for sku " + sku);
+          result = new IabResult(IABHELPER_VERIFICATION_FAILED,
+              "Signature verification failed for sku " + sku);
+          if (mPurchaseListener != null) mPurchaseListener.onIabPurchaseFinished(result, purchase);
+          return true;
+        }
+        logDebug("Purchase signature successfully verified.");
+      } catch (JSONException e) {
+        logError("Failed to parse purchase data.");
+        e.printStackTrace();
+        result = new IabResult(IABHELPER_BAD_RESPONSE, "Failed to parse purchase data.");
+        if (mPurchaseListener != null) mPurchaseListener.onIabPurchaseFinished(result, null);
+        return true;
+      }
+
+      if (mPurchaseListener != null && responseCode == BILLING_RESPONSE_RESULT_OK) {
+        mPurchaseListener.onIabPurchaseFinished(
+            new IabResult(BILLING_RESPONSE_RESULT_OK, "Success"), purchase);
+      } else if (mPurchaseListener != null
+          && responseCode == BILLING_RESPONSE_RESULT_ITEM_ALREADY_OWNED) {
+        mPurchaseListener.onIabPurchaseFinished(
+            new IabResult(BILLING_RESPONSE_RESULT_ITEM_ALREADY_OWNED, "Success"), purchase);
+      }
+    } else if (resultCode == Activity.RESULT_OK) {
+      // result code was OK, but in-app billing response was not OK.
+      logDebug("Result code was OK but in-app billing response was not OK: " + getResponseDesc(
+          responseCode));
+      if (mPurchaseListener != null) {
+        result = new IabResult(responseCode, "Problem purchashing item.");
+        mPurchaseListener.onIabPurchaseFinished(result, null);
+      }
+    } else if (resultCode == Activity.RESULT_CANCELED) {
+      logDebug("Purchase canceled - Response: " + getResponseDesc(responseCode));
+      result = new IabResult(IABHELPER_USER_CANCELLED, "User canceled.");
+      if (mPurchaseListener != null) mPurchaseListener.onIabPurchaseFinished(result, null);
+    } else {
+      logError("Purchase failed. Result code: " + resultCode + ". Response: " + getResponseDesc(
+          responseCode));
+      result = new IabResult(IABHELPER_UNKNOWN_PURCHASE_RESPONSE, "Unknown purchase response.");
+      if (mPurchaseListener != null) mPurchaseListener.onIabPurchaseFinished(result, null);
+    }
+    return true;
   }
 
   // Checks that setup was done; if not, throws an exception.
@@ -946,7 +958,7 @@ public class IabHelper {
           mService.getPurchases(3, mContext.getPackageName(), itemType, continueToken);
 
       int response = getResponseCodeFromBundle(ownedItems);
-      logDebug("Owned items response: " + String.valueOf(response));
+      logDebug("Owned items response: " + response);
       if (response != BILLING_RESPONSE_RESULT_OK) {
         logDebug("getPurchases() failed: " + getResponseDesc(response));
         return response;
@@ -963,8 +975,7 @@ public class IabHelper {
           ownedItems.getStringArrayList(RESPONSE_INAPP_PURCHASE_DATA_LIST);
       ArrayList<String> signatureList =
           ownedItems.getStringArrayList(RESPONSE_INAPP_SIGNATURE_LIST);
-      ArrayList<String> idsList =
-          ownedItems.getStringArrayList(RESPONSE_INAPP_PURCHASE_ID_LIST);
+      ArrayList<String> idsList = ownedItems.getStringArrayList(RESPONSE_INAPP_PURCHASE_ID_LIST);
 
       for (int i = 0; i < purchaseDataList.size(); ++i) {
         String purchaseData = purchaseDataList.get(i);
