@@ -82,6 +82,10 @@ public class MainActivity extends Activity
   static final String TAG = "TrivialDrive";
   // How many units (1/4 tank is our unit) fill in the tank.
   static final int TANK_MAX = 4;
+  // (arbitrary) request code for the purchase flow
+  static final int RC_REQUEST = 10001;
+  static final int RC_DONATE = 10002;
+  static final int RC_ONE_STEP = 10003;
   // Graphics for the gas gauge
   static int[] TANK_RES_IDS = {
       R.drawable.gas0, R.drawable.gas1, R.drawable.gas2, R.drawable.gas3, R.drawable.gas4
@@ -104,12 +108,33 @@ public class MainActivity extends Activity
   IabHelper mHelper;
   // Provides purchase notification while this app is running
   IabBroadcastReceiver mBroadcastReceiver;
+  // Called when consumption is complete
+  IabHelper.OnConsumeFinishedListener mConsumeFinishedListener =
+      new IabHelper.OnConsumeFinishedListener() {
+        public void onConsumeFinished(Purchase purchase, IabResult result) {
+          Log.d(TAG, "Consumption finished. Purchase: " + purchase + ", result: " + result);
 
-  // (arbitrary) request code for the purchase flow
-  static final int RC_REQUEST = 10001;
-  static final int RC_DONATE = 10002;
-  static final int RC_ONE_STEP = 10003;
+          // if we were disposed of in the meantime, quit.
+          if (mHelper == null) return;
 
+          // We know this is the "gas" sku because it's the only one we consume,
+          // so we don't check which sku was consumed. If you have more than one
+          // sku, you probably should check...
+          if (result.isSuccess()) {
+            // successfully consumed, so we apply the effects of the item in our
+            // game world's logic, which in our case means filling the gas tank a bit
+            Log.d(TAG, "Consumption successful. Provisioning.");
+            mTank = mTank == TANK_MAX ? TANK_MAX : mTank + 1;
+            saveData();
+            alert("You filled 1/4 tank. Your tank is now " + mTank + "/4 full!");
+          } else {
+            complain("Error while consuming: " + result);
+          }
+          updateUi();
+          setWaitScreen(false);
+          Log.d(TAG, "End consumption flow.");
+        }
+      };
   // Listener that's called when we finish querying the items and subscriptions we own
   IabHelper.QueryInventoryFinishedListener mGotInventoryListener =
       new IabHelper.QueryInventoryFinishedListener() {
@@ -139,24 +164,26 @@ public class MainActivity extends Activity
           Log.d(TAG, "User is " + (mIsPremium ? "PREMIUM" : "NOT PREMIUM"));
 
           // First find out which subscription is auto renewing
-          Purchase gasMonthly = inventory.getPurchase(Skus.SKU_INFINITE_GAS_MONTHLY_ID);
-          Purchase gasYearly = inventory.getPurchase(Skus.SKU_INFINITE_GAS_YEARLY_ID);
-          if (gasMonthly != null && gasMonthly.isAutoRenewing()) {
+          Purchase gasWeekly = inventory.getPurchase(Skus.SKU_INFINITE_GAS_WEEKLY_ID);
+          // Purchase gasMonthly = inventory.getPurchase(Skus.SKU_INFINITE_GAS_MONTHLY_ID);
+          // Purchase gasYearly = inventory.getPurchase(Skus.SKU_INFINITE_GAS_YEARLY_ID);
+          if (gasWeekly != null && gasWeekly.isAutoRenewing()) {
+            mInfiniteGasSku = Skus.SKU_INFINITE_GAS_WEEKLY_ID;
+            mAutoRenewEnabled = true;
+          } /*else if (gasMontly != null && gasMonthly.isAutoRenewing()) {
             mInfiniteGasSku = Skus.SKU_INFINITE_GAS_MONTHLY_ID;
             mAutoRenewEnabled = true;
           } else if (gasYearly != null && gasYearly.isAutoRenewing()) {
             mInfiniteGasSku = Skus.SKU_INFINITE_GAS_YEARLY_ID;
             mAutoRenewEnabled = true;
-          } else {
+          } */ else {
             mInfiniteGasSku = "";
             mAutoRenewEnabled = false;
           }
 
           // The user is subscribed if either subscription exists, even if neither is auto
           // renewing
-          mSubscribedToInfiniteGas = (gasMonthly != null && verifyDeveloperPayload(gasMonthly)) || (
-              gasYearly != null
-                  && verifyDeveloperPayload(gasYearly));
+          mSubscribedToInfiniteGas = (gasWeekly != null && verifyDeveloperPayload(gasWeekly));
           Log.d(TAG, "User "
               + (mSubscribedToInfiniteGas ? "HAS" : "DOES NOT HAVE")
               + " infinite gas subscription.");
@@ -180,7 +207,6 @@ public class MainActivity extends Activity
           Log.d(TAG, "Initial inventory query finished; enabling main UI.");
         }
       };
-
   // Callback for when a purchase is finished
   IabHelper.OnIabPurchaseFinishedListener mPurchaseFinishedListener =
       new IabHelper.OnIabPurchaseFinishedListener() {
@@ -230,6 +256,7 @@ public class MainActivity extends Activity
               updateUi();
               setWaitScreen(false);
               break;
+            case Skus.SKU_INFINITE_GAS_WEEKLY_ID:
             case Skus.SKU_INFINITE_GAS_MONTHLY_ID:
             case Skus.SKU_INFINITE_GAS_YEARLY_ID:
               // bought the infinite gas subscription
@@ -243,34 +270,6 @@ public class MainActivity extends Activity
               setWaitScreen(false);
               break;
           }
-        }
-      };
-
-  // Called when consumption is complete
-  IabHelper.OnConsumeFinishedListener mConsumeFinishedListener =
-      new IabHelper.OnConsumeFinishedListener() {
-        public void onConsumeFinished(Purchase purchase, IabResult result) {
-          Log.d(TAG, "Consumption finished. Purchase: " + purchase + ", result: " + result);
-
-          // if we were disposed of in the meantime, quit.
-          if (mHelper == null) return;
-
-          // We know this is the "gas" sku because it's the only one we consume,
-          // so we don't check which sku was consumed. If you have more than one
-          // sku, you probably should check...
-          if (result.isSuccess()) {
-            // successfully consumed, so we apply the effects of the item in our
-            // game world's logic, which in our case means filling the gas tank a bit
-            Log.d(TAG, "Consumption successful. Provisioning.");
-            mTank = mTank == TANK_MAX ? TANK_MAX : mTank + 1;
-            saveData();
-            alert("You filled 1/4 tank. Your tank is now " + mTank + "/4 full!");
-          } else {
-            complain("Error while consuming: " + result);
-          }
-          updateUi();
-          setWaitScreen(false);
-          Log.d(TAG, "End consumption flow.");
         }
       };
 
@@ -443,21 +442,7 @@ public class MainActivity extends Activity
   // User clicked the "Buy Gas" button
   public void onBuyGasButtonClicked(View arg0) {
     Log.d(TAG, "Buy gas button clicked.");
-
-    if (mSubscribedToInfiniteGas) {
-      complain("No need! You're subscribed to infinite gas. Isn't that awesome?");
-      return;
-    }
-
-    if (mTank >= TANK_MAX) {
-      complain("Your tank is full. Drive around a bit!");
-      return;
-    }
-
-    // launch the gas purchase UI flow.
-    // We will be notified of completion via mPurchaseFinishedListener
-    setWaitScreen(true);
-    Log.d(TAG, "Launching purchase flow for gas.");
+    onBuySetup();
 
     /* TODO: for security, generate your payload here for verification. See the comments on
      *        verifyDeveloperPayload() for more info. Since this is a SAMPLE, we just use
@@ -516,21 +501,14 @@ public class MainActivity extends Activity
   // "Buy oil" button clicked. Explain to user, then start purchase
   // flow for subscription.
   public void onBuyOilButtonClicked(View arg0) {
-    if (mSubscribedToInfiniteGas) {
-      complain("No need! You're subscribed to infinite gas. Isn't that awesome?");
-      return;
-    }
+    onBuySetup();
 
-    if (mTank >= TANK_MAX) {
-      complain("Your tank is full. Drive around a bit!");
-      return;
-    }
-
-    setWaitScreen(true);
-    String url =
-        "https://apichain-dev.blockchainds.com/transaction/inapp?value=5&currency=USD&domain=com.appcoins.trivialdrivesample.test";
+    String url = BuildConfig.BACKEND_HOST
+        + "transaction/inapp?value=5&currency=USD&domain=com"
+        + getPackageName();
     Intent i = new Intent(Intent.ACTION_VIEW);
     i.setData(Uri.parse(url));
+    i.setPackage(BuildConfig.IAB_BIND_PACKAGE);
 
     PendingIntent intent =
         PendingIntent.getActivity(getApplicationContext(), 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -544,20 +522,7 @@ public class MainActivity extends Activity
   // "Subscribe to infinite gas" button clicked. Explain to user, then start purchase
   // flow for subscription.
   public void onBuyAntiFreezeButtonClicked(View arg0) {
-    if (mSubscribedToInfiniteGas) {
-      complain("No need! You're subscribed to infinite gas. Isn't that awesome?");
-      return;
-    }
-
-    if (mTank >= TANK_MAX) {
-      complain("Your tank is full. Drive around a bit!");
-      return;
-    }
-
-    // launch the gas purchase UI flow.
-    // We will be notified of completion via mPurchaseFinishedListener
-    setWaitScreen(true);
-    Log.d(TAG, "Launching purchase flow for gas.");
+    onBuySetup();
 
     /* TODO: for security, generate your payload here for verification. See the comments on
      *        verifyDeveloperPayload() for more info. Since this is a SAMPLE, we just use
@@ -587,6 +552,48 @@ public class MainActivity extends Activity
       alert("Vroooom, you drove a few miles.");
       updateUi();
       Log.d(TAG, "Vrooom. Tank is now " + mTank);
+    }
+  }
+
+  //Subs managed
+  public void onBuyGasReserveButtonClicked(View view) {
+    onBuySetup();
+
+    /* TODO: for security, generate your payload here for verification. See the comments on
+     *        verifyDeveloperPayload() for more info. Since this is a SAMPLE, we just use
+     *        an empty string, but on a production app you should carefully generate this.
+     * TODO: On this payload the developer's wallet address must be added, or the purchase does
+     * NOT work.
+     */
+    String payload = PayloadHelper.buildIntentPayload("orderId=" + System.currentTimeMillis(),
+        "developer payload: gas_reserve", null);
+    try {
+      mHelper.launchSubscriptionPurchaseFlow(this, Skus.SKU_INFINITE_GAS_WEEKLY_ID, RC_REQUEST,
+          mPurchaseFinishedListener, payload);
+    } catch (IabHelper.IabAsyncInProgressException e) {
+      complain("Error launching purchase flow. Another async operation in progress.");
+      setWaitScreen(false);
+    }
+  }
+
+  //Subs unmanaged
+  public void onBuyOilReserveButtonClicked(View view) {
+    onBuySetup();
+
+    //TODO Change for the correct endpoint for subs
+    String url = BuildConfig.BACKEND_HOST
+        + "transaction/inapp?value=5&currency=USD&domain=com"
+        + getPackageName();
+    Intent i = new Intent(Intent.ACTION_VIEW);
+    i.setData(Uri.parse(url));
+    i.setPackage(BuildConfig.IAB_BIND_PACKAGE);
+
+    PendingIntent intent =
+        PendingIntent.getActivity(getApplicationContext(), 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
+    try {
+      startIntentSenderForResult(intent.getIntentSender(), RC_ONE_STEP, new Intent(), 0, 0, 0);
+    } catch (IntentSender.SendIntentException e) {
+      e.printStackTrace();
     }
   }
 
@@ -671,5 +678,22 @@ public class MainActivity extends Activity
      */
 
     return true;
+  }
+
+  private void onBuySetup() {
+    if (mSubscribedToInfiniteGas) {
+      complain("No need! You're subscribed to infinite gas. Isn't that awesome?");
+      return;
+    }
+
+    if (mTank >= TANK_MAX) {
+      complain("Your tank is full. Drive around a bit!");
+      return;
+    }
+
+    // launch the gas purchase UI flow.
+    // We will be notified of completion via mPurchaseFinishedListener
+    setWaitScreen(true);
+    Log.d(TAG, "Launching purchase flow for gas.");
   }
 }

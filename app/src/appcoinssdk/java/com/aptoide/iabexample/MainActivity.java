@@ -163,10 +163,15 @@ public class MainActivity extends Activity
       Log.d(TAG, "User is " + (mIsPremium ? "PREMIUM" : "NOT PREMIUM"));
 
       // First find out which subscription is auto renewing
-      List<Purchase> gasMonthlyList = getSku(purchases, Skus.SKU_INFINITE_GAS_MONTHLY_ID);
-      List<Purchase> gasYearlyList = getSku(purchases, Skus.SKU_INFINITE_GAS_YEARLY_ID);
+      List<Purchase> gasWeeklyList = getSku(purchases, Skus.SKU_INFINITE_GAS_WEEKLY_ID);
+      //List<Purchase> gasMonthlyList = getSku(purchases, Skus.SKU_INFINITE_GAS_MONTHLY_ID);
+      //List<Purchase> gasYearlyList = getSku(purchases, Skus.SKU_INFINITE_GAS_YEARLY_ID);
 
-      Purchase gasMonthly = null;
+      Purchase gasWeekly = null;
+      if (gasWeeklyList.size() > 0) {
+        gasWeekly = gasWeeklyList.get(0);
+      }
+     /* Purchase gasMonthly = null;
       if (gasMonthlyList.size() > 0) {
         gasMonthly = gasMonthlyList.get(0);
       }
@@ -174,22 +179,24 @@ public class MainActivity extends Activity
       Purchase gasYearly = null;
       if (gasYearlyList.size() > 0) {
         gasYearly = gasYearlyList.get(0);
-      }
-
-      if (gasMonthly != null && gasMonthly.isAutoRenewing()) {
+      }*/
+      if (gasWeekly != null && gasWeekly.isAutoRenewing()) {
+        mInfiniteGasSku = Skus.SKU_INFINITE_GAS_MONTHLY_ID;
+        mAutoRenewEnabled = true;
+      } /*else if (gasMonthly != null && gasMonthly.isAutoRenewing()) {
         mInfiniteGasSku = Skus.SKU_INFINITE_GAS_MONTHLY_ID;
         mAutoRenewEnabled = true;
       } else if (gasYearly != null && gasYearly.isAutoRenewing()) {
         mInfiniteGasSku = Skus.SKU_INFINITE_GAS_YEARLY_ID;
         mAutoRenewEnabled = true;
-      } else {
+      } */ else {
         mInfiniteGasSku = "";
         mAutoRenewEnabled = false;
       }
 
       // The user is subscribed if either subscription exists, even if neither is auto
       // renewing
-      mSubscribedToInfiniteGas = (gasMonthly != null) || gasYearly != null;
+      mSubscribedToInfiniteGas = gasWeekly != null;
 
       Log.d(TAG, "User "
           + (mSubscribedToInfiniteGas ? "HAS" : "DOES NOT HAVE")
@@ -504,21 +511,7 @@ public class MainActivity extends Activity
   }
 
   public void onBuyGasButtonClicked(View arg0) {
-    Log.d(TAG, "Buy gas button clicked.");
-
-    if (mSubscribedToInfiniteGas) {
-      complain("No need! You're subscribed to infinite gas. Isn't that awesome?");
-      return;
-    }
-
-    if (mTank >= TANK_MAX) {
-      complain("Your tank is full. Drive around a bit!");
-      return;
-    }
-
-    setWaitScreen(true);
-
-    Log.d(TAG, "Launching purchase flow for gas.");
+    onBuySetup();
 
     BillingFlowParams billingFlowParams =
         new BillingFlowParams(Skus.SKU_GAS_ID, SkuType.inapp.toString(),
@@ -546,7 +539,7 @@ public class MainActivity extends Activity
   }
 
   public void onBuyOilButtonClicked(View arg0) {
-    setWaitScreen(true);
+    onBuySetup();
 
     String url =
         BuildConfig.BACKEND_HOST + "transaction/inapp?product=gas&domain=" + getPackageName();
@@ -564,7 +557,7 @@ public class MainActivity extends Activity
   }
 
   public void onBuyAntiFreezeButtonClicked(View arg0) {
-    setWaitScreen(true);
+    onBuySetup();
 
     String url = BuildConfig.BACKEND_HOST
         + "transaction/inapp?value=0.25&currency=EUR"
@@ -579,6 +572,52 @@ public class MainActivity extends Activity
     try {
       startIntentSenderForResult(intent.getIntentSender(), RC_ONE_STEP, new Intent(), 0, 0, 0);
     } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+  //Subs managed
+  public void onBuyGasReserveButtonClicked(View view) {
+    onBuySetup();
+
+    BillingFlowParams billingFlowParams =
+        new BillingFlowParams(Skus.SKU_INFINITE_GAS_WEEKLY_ID, SkuType.subs.toString(),
+            "orderId=" + System.currentTimeMillis(), null, null);
+
+    if (!cab.isReady()) {
+      startConnection();
+    }
+
+    ResponseListener responseListener = responseCode -> {
+      if (responseCode != ResponseCode.OK.getValue()) {
+        setWaitScreen(false);
+        complain("Error purchasing with response code : " + responseCode);
+      }
+    };
+
+    Activity activity = this;
+    Thread thread = new Thread(
+        () -> responseListener.onResponse(cab.launchBillingFlow(activity, billingFlowParams)));
+    thread.start();
+  }
+
+  //Subs unmanaged
+  public void onBuyOilReserveButtonClicked(View view) {
+    onBuySetup();
+
+    //TODO Change for the correct endpoint for subs
+    String url = BuildConfig.BACKEND_HOST
+        + "transaction/inapp?value=5&currency=USD&domain=com"
+        + getPackageName();
+    Intent i = new Intent(Intent.ACTION_VIEW);
+    i.setData(Uri.parse(url));
+    i.setPackage(BuildConfig.IAB_BIND_PACKAGE);
+
+    PendingIntent intent =
+        PendingIntent.getActivity(getApplicationContext(), 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
+    try {
+      startIntentSenderForResult(intent.getIntentSender(), RC_ONE_STEP, new Intent(), 0, 0, 0);
+    } catch (IntentSender.SendIntentException e) {
       e.printStackTrace();
     }
   }
@@ -616,6 +655,23 @@ public class MainActivity extends Activity
       setWaitScreen(false);
       complain("Error purchasing with response code : " + response);
     }
+  }
+
+  private void onBuySetup() {
+    if (mSubscribedToInfiniteGas) {
+      complain("No need! You're subscribed to infinite gas. Isn't that awesome?");
+      return;
+    }
+
+    if (mTank >= TANK_MAX) {
+      complain("Your tank is full. Drive around a bit!");
+      return;
+    }
+
+    // launch the gas purchase UI flow.
+    // We will be notified of completion via mPurchaseFinishedListener
+    setWaitScreen(true);
+    Log.d(TAG, "Launching purchase flow for gas.");
   }
 
   public interface ResponseListener {
