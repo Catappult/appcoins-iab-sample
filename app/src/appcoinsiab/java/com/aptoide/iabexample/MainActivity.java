@@ -203,44 +203,45 @@ public class MainActivity extends Activity
 
           Log.d(TAG, "Purchase successful.");
 
-          if (purchase.getSku()
-              .equals(Skus.SKU_GAS_ID)) {
-            // bought 1/4 tank of gas. So consume it.
-            Log.d(TAG, "Purchase is gas. Starting gas consumption.");
-            try {
-              if (result.isItemAlreadyOwened()) {
-                List<Purchase> purchases = new ArrayList<>();
-                purchases.add(purchase);
-                mHelper.consumeAsync(purchases, mConsumeFinishedListener);
-                Log.d(TAG, "Consumed previously bought gas");
-              } else {
-                mHelper.consumeAsync(purchase, mConsumeFinishedListener);
+          switch (purchase.getSku()) {
+            case Skus.SKU_GAS_ID:
+              // bought 1/4 tank of gas. So consume it.
+              Log.d(TAG, "Purchase is gas. Starting gas consumption.");
+              try {
+                if (result.isItemAlreadyOwened()) {
+                  List<Purchase> purchases = new ArrayList<>();
+                  purchases.add(purchase);
+                  mHelper.consumeAsync(purchases, mConsumeFinishedListener);
+                  Log.d(TAG, "Consumed previously bought gas");
+                } else {
+                  mHelper.consumeAsync(purchase, mConsumeFinishedListener);
+                }
+              } catch (IabHelper.IabAsyncInProgressException e) {
+                complain("Error consuming gas. Another async operation in progress.");
+                setWaitScreen(false);
+                return;
               }
-            } catch (IabHelper.IabAsyncInProgressException e) {
-              complain("Error consuming gas. Another async operation in progress.");
+              break;
+            case Skus.SKU_PREMIUM_ID:
+              // bought the premium upgrade!
+              Log.d(TAG, "Purchase is premium upgrade. Congratulating user.");
+              alert("Thank you for upgrading to premium!");
+              mIsPremium = true;
+              updateUi();
               setWaitScreen(false);
-              return;
-            }
-          } else if (purchase.getSku()
-              .equals(Skus.SKU_PREMIUM_ID)) {
-            // bought the premium upgrade!
-            Log.d(TAG, "Purchase is premium upgrade. Congratulating user.");
-            alert("Thank you for upgrading to premium!");
-            mIsPremium = true;
-            updateUi();
-            setWaitScreen(false);
-          } else if (purchase.getSku()
-              .equals(Skus.SKU_INFINITE_GAS_MONTHLY_ID) || purchase.getSku()
-              .equals(Skus.SKU_INFINITE_GAS_YEARLY_ID)) {
-            // bought the infinite gas subscription
-            Log.d(TAG, "Infinite gas subscription purchased.");
-            alert("Thank you for subscribing to infinite gas!");
-            mSubscribedToInfiniteGas = true;
-            mAutoRenewEnabled = purchase.isAutoRenewing();
-            mInfiniteGasSku = purchase.getSku();
-            mTank = TANK_MAX;
-            updateUi();
-            setWaitScreen(false);
+              break;
+            case Skus.SKU_INFINITE_GAS_MONTHLY_ID:
+            case Skus.SKU_INFINITE_GAS_YEARLY_ID:
+              // bought the infinite gas subscription
+              Log.d(TAG, "Infinite gas subscription purchased.");
+              alert("Thank you for subscribing to infinite gas!");
+              mSubscribedToInfiniteGas = true;
+              mAutoRenewEnabled = purchase.isAutoRenewing();
+              mInfiniteGasSku = purchase.getSku();
+              mTank = TANK_MAX;
+              updateUi();
+              setWaitScreen(false);
+              break;
           }
         }
       };

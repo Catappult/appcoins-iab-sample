@@ -417,7 +417,7 @@ public class MainActivity extends Activity
         mSelectedSubscriptionPeriod = mFirstChoiceSku;
       }
 
-      List<String> oldSkus = null;
+      List<String> oldSkus;
       if (!TextUtils.isEmpty(mInfiniteGasSku) && !mInfiniteGasSku.equals(
           mSelectedSubscriptionPeriod)) {
         // The user currently has a valid subscription, any purchase action is going to
@@ -552,6 +552,7 @@ public class MainActivity extends Activity
         BuildConfig.BACKEND_HOST + "transaction/inapp?product=gas&domain=" + getPackageName();
     Intent i = new Intent(Intent.ACTION_VIEW);
     i.setData(Uri.parse(url));
+    i.setPackage(BuildConfig.IAB_BIND_PACKAGE);
 
     PendingIntent intent =
         PendingIntent.getActivity(getApplicationContext(), 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -571,7 +572,7 @@ public class MainActivity extends Activity
         + getPackageName();
     Intent i = new Intent(Intent.ACTION_VIEW);
     i.setData(Uri.parse(url));
-    i.setPackage("com.appcoins.wallet");
+    i.setPackage(BuildConfig.IAB_BIND_PACKAGE);
 
     PendingIntent intent =
         PendingIntent.getActivity(getApplicationContext(), 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
