@@ -576,27 +576,6 @@ public class MainActivity extends Activity
     }
   }
 
-  //Subs unmanaged
-  public void onBuyOilReserveButtonClicked(View view) {
-    onBuySetup();
-
-    //TODO Change for the correct endpoint for subs
-    String url = BuildConfig.BACKEND_HOST
-        + "transaction/inapp?value=5&currency=USD&domain=com"
-        + getPackageName();
-    Intent i = new Intent(Intent.ACTION_VIEW);
-    i.setData(Uri.parse(url));
-    i.setPackage(BuildConfig.IAB_BIND_PACKAGE);
-
-    PendingIntent intent =
-        PendingIntent.getActivity(getApplicationContext(), 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
-    try {
-      startIntentSenderForResult(intent.getIntentSender(), RC_ONE_STEP, new Intent(), 0, 0, 0);
-    } catch (IntentSender.SendIntentException e) {
-      e.printStackTrace();
-    }
-  }
-
   // updates UI to reflect model
   public void updateUi() {
     // update the car color to reflect premium status or lack thereof

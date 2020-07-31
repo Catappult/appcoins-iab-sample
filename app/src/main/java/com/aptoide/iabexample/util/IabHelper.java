@@ -89,7 +89,7 @@ public class IabHelper {
   public static final String RESPONSE_INAPP_PURCHASE_ID = "INAPP_PURCHASE_ID";
   // Item types
   public static final String ITEM_TYPE_INAPP = "inapp";
-  public static final String ITEM_TYPE_SUBS = "subs";
+  public static final String ITEM_TYPE_SUBS = "inapp_subscription";
   // some fields on the getSkuDetails response bundle
   public static final String GET_SKU_DETAILS_ITEM_LIST = "ITEM_ID_LIST";
   public static final String GET_SKU_DETAILS_ITEM_TYPE_LIST = "ITEM_TYPE_LIST";

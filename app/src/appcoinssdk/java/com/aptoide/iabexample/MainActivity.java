@@ -32,6 +32,7 @@ import com.appcoins.sdk.billing.listeners.SkuDetailsResponseListener;
 import com.appcoins.sdk.billing.types.SkuType;
 import com.aptoide.iabexample.util.GenericPaymentIntentBuilder;
 import com.aptoide.iabexample.util.IabBroadcastReceiver;
+import com.aptoide.iabexample.util.IabHelper;
 import com.aptoide.iabexample.util.PurchaseService;
 import com.aptoide.iabexample.util.Skus;
 import com.google.gson.Gson;
@@ -581,7 +582,7 @@ public class MainActivity extends Activity
     onBuySetup();
 
     BillingFlowParams billingFlowParams =
-        new BillingFlowParams(Skus.SKU_INFINITE_GAS_WEEKLY_ID, SkuType.subs.toString(),
+        new BillingFlowParams(Skus.SKU_INFINITE_GAS_WEEKLY_ID, IabHelper.ITEM_TYPE_SUBS,
             "orderId=" + System.currentTimeMillis(), null, null);
 
     if (!cab.isReady()) {
@@ -599,27 +600,6 @@ public class MainActivity extends Activity
     Thread thread = new Thread(
         () -> responseListener.onResponse(cab.launchBillingFlow(activity, billingFlowParams)));
     thread.start();
-  }
-
-  //Subs unmanaged
-  public void onBuyOilReserveButtonClicked(View view) {
-    onBuySetup();
-
-    //TODO Change for the correct endpoint for subs
-    String url = BuildConfig.BACKEND_HOST
-        + "transaction/inapp?value=5&currency=USD&domain=com"
-        + getPackageName();
-    Intent i = new Intent(Intent.ACTION_VIEW);
-    i.setData(Uri.parse(url));
-    i.setPackage(BuildConfig.IAB_BIND_PACKAGE);
-
-    PendingIntent intent =
-        PendingIntent.getActivity(getApplicationContext(), 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
-    try {
-      startIntentSenderForResult(intent.getIntentSender(), RC_ONE_STEP, new Intent(), 0, 0, 0);
-    } catch (IntentSender.SendIntentException e) {
-      e.printStackTrace();
-    }
   }
 
   public void onDonateButtonClicked(View arg0) {

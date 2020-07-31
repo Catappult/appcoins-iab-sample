@@ -15,13 +15,14 @@ public class Application extends android.app.Application {
 
   @Override public void onCreate() {
     super.onCreate();
-    adsSdk = new AppCoinsAdsBuilder().withDebug(BuildConfig.TEST_NETWORK)
+    //Removed until new SDK version
+    /*adsSdk = new AppCoinsAdsBuilder().withDebug(BuildConfig.TEST_NETWORK)
         .createAdvertisementSdk(this);
     try {
       adsSdk.init(this);
     } catch (PackageManager.NameNotFoundException e) {
       e.printStackTrace();
-    }
+    }*/
   }
 
   public String getDeveloperAddress() {

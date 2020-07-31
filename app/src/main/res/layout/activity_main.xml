@@ -134,13 +134,6 @@
             android:onClick="onBuyGasReserveButtonClicked"
             android:src="@drawable/buy_gas"
             />
-        <ImageView
-            android:id="@+id/buy_oil_reserve"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="onBuyOilReserveButtonClicked"
-            android:src="@drawable/buy_oil"
-            />
       </LinearLayout>
     </LinearLayout>
   </FrameLayout>
