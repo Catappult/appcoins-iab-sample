@@ -416,7 +416,7 @@ public class MainActivity extends Activity
       try {
         mHelper.launchPurchaseFlow(this, mSelectedSubscriptionPeriod, IabHelper.ITEM_TYPE_SUBS,
             oldSkus, RC_REQUEST, mPurchaseFinishedListener, payload);
-      } catch (IabHelper.IabAsyncInProgressException e) {
+      } catch (IabHelper.IabAsyncInProgressException | IllegalStateException e) {
         complain("Error launching purchase flow. Another async operation in progress.");
         setWaitScreen(false);
       }      // Reset the dialog options
@@ -455,7 +455,7 @@ public class MainActivity extends Activity
     try {
       mHelper.launchPurchaseFlow(this, Skus.SKU_GAS_ID, RC_REQUEST, mPurchaseFinishedListener,
           payload);
-    } catch (IabHelper.IabAsyncInProgressException e) {
+    } catch (IabHelper.IabAsyncInProgressException | IllegalStateException e) {
       complain("Error launching purchase flow. Another async operation in progress.");
       setWaitScreen(false);
     }
@@ -570,7 +570,7 @@ public class MainActivity extends Activity
     try {
       mHelper.launchSubscriptionPurchaseFlow(this, Skus.SKU_INFINITE_GAS_WEEKLY_ID, RC_REQUEST,
           mPurchaseFinishedListener, payload);
-    } catch (IabHelper.IabAsyncInProgressException e) {
+    } catch (IabHelper.IabAsyncInProgressException | IllegalStateException e) {
       complain("Error launching purchase flow. Another async operation in progress.");
       setWaitScreen(false);
     }
