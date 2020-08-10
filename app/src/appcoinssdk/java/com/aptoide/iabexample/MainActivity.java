@@ -13,7 +13,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -32,13 +31,16 @@ import com.appcoins.sdk.billing.listeners.SkuDetailsResponseListener;
 import com.appcoins.sdk.billing.types.SkuType;
 import com.aptoide.iabexample.util.GenericPaymentIntentBuilder;
 import com.aptoide.iabexample.util.IabBroadcastReceiver;
-import com.aptoide.iabexample.util.IabHelper;
 import com.aptoide.iabexample.util.PurchaseService;
 import com.aptoide.iabexample.util.Skus;
 import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+
+import static com.aptoide.iabexample.util.IabHelper.ITEM_TYPE_SUBS;
+import static com.aptoide.iabexample.util.IabHelper.ONE_WEEK;
+import static com.aptoide.iabexample.util.IabHelper.TWO_MINUTES;
 
 /**
  * Example game using in-app billing version 4.
@@ -108,20 +110,18 @@ public class MainActivity extends Activity
   // Does the user have the premium upgrade?
   boolean mIsPremium = false;
   // Does the user have an active subscription to the infinite gas plan?
-  boolean mSubscribedToInfiniteGas = false;
+  boolean mSubscribedToGasReserve = false;
   // Will the subscription auto-renew?
   boolean mAutoRenewEnabled = false;
-  // Tracks the currently owned infinite gas SKU, and the options in the Manage dialog
-  String mInfiniteGasSku = "";
-  String mFirstChoiceSku = "";
-  String mSecondChoiceSku = "";
-  // Used to select between purchasing gas on a monthly or yearly basis
+  long subscriptionPurchaseTime = 0;
+  String mSubscriptionPurchaseToken = "";
   String mSelectedSubscriptionPeriod = "";
   // Current amount of gas in tank, in units
   int mTank;
   // Provides purchase notification while this app is running
   Handler handler;
   PurchaseService purchasesService;
+  private AppcoinsBillingClient cab;
   ConsumeResponseListener consumeResponseListener = new ConsumeResponseListener() {
     @Override public void onConsumeResponse(int responseCode, String purchaseToken) {
       Log.d(TAG, "Consumption finished. Purchase: " + purchaseToken + ", result: " + responseCode);
@@ -131,9 +131,25 @@ public class MainActivity extends Activity
         Log.d(TAG, "Consumption successful. Provisioning.");
 
         mTank = mTank == TANK_MAX ? TANK_MAX : mTank + 1;
-
+        String message = "You filled 1/4 tank. Your tank is now " + mTank + "/4 full!";
+        //If subscribed to reserve then you are entitled to one more gas for each normal gas
+        // purchase
+        if (mSubscribedToGasReserve) {
+          if (checkForActiveSubscription()) {
+            mTank = mTank == TANK_MAX ? TANK_MAX : mTank + 1;
+            message =
+                "You filled 2/4 tank. You got one extra gas item since you're subscribed to our gas"
+                    + " reserve. Your tank is now "
+                    + mTank
+                    + "/4 full!";
+          }
+        }
+        if (purchaseToken.equals(mSubscriptionPurchaseToken)) {
+          mSubscribedToGasReserve = true;
+        }
+        mSubscriptionPurchaseToken = "";
         saveData();
-        alert("You filled 1/4 tank. Your tank is now " + mTank + "/4 full!");
+        alert(message);
       } else {
         complain("Error while consuming token: " + purchaseToken);
       }
@@ -142,9 +158,6 @@ public class MainActivity extends Activity
       Log.d(TAG, "End consumption flow.");
     }
   };
-  private String token = null;
-  private AppcoinsBillingClient cab;
-
   SkuDetailsResponseListener skuDetailsResponseListener = new SkuDetailsResponseListener() {
     @Override public void onSkuDetailsResponse(int responseCode, List<SkuDetails> skuDetailsList) {
       Log.d(TAG, "Query inventory finished.");
@@ -163,47 +176,7 @@ public class MainActivity extends Activity
       mIsPremium = checkSkuExists(purchases, Skus.SKU_PREMIUM_ID);
       Log.d(TAG, "User is " + (mIsPremium ? "PREMIUM" : "NOT PREMIUM"));
 
-      // First find out which subscription is auto renewing
-      List<Purchase> gasWeeklyList = getSku(purchases, Skus.SKU_INFINITE_GAS_WEEKLY_ID);
-      //List<Purchase> gasMonthlyList = getSku(purchases, Skus.SKU_INFINITE_GAS_MONTHLY_ID);
-      //List<Purchase> gasYearlyList = getSku(purchases, Skus.SKU_INFINITE_GAS_YEARLY_ID);
-
-      Purchase gasWeekly = null;
-      if (gasWeeklyList.size() > 0) {
-        gasWeekly = gasWeeklyList.get(0);
-      }
-     /* Purchase gasMonthly = null;
-      if (gasMonthlyList.size() > 0) {
-        gasMonthly = gasMonthlyList.get(0);
-      }
-
-      Purchase gasYearly = null;
-      if (gasYearlyList.size() > 0) {
-        gasYearly = gasYearlyList.get(0);
-      }*/
-      if (gasWeekly != null && gasWeekly.isAutoRenewing()) {
-        mInfiniteGasSku = Skus.SKU_INFINITE_GAS_MONTHLY_ID;
-        mAutoRenewEnabled = true;
-      } /*else if (gasMonthly != null && gasMonthly.isAutoRenewing()) {
-        mInfiniteGasSku = Skus.SKU_INFINITE_GAS_MONTHLY_ID;
-        mAutoRenewEnabled = true;
-      } else if (gasYearly != null && gasYearly.isAutoRenewing()) {
-        mInfiniteGasSku = Skus.SKU_INFINITE_GAS_YEARLY_ID;
-        mAutoRenewEnabled = true;
-      } */ else {
-        mInfiniteGasSku = "";
-        mAutoRenewEnabled = false;
-      }
-
-      // The user is subscribed if either subscription exists, even if neither is auto
-      // renewing
-      mSubscribedToInfiniteGas = gasWeekly != null;
-
-      Log.d(TAG, "User "
-          + (mSubscribedToInfiniteGas ? "HAS" : "DOES NOT HAVE")
-          + " infinite gas subscription.");
-      if (mSubscribedToInfiniteGas) mTank = TANK_MAX;
-
+      checkForActiveSubscription();
       // Check for gas delivery -- if we own gas, we should fill up the tank immediately
       if (checkSkuExists(purchases, Skus.SKU_GAS_ID)) {
         Log.d(TAG, "We have gas. Consuming it.");
@@ -285,19 +258,19 @@ public class MainActivity extends Activity
     findViewById(R.id.upgrade_button).setVisibility(mIsPremium ? View.GONE : View.VISIBLE);
 
     // update gas gauge to reflect tank status
-    if (mSubscribedToInfiniteGas) {
-      ((ImageView) findViewById(R.id.gas_gauge)).setImageResource(R.drawable.gas_inf);
+    if (mSubscribedToGasReserve) {
+      findViewById(R.id.subscription_image).setVisibility(View.VISIBLE);
     } else {
-      int index = mTank >= TANK_RES_IDS.length ? TANK_RES_IDS.length - 1 : mTank;
-      ((ImageView) findViewById(R.id.gas_gauge)).setImageResource(TANK_RES_IDS[index]);
+      findViewById(R.id.subscription_image).setVisibility(View.GONE);
     }
+    int index = mTank >= TANK_RES_IDS.length ? TANK_RES_IDS.length - 1 : mTank;
+    ((ImageView) findViewById(R.id.gas_gauge)).setImageResource(TANK_RES_IDS[index]);
   }
 
   @Override public void onCreate(Bundle savedInstanceState) {
     Log.d("MainActivity", "MAIN ACTIVITY SDK IAB");
     super.onCreate(savedInstanceState);
     handler = new Handler();
-    // bought the infinite gas subscription
     PurchaseService.PurchaseValidatorListener purchaseValidatorListener =
         new PurchaseService.PurchaseValidatorListener() {
           @Override
@@ -314,16 +287,11 @@ public class MainActivity extends Activity
                   mIsPremium = true;
                   MainActivity.this.updateUi();
                   break;
-                case Skus.SKU_INFINITE_GAS_MONTHLY_ID:
-                case Skus.SKU_INFINITE_GAS_YEARLY_ID:
-                  // bought the infinite gas subscription
-                  Log.d(TAG, "Infinite gas subscription purchased.");
-                  MainActivity.this.alert("Thank you for subscribing to infinite gas!");
-                  mSubscribedToInfiniteGas = true;
-                  mAutoRenewEnabled = true;
-                  mInfiniteGasSku = sku;
-                  mTank = TANK_MAX;
-                  MainActivity.this.updateUi();
+                case Skus.SKU_GAS_WEEKLY_ID:
+                  Log.d(TAG, "Gas reserved subscription");
+                  mSubscriptionPurchaseToken = token;
+                  cab.consumeAsync(token, consumeResponseListener);
+                  mAutoRenewEnabled = false; //TODO Change later
                   break;
               }
             } else {
@@ -348,22 +316,25 @@ public class MainActivity extends Activity
             new Gson());
     setContentView(R.layout.activity_main);
     loadData();
+    if (mSubscribedToGasReserve) {
+      findViewById(R.id.subscription_image).setVisibility(View.VISIBLE);
+    } else {
+      findViewById(R.id.subscription_image).setVisibility(View.GONE);
+    }
     String base64EncodedPublicKey = BuildConfig.IAB_KEY;
-    PurchasesUpdatedListener purchasesUpdatedListener = new PurchasesUpdatedListener() {
-      @Override public void onPurchasesUpdated(int responseCode, List<Purchase> purchases) {
-        if (responseCode == ResponseCode.OK.getValue()) {
-          String sku;
-          for (Purchase purchase : purchases) {
-            token = purchase.getToken();
-            sku = purchase.getSku();
-            purchasesService.verifyPurchase(sku, purchase.getToken());
-          }
-        } else {
-          MainActivity.this.complain(
-              "Error purchasing: " + String.format(Locale.ENGLISH, "response code: %d -> %s",
-                  responseCode, ResponseCode.values()[responseCode].name()));
-          return;
+    PurchasesUpdatedListener purchasesUpdatedListener = (responseCode, purchases) -> {
+      if (responseCode == ResponseCode.OK.getValue()
+          || responseCode == ResponseCode.ITEM_ALREADY_OWNED.getValue()) {
+        String sku;
+        for (Purchase purchase : purchases) {
+          sku = purchase.getSku();
+          purchasesService.verifyPurchase(sku, purchase.getToken());
         }
+      } else {
+        MainActivity.this.complain(
+            "Error purchasing: " + String.format(Locale.ENGLISH, "response code: %d -> %s",
+                responseCode, ResponseCode.values()[responseCode].name()));
+        return;
       }
     };
     cab = CatapultBillingAppCoinsFactory.BuildAppcoinsBilling(this, base64EncodedPublicKey,
@@ -403,6 +374,7 @@ public class MainActivity extends Activity
     SharedPreferences sp = getPreferences(MODE_PRIVATE);
     mTank = sp.getInt("tank", 2);
     mIsPremium = sp.getBoolean("mIsPremium", mIsPremium);
+    mSubscribedToGasReserve = sp.getBoolean("isSubscribed", mSubscribedToGasReserve);
     Log.d(TAG, "Loaded data: tank = " + mTank);
   }
 
@@ -414,25 +386,7 @@ public class MainActivity extends Activity
 
   @Override public void onClick(DialogInterface dialog, int id) {
 
-    if (id == 0) {
-      mSelectedSubscriptionPeriod = mFirstChoiceSku;
-    } else if (id == 1) {
-      mSelectedSubscriptionPeriod = mSecondChoiceSku;
-    } else if (id == DialogInterface.BUTTON_POSITIVE) {
-
-      if (TextUtils.isEmpty(mSelectedSubscriptionPeriod)) {
-        // The user has not changed from the default selection
-        mSelectedSubscriptionPeriod = mFirstChoiceSku;
-      }
-
-      List<String> oldSkus;
-      if (!TextUtils.isEmpty(mInfiniteGasSku) && !mInfiniteGasSku.equals(
-          mSelectedSubscriptionPeriod)) {
-        // The user currently has a valid subscription, any purchase action is going to
-        // replace that subscription
-        oldSkus = new ArrayList<>();
-        oldSkus.add(mInfiniteGasSku);
-      }
+    if (id == DialogInterface.BUTTON_POSITIVE) {
 
       setWaitScreen(true);
       Log.d(TAG, "Launching purchase flow for gas subscription.");
@@ -451,8 +405,6 @@ public class MainActivity extends Activity
         }
 
         mSelectedSubscriptionPeriod = "";
-        mFirstChoiceSku = "";
-        mSecondChoiceSku = "";
       };
 
       Activity activity = this;
@@ -476,6 +428,7 @@ public class MainActivity extends Activity
     SharedPreferences.Editor spe = getPreferences(MODE_PRIVATE).edit();
     spe.putBoolean("mIsPremium", mIsPremium);
     spe.putInt("tank", mTank);
+    spe.putBoolean("isSubscribed", mSubscribedToGasReserve);
     spe.apply();
     Log.d(TAG, "Saved data: tank = " + mTank);
   }
@@ -500,10 +453,10 @@ public class MainActivity extends Activity
 
   public void onDriveButtonClicked(View arg0) {
     Log.d(TAG, "Drive button clicked.");
-    if (!mSubscribedToInfiniteGas && mTank <= 0) {
+    if (!mSubscribedToGasReserve && mTank <= 0) {
       alert("Oh, no! You are out of gas! Try buying some!");
     } else {
-      if (!mSubscribedToInfiniteGas) --mTank;
+      --mTank;
       saveData();
       alert("Vroooom, you drove a few miles.");
       updateUi();
@@ -529,8 +482,6 @@ public class MainActivity extends Activity
       }
 
       mSelectedSubscriptionPeriod = "";
-      mFirstChoiceSku = "";
-      mSecondChoiceSku = "";
     };
 
     Activity activity = this;
@@ -579,10 +530,15 @@ public class MainActivity extends Activity
 
   //Subs managed
   public void onBuyGasReserveButtonClicked(View view) {
+    if (mSubscribedToGasReserve) {
+      complain("You already have gas reserve subscription");
+      return;
+    }
+
     onBuySetup();
 
     BillingFlowParams billingFlowParams =
-        new BillingFlowParams(Skus.SKU_INFINITE_GAS_WEEKLY_ID, IabHelper.ITEM_TYPE_SUBS,
+        new BillingFlowParams(Skus.SKU_GAS_WEEKLY_ID, ITEM_TYPE_SUBS,
             "orderId=" + System.currentTimeMillis(), null, null);
 
     if (!cab.isReady()) {
@@ -638,20 +594,38 @@ public class MainActivity extends Activity
   }
 
   private void onBuySetup() {
-    if (mSubscribedToInfiniteGas) {
-      complain("No need! You're subscribed to infinite gas. Isn't that awesome?");
-      return;
-    }
-
     if (mTank >= TANK_MAX) {
       complain("Your tank is full. Drive around a bit!");
       return;
     }
-
     // launch the gas purchase UI flow.
     // We will be notified of completion via mPurchaseFinishedListener
     setWaitScreen(true);
     Log.d(TAG, "Launching purchase flow for gas.");
+  }
+
+  private boolean checkForActiveSubscription() {
+    PurchasesResult subsPurchasesResult = cab.queryPurchases(ITEM_TYPE_SUBS);
+    List<Purchase> subPurchases = subsPurchasesResult.getPurchases();
+    List<Purchase> gasWeeklyList = getSku(subPurchases, Skus.SKU_GAS_WEEKLY_ID);
+
+    Purchase gasWeekly = null;
+    if (gasWeeklyList.size() > 0) {
+      gasWeekly = gasWeeklyList.get(0);
+    }
+    if (gasWeekly != null) {
+      mAutoRenewEnabled = gasWeekly.isAutoRenewing();
+      long subscriptionDuration = ONE_WEEK;
+      if (BuildConfig.DEBUG) {
+        // For test purposes we use 3 minutes
+        subscriptionDuration = TWO_MINUTES;
+      }
+      if (System.currentTimeMillis() - gasWeekly.getPurchaseTime() >= subscriptionDuration) {
+        mSubscribedToGasReserve = false;
+        saveData();
+      }
+    }
+    return mSubscribedToGasReserve;
   }
 
   public interface ResponseListener {

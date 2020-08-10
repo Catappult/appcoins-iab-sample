@@ -90,6 +90,9 @@ public class IabHelper {
   // Item types
   public static final String ITEM_TYPE_INAPP = "inapp";
   public static final String ITEM_TYPE_SUBS = "inapp_subscription";
+  // Milli time
+  public static final long ONE_WEEK = 604800000;
+  public static final long TWO_MINUTES = 120000;
   // some fields on the getSkuDetails response bundle
   public static final String GET_SKU_DETAILS_ITEM_LIST = "ITEM_ID_LIST";
   public static final String GET_SKU_DETAILS_ITEM_TYPE_LIST = "ITEM_TYPE_LIST";
