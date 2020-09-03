@@ -254,12 +254,6 @@ public class IabHelper {
     }
   }
 
-  /** Returns whether subscriptions are supported. */
-  public boolean subscriptionsSupported() {
-    checkNotDisposed();
-    return mSubscriptionsSupported;
-  }
-
   public void launchPurchaseFlow(Activity act, String sku, int requestCode,
       OnIabPurchaseFinishedListener listener) throws IabAsyncInProgressException {
     launchPurchaseFlow(act, sku, requestCode, listener, "");
@@ -600,7 +594,7 @@ public class IabHelper {
     checkNotDisposed();
     checkSetupDone("consume");
 
-    if (!itemInfo.mItemType.equals(ITEM_TYPE_INAPP)) {
+    if (!itemInfo.mItemType.equals(ITEM_TYPE_INAPP) && !itemInfo.mItemType.equals(ITEM_TYPE_SUBS)) {
       throw new IabException(IABHELPER_INVALID_CONSUMPTION,
           "Items of type '" + itemInfo.mItemType + "' can't be consumed.");
     }
@@ -873,7 +867,7 @@ public class IabHelper {
           ownedItems.getStringArrayList(RESPONSE_INAPP_SIGNATURE_LIST);
       ArrayList<String> idsList = ownedItems.getStringArrayList(RESPONSE_INAPP_PURCHASE_ID_LIST);
 
-      for (int i = 0; i < purchaseDataList.size(); ++i) {
+      for (int i = purchaseDataList.size() - 1; i >= 0; --i) {
         String purchaseData = purchaseDataList.get(i);
         String signature = signatureList.get(i);
         String sku = ownedSkus.get(i);

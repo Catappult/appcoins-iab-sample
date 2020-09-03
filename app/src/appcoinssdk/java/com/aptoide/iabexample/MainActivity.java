@@ -95,6 +95,7 @@ import static com.aptoide.iabexample.util.IabHelper.TWO_MINUTES;
  */
 public class MainActivity extends Activity
     implements IabBroadcastReceiver.IabBroadcastListener, OnClickListener {
+
   // Debug tag, for logging
   static final String TAG = "TrivialDrive";
   // How many units (1/4 tank is our unit) fill in the tank.
@@ -109,11 +110,10 @@ public class MainActivity extends Activity
   };
   // Does the user have the premium upgrade?
   boolean mIsPremium = false;
-  // Does the user have an active subscription to the infinite gas plan?
+  // Does the user have an active subscription?
   boolean mSubscribedToGasReserve = false;
   // Will the subscription auto-renew?
   boolean mAutoRenewEnabled = false;
-  long subscriptionPurchaseTime = 0;
   String mSubscriptionPurchaseToken = "";
   String mSelectedSubscriptionPeriod = "";
   // Current amount of gas in tank, in units
@@ -176,7 +176,6 @@ public class MainActivity extends Activity
       mIsPremium = checkSkuExists(purchases, Skus.SKU_PREMIUM_ID);
       Log.d(TAG, "User is " + (mIsPremium ? "PREMIUM" : "NOT PREMIUM"));
 
-      checkForActiveSubscription();
       // Check for gas delivery -- if we own gas, we should fill up the tank immediately
       if (checkSkuExists(purchases, Skus.SKU_GAS_ID)) {
         Log.d(TAG, "We have gas. Consuming it.");
@@ -447,13 +446,14 @@ public class MainActivity extends Activity
     if (!cab.isReady()) {
       startConnection();
     }
-
+    Thread subscriptionThread = new Thread(this::checkForActiveSubscription);
+    subscriptionThread.start();
     cab.querySkuDetailsAsync(skuDetailsParams, skuDetailsResponseListener);
   }
 
   public void onDriveButtonClicked(View arg0) {
     Log.d(TAG, "Drive button clicked.");
-    if (!mSubscribedToGasReserve && mTank <= 0) {
+    if (mTank <= 0) {
       alert("Oh, no! You are out of gas! Try buying some!");
     } else {
       --mTank;
@@ -512,7 +512,7 @@ public class MainActivity extends Activity
     onBuySetup();
 
     String url = BuildConfig.BACKEND_HOST
-        + "transaction/inapp?value=0.25&currency=EUR"
+        + "transaction/inapp?value=6.0&currency=EUR"
         + "&domain="
         + getPackageName();
     Intent i = new Intent(Intent.ACTION_VIEW);
@@ -612,12 +612,15 @@ public class MainActivity extends Activity
     Purchase gasWeekly = null;
     if (gasWeeklyList.size() > 0) {
       gasWeekly = gasWeeklyList.get(0);
+    } else {
+      mSubscribedToGasReserve = false;
+      saveData();
     }
     if (gasWeekly != null) {
       mAutoRenewEnabled = gasWeekly.isAutoRenewing();
       long subscriptionDuration = ONE_WEEK;
       if (BuildConfig.DEBUG) {
-        // For test purposes we use 3 minutes
+        // For test purposes we use 2 minutes
         subscriptionDuration = TWO_MINUTES;
       }
       if (System.currentTimeMillis() - gasWeekly.getPurchaseTime() >= subscriptionDuration) {
@@ -625,7 +628,18 @@ public class MainActivity extends Activity
         saveData();
       }
     }
+    //TODO Remove after the following is solved. At the moment we are unable to identify which
+    // purchases are not consumed for subscriptions, since the endpoint returns all purchases.
+    //Uncomment this method if you're stuck with unconsumed purchases
+    // checkForUnconsumedSubscriptions(subPurchases);
     return mSubscribedToGasReserve;
+  }
+
+  private void checkForUnconsumedSubscriptions(List<Purchase> subPurchases) {
+    for (Purchase purchase : subPurchases) {
+      mSubscriptionPurchaseToken = purchase.getToken();
+      cab.consumeAsync(purchase.getToken(), consumeResponseListener);
+    }
   }
 
   public interface ResponseListener {
