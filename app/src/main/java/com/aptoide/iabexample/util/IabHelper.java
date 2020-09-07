@@ -89,7 +89,7 @@ public class IabHelper {
   public static final String RESPONSE_INAPP_PURCHASE_ID = "INAPP_PURCHASE_ID";
   // Item types
   public static final String ITEM_TYPE_INAPP = "inapp";
-  public static final String ITEM_TYPE_SUBS = "inapp_subscription";
+  public static final String ITEM_TYPE_SUBS = "subs";
   // Milli time
   public static final long ONE_WEEK = 604800000;
   public static final long TWO_MINUTES = 120000;

@@ -8,6 +8,7 @@ import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -103,6 +104,7 @@ public class MainActivity extends Activity implements IabBroadcastReceiver.IabBr
   int mTank;
   // The helper object
   IabHelper mHelper;
+  Handler mHandler;
   // Provides purchase notification while this app is running
   // Called when consumption is complete
   IabHelper.OnConsumeFinishedListener mConsumeFinishedListener =
@@ -283,10 +285,12 @@ public class MainActivity extends Activity implements IabBroadcastReceiver.IabBr
       if (System.currentTimeMillis() - gasWeekly.getPurchaseTime() >= subscriptionDuration) {
         mSubscribedToGasReserve = false;
         saveData();
+        mHandler.post(this::updateUi);
       }
     } else {
       mSubscribedToGasReserve = false;
       saveData();
+      mHandler.post(this::updateUi);
     }
     //TODO Remove after the following is solved. At the moment we are unable to identify which
     // purchases are not consumed for subscriptions, since the endpoint returns all purchases.
@@ -299,7 +303,7 @@ public class MainActivity extends Activity implements IabBroadcastReceiver.IabBr
     super.onCreate(savedInstanceState);
     Log.d("MainActivity", "MAIN ACTIVITY APPCOINS IAB");
     setContentView(R.layout.activity_main);
-
+    mHandler = new Handler();
     // load game data
     loadData();
 
@@ -526,6 +530,17 @@ public class MainActivity extends Activity implements IabBroadcastReceiver.IabBr
   public void onBuyGasReserveButtonClicked(View view) {
     if (mSubscribedToGasReserve) {
       complain("You are already subscribed to gas reserve");
+      Thread thread = new Thread(() -> {
+        Purchase inventoryPurchase = null;
+        try {
+          Inventory inventory = mHelper.queryInventory();
+          inventoryPurchase = inventory.getPurchase(SKU_GAS_WEEKLY_ID);
+        } catch (IabException e) {
+          e.printStackTrace();
+        }
+        checkForActiveSubscription(inventoryPurchase);
+      });
+      thread.start();
       return;
     }
 

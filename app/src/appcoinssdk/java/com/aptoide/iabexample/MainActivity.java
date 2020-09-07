@@ -532,6 +532,8 @@ public class MainActivity extends Activity
   public void onBuyGasReserveButtonClicked(View view) {
     if (mSubscribedToGasReserve) {
       complain("You already have gas reserve subscription");
+      Thread thread = new Thread(this::checkForActiveSubscription);
+      thread.start();
       return;
     }
 
@@ -615,6 +617,7 @@ public class MainActivity extends Activity
     } else {
       mSubscribedToGasReserve = false;
       saveData();
+      handler.post(() -> updateUi());
     }
     if (gasWeekly != null) {
       mAutoRenewEnabled = gasWeekly.isAutoRenewing();
@@ -626,6 +629,7 @@ public class MainActivity extends Activity
       if (System.currentTimeMillis() - gasWeekly.getPurchaseTime() >= subscriptionDuration) {
         mSubscribedToGasReserve = false;
         saveData();
+        handler.post(() -> updateUi());
       }
     }
     //TODO Remove after the following is solved. At the moment we are unable to identify which
