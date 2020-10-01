@@ -24,8 +24,8 @@ allprojects {
 }
 
 project.ext {
-  sdkDev = "0.6.3.1.dev"
-  sdk = "0.6.3.1.staging"
+  sdkDev = "0.6.4.0.dev"
+  sdk = "0.6.4.0.staging"
 }
 
 wrapper {
