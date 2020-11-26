@@ -7,8 +7,5 @@ public final class Skus {
   public static final String SKU_GAS_ID = "gas";
 
   // SKU for our subscription (infinite gas)
-  public static final String SKU_INFINITE_GAS_MONTHLY_ID = "infinite_gas_monthly";
-  public static final String SKU_INFINITE_GAS_YEARLY_ID = "infinite_gas_yearly";
-
-
+  public static final String SKU_GAS_WEEKLY_ID = "gas_reserve";
 }
