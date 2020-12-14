@@ -512,7 +512,7 @@ public class MainActivity extends Activity
     onBuySetup();
 
     String url = BuildConfig.BACKEND_HOST
-        + "transaction/inapp?value=6.0&currency=EUR"
+        + "transaction/inapp?value=0.99&currency=EUR"
         + "&domain="
         + getPackageName();
     Intent i = new Intent(Intent.ACTION_VIEW);
