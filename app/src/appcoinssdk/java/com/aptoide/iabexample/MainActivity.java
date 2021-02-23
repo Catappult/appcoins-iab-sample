@@ -264,6 +264,10 @@ public class MainActivity extends Activity
     }
     int index = mTank >= TANK_RES_IDS.length ? TANK_RES_IDS.length - 1 : mTank;
     ((ImageView) findViewById(R.id.gas_gauge)).setImageResource(TANK_RES_IDS[index]);
+
+    if (!BuildConfig.TEST_NETWORK) {
+      findViewById(R.id.buy_gas_reserve).setVisibility(View.GONE);
+    }
   }
 
   @Override public void onCreate(Bundle savedInstanceState) {
@@ -469,7 +473,7 @@ public class MainActivity extends Activity
 
     BillingFlowParams billingFlowParams =
         new BillingFlowParams(Skus.SKU_GAS_ID, SkuType.inapp.toString(),
-            "orderId=" + System.currentTimeMillis(), null, null);
+            "orderId=" + System.currentTimeMillis(), "PAYLOAD TESTING", null);
 
     if (!cab.isReady()) {
       startConnection();
@@ -494,10 +498,17 @@ public class MainActivity extends Activity
     onBuySetup();
 
     String url =
-        BuildConfig.BACKEND_HOST + "transaction/inapp?product=gas&domain=" + getPackageName();
+        BuildConfig.BACKEND_HOST + "transaction/inapp?product=oil&value=0.05&currency=USD&domain=" + getPackageName();
+
+    if (BuildConfig.TEST_NETWORK) {
+      url += "&signature=fd0193fb4f36a6202aa7ace42daa5a6f623247279e3e8fe642bbc4152c8d8887";
+    } else {
+      url += "&signature=de84aeeabc9c4abb7014fe721c576e46c79c9667108c807e6a462161527db2fc";
+    }
     Intent i = new Intent(Intent.ACTION_VIEW);
     i.setData(Uri.parse(url));
     i.setPackage(BuildConfig.IAB_BIND_PACKAGE);
+
 
     PendingIntent intent =
         PendingIntent.getActivity(getApplicationContext(), 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -512,9 +523,15 @@ public class MainActivity extends Activity
     onBuySetup();
 
     String url = BuildConfig.BACKEND_HOST
-        + "transaction/inapp?value=6.0&currency=EUR"
+        + "transaction/inapp?product=antifreeze&value=1.5&currency=USD"
         + "&domain="
         + getPackageName();
+    if (BuildConfig.TEST_NETWORK) {
+      url += "&signature=c75fb208a71765bd6e1df13d255fab66930d3b5520d5da1bcf6332e013938759";
+    } else {
+      url += "&signature=e22daaf79c615c6ae89bcc04df09d94d9c5224dbbd51cc38d58a93589920407b";
+    }
+
     Intent i = new Intent(Intent.ACTION_VIEW);
     i.setData(Uri.parse(url));
     i.setPackage(BuildConfig.IAB_BIND_PACKAGE);

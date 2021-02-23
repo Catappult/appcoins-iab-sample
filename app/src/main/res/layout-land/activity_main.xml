@@ -166,9 +166,8 @@
               android:id="@+id/buy_gas_reserve"
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
-              android:layout_marginEnd="20dp"
               android:onClick="onBuyGasReserveButtonClicked"
-              android:src="@drawable/buy_gas"
+              android:src="@drawable/buy_inspection"
               />
         </LinearLayout>
       </LinearLayout>
