@@ -10,8 +10,8 @@ android {
     applicationId "com.appcoins.trivialdrivesample"
     minSdkVersion 21
     targetSdkVersion 27
-    versionCode 17
-    versionName "1.4.1"
+    versionCode 20
+    versionName "1.5.0"
     multiDexEnabled true
   }
 
@@ -138,7 +138,7 @@ dependencies {
   implementation 'com.google.code.gson:gson:2.8.2'
   debugImplementation "com.blockchainds:appcoins-ads:$sdkDev"
   debugImplementation "com.blockchainds:android-appcoins-billing:$sdkDev"
-  debugImplementation "com.blockchainds:appcoins-contract-proxy:0.5.5.2.dev"
+  debugImplementation "com.blockchainds:appcoins-contract-proxy:$sdkDev"
   releaseImplementation "com.blockchainds:appcoins-ads:$sdk"
   releaseImplementation "com.blockchainds:android-appcoins-billing:$sdk"
   releaseImplementation "com.blockchainds:appcoins-contract-proxy:0.5.5.5"
