@@ -1,1 +1,1 @@
-AppCoins SDK and Code integration documentation is available [here](https://github.com/Aptoide/appcoins-iab-sample/wiki)
+AppCoins SDK and Code integration documentation is available [here](https://github.com/Catappult/appcoins-iab-sample/wiki)
