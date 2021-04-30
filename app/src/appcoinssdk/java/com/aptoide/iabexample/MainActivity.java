@@ -278,6 +278,7 @@ public class MainActivity extends Activity
         new PurchaseService.PurchaseValidatorListener() {
           @Override
           public void onPurchaseValidationResult(String sku, String token, boolean isValid) {
+            Log.d(TAG, "Purchase is gas. Starting gas consumption.");
             if (isValid) {
               switch (sku) {
                 case Skus.SKU_GAS_ID:
@@ -310,9 +311,9 @@ public class MainActivity extends Activity
         };
     String baseHost;
     if (BuildConfig.DEBUG) {
-      baseHost = "https://validators-dev.aptoide.com";
+      baseHost = "https://validators-dev.catappult.io";
     } else {
-      baseHost = "https://validators.aptoide.com";
+      baseHost = "https://validators.catappult.io";
     }
     purchasesService =
         new PurchaseService(baseHost, BuildConfig.APPLICATION_ID, purchaseValidatorListener,
