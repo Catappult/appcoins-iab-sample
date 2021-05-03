@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
   compileSdkVersion 27
-  buildToolsVersion '28.0.3'
+  buildToolsVersion '29.0.2'
 
   flavorDimensions "iab", "network"
 
@@ -10,8 +10,8 @@ android {
     applicationId "com.appcoins.trivialdrivesample"
     minSdkVersion 21
     targetSdkVersion 27
-    versionCode 20
-    versionName "1.5.0"
+    versionCode 21
+    versionName "1.5.1"
     multiDexEnabled true
   }
 
@@ -135,13 +135,13 @@ android {
 
 dependencies {
   implementation 'com.android.support:appcompat-v7:27.1.1'
-  implementation 'com.google.code.gson:gson:2.8.2'
-  debugImplementation "com.blockchainds:appcoins-ads:$sdkDev"
-  debugImplementation "com.blockchainds:android-appcoins-billing:$sdkDev"
-  debugImplementation "com.blockchainds:appcoins-contract-proxy:$sdkDev"
-  releaseImplementation "com.blockchainds:appcoins-ads:$sdk"
-  releaseImplementation "com.blockchainds:android-appcoins-billing:$sdk"
-  releaseImplementation "com.blockchainds:appcoins-contract-proxy:0.5.5.5"
+  implementation 'com.google.code.gson:gson:2.8.6'
+  debugImplementation "io.catappult:appcoins-ads:$sdkDev"
+  debugImplementation "io.catappult:android-appcoins-billing:$sdkDev"
+  debugImplementation "io.catappult:appcoins-contract-proxy:$sdkDev"
+  releaseImplementation "io.catappult:appcoins-ads:$sdk"
+  releaseImplementation "io.catappult:android-appcoins-billing:$sdk"
+  releaseImplementation "io.catappult:appcoins-contract-proxy:$sdk"
 }
 
 def renameArtifact(defaultConfig) {

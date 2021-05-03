@@ -2,12 +2,15 @@
 
 buildscript {
   repositories {
-    jcenter()
     google()
+    mavenCentral()
+    maven { url "https://s01.oss.sonatype.org/content/repositories/snapshots" }
+    jcenter()
+
   }
 
   dependencies {
-    classpath 'com.android.tools.build:gradle:3.2.0'
+    classpath 'com.android.tools.build:gradle:4.1.3'
 
     // NOTE: Do not place your application dependencies here; they belong
     // in the individual module build.gradle files
@@ -16,16 +19,19 @@ buildscript {
 
 allprojects {
   repositories {
-    jcenter()
     google()
-    maven { url "https://dl.bintray.com/blockchainds/bds" }
-    maven { url "https://dl.bintray.com/blockchainds/bds-stage" }
+    mavenCentral()
+    maven { url "https://s01.oss.sonatype.org/content/repositories/snapshots" }
+    jcenter()
   }
 }
 
 project.ext {
-  sdkDev = "0.6.6.3.dev"
-  sdk = "0.6.5.0.staging"
+  sdkDev = "0.6.7.0.dev-SNAPSHOT"
+  // NOTE: in case you need to test a version of the SDK that points to prod but is yet to be
+  // published and available as the staging snapshot, use sdk = <version>-staging-SNAPSHOT.
+  // Example: sdk = "0.6.7.0.staging-SNAPSHOT"
+  sdk = "0.6.7.0"
 }
 
 wrapper {
