@@ -526,7 +526,7 @@ public class MainActivity extends Activity
 
     setWaitScreen(true);
     String url =
-        "https://apichain-dev.blockchainds.com/transaction/inapp?value=5&currency=USD&domain=com.appcoins.trivialdrivesample.test";
+        "https://apichain.dev.blockchainds.com/transaction/inapp?value=5&currency=USD&domain=com.appcoins.trivialdrivesample.test";
     Intent i = new Intent(Intent.ACTION_VIEW);
     i.setData(Uri.parse(url));
 
