@@ -265,9 +265,6 @@ public class MainActivity extends Activity
     int index = mTank >= TANK_RES_IDS.length ? TANK_RES_IDS.length - 1 : mTank;
     ((ImageView) findViewById(R.id.gas_gauge)).setImageResource(TANK_RES_IDS[index]);
 
-    if (!BuildConfig.TEST_NETWORK) {
-      findViewById(R.id.buy_gas_reserve).setVisibility(View.GONE);
-    }
   }
 
   @Override public void onCreate(Bundle savedInstanceState) {
