@@ -499,9 +499,9 @@ public class MainActivity extends Activity
         BuildConfig.BACKEND_HOST + "transaction/inapp?product=oil&value=0.05&currency=USD&domain=" + getPackageName();
 
     if (BuildConfig.TEST_NETWORK) {
-      url += "&signature=fd0193fb4f36a6202aa7ace42daa5a6f623247279e3e8fe642bbc4152c8d8887";
+      url += "&signature=56bc3568f83deb428b12c351a7115d4cfea47d727f8d7adbb624287155e3550a";
     } else {
-      url += "&signature=de84aeeabc9c4abb7014fe721c576e46c79c9667108c807e6a462161527db2fc";
+      url += "&signature=31161a6d9f6d946612f0816822da2a518d5168e3ca8a48831a9529c08e8d521b";
     }
     Intent i = new Intent(Intent.ACTION_VIEW);
     i.setData(Uri.parse(url));
@@ -525,9 +525,9 @@ public class MainActivity extends Activity
         + "&domain="
         + getPackageName();
     if (BuildConfig.TEST_NETWORK) {
-      url += "&signature=c75fb208a71765bd6e1df13d255fab66930d3b5520d5da1bcf6332e013938759";
+      url += "&signature=f705e4863cbf2abcf1b071c3627d9da41425d3ba7a2039613db8ef141c5371fd";
     } else {
-      url += "&signature=e22daaf79c615c6ae89bcc04df09d94d9c5224dbbd51cc38d58a93589920407b";
+      url += "&signature=9b406368c71622e0765d0f64f93963b2cd1afc4c8fdb8bb5208b0d3ae374f826";
     }
 
     Intent i = new Intent(Intent.ACTION_VIEW);

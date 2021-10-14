@@ -26,7 +26,8 @@ public class PurchaseService {
   }
 
   public void verifyPurchase(String sku, String token) {
-    if (!BuildConfig.DEBUG) {
+    boolean shouldValidate = false;
+    if (!BuildConfig.DEBUG && shouldValidate) {
       Thread thread = new Thread(() -> {
         HttpURLConnection conn = null;
         try {
