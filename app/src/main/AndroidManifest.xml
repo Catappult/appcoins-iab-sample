@@ -4,6 +4,13 @@
 
   <!-- VERY IMPORTANT! Don't forget this permission, or in-app billing won't work. -->
   <uses-permission android:name="${iabPermission}" />
+<!--  <permission android:name="android.permission.QUERY_ALL_PACKAGES" />-->
+
+  <queries>
+    <package android:name="com.appcoins.wallet.dev" />
+    <package android:name="com.appcoins.wallet" />
+<!--    <package android:name="cm.aptoide.pt" />-->
+  </queries>
 
   <application
       android:name=".Application"
@@ -14,7 +21,8 @@
       android:theme="@style/AppTheme">
     <activity
         android:name=".MainActivity"
-        android:screenOrientation="sensor">
+        android:screenOrientation="sensor"
+        android:exported="true">
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />
         <category android:name="android.intent.category.LAUNCHER" />

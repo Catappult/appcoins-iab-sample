@@ -1,7 +1,7 @@
 apply plugin: 'com.android.application'
 
 android {
-  compileSdkVersion 27
+  compileSdkVersion 30
   buildToolsVersion '29.0.2'
 
   flavorDimensions "iab", "network"
@@ -9,7 +9,7 @@ android {
   defaultConfig {
     applicationId "com.appcoins.trivialdrivesample"
     minSdkVersion 21
-    targetSdkVersion 27
+    targetSdkVersion 30
     versionCode 24
     versionName "1.5.4"
     multiDexEnabled true
@@ -121,6 +121,8 @@ android {
       buildConfigField "boolean", "TEST_NETWORK", "false"
       buildConfigField "String", "BACKEND_HOST",
           "\"" + project.BACK_END_HOST_PROD + "\""
+      buildConfigField "String", "WALLET_PACKAGE",
+          "\"" + project.APPCOINS_IAB_BIND_PACKAGE + "\""
     }
 
     ropstenNetwork {
@@ -129,6 +131,8 @@ android {
       buildConfigField "boolean", "TEST_NETWORK", "true"
       buildConfigField "String", "BACKEND_HOST",
           "\"" + project.BACK_END_HOST_DEV + "\""
+      buildConfigField "String", "WALLET_PACKAGE",
+          "\"" + project.APPCOINS_DEV_IAB_BIND_PACKAGE + "\""
     }
   }
 }
