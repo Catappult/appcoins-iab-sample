@@ -499,11 +499,16 @@ public class MainActivity extends Activity
 
     // with the price and currency fields as optionals (not included):
     String url =
+        //BuildConfig.BACKEND_HOST + "transaction/inapp?product=oil&value=0.05&currency=USD"
+        //    + "&callback_url=https%3A%2F%2Fapi.dev.catappult.io%2Fbroker%2F8.20200101%2Fmock%2Fcallback"
+        //    + "&domain=" + getPackageName();
         BuildConfig.BACKEND_HOST + "transaction/inapp?product=oil&domain=" + getPackageName();
 
     if (BuildConfig.TEST_NETWORK) {
+      //url += "&signature=570c49c27cb916c595744e73d0aca61faf8ebae16603d90504ed8677ac5d4504";
       url += "&signature=cb2a0bf9eb470f1540207596c840672760fc05cbd69329ad86526ba141f8d9b4";
     } else {
+      //url += "&signature=231c9185134f9c3ae2d525fef24c3d8234c159f0c05e22842b836ff72f38f08c";
       url += "&signature=644604f3c01373ac193e91ebda34f50f1354b7f933dffe0c8e6f1d5ecbb727ab";
     }
 
@@ -525,12 +530,13 @@ public class MainActivity extends Activity
 
     String url = BuildConfig.BACKEND_HOST
         + "transaction/inapp?product=antifreeze&value=1.5&currency=USD"
+        + "&callback_url=https%3A%2F%2Fapi.dev.catappult.io%2Fbroker%2F8.20200101%2Fmock%2Fcallback"
         + "&domain="
         + getPackageName();
     if (BuildConfig.TEST_NETWORK) {
-      url += "&signature=f705e4863cbf2abcf1b071c3627d9da41425d3ba7a2039613db8ef141c5371fd";
+      url += "&signature=7878cb314b82ad2684ad4865cf84ab33e2905d2b6c7f9c3a368f6f70917e1364";
     } else {
-      url += "&signature=9b406368c71622e0765d0f64f93963b2cd1afc4c8fdb8bb5208b0d3ae374f826";
+      url += "&signature=f43bb044808622581147a157c68bcb581a93e8766574ef908f7f5a3579b4451a";
     }
 
     startOneStepPayment(url);

@@ -1,7 +1,7 @@
 apply plugin: 'com.android.application'
 
 android {
-  compileSdkVersion 30
+  compileSdkVersion 31
   buildToolsVersion '29.0.2'
 
   flavorDimensions "iab", "network"
@@ -9,9 +9,9 @@ android {
   defaultConfig {
     applicationId "com.appcoins.trivialdrivesample"
     minSdkVersion 21
-    targetSdkVersion 30
-    versionCode 24
-    versionName "1.5.4"
+    targetSdkVersion 31
+    versionCode 25
+    versionName "1.5.5"
     multiDexEnabled true
   }
 
@@ -138,7 +138,7 @@ android {
 }
 
 dependencies {
-  implementation 'com.android.support:appcompat-v7:27.1.1'
+//  implementation 'com.android.support:appcompat-v7:28.0.0'
   implementation 'com.google.code.gson:gson:2.8.6'
   debugImplementation "io.catappult:appcoins-ads:$sdkDev"
   debugImplementation "io.catappult:android-appcoins-billing:$sdkDev"
