@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.aptoide.iabexample">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
   <!-- VERY IMPORTANT! Don't forget this permission, or in-app billing won't work. -->
   <uses-permission android:name="${iabPermission}" />
@@ -28,6 +27,21 @@
         <category android:name="android.intent.category.LAUNCHER" />
       </intent-filter>
     </activity>
+
+    <activity android:name="com.appcoins.sdk.billing.UriCommunicationActivity"
+        android:exported="true">
+      <intent-filter>
+        <action android:name="android.intent.action.VIEW" />
+
+        <data
+            android:host="billing"
+            android:path="/communication/requester/1"
+            android:scheme="appcoins" />
+
+        <category android:name="android.intent.category.DEFAULT" />
+      </intent-filter>
+    </activity>
+
 
   </application>
 </manifest>
