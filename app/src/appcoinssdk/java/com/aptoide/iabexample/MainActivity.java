@@ -497,30 +497,19 @@ public class MainActivity extends Activity
   public void onBuyOilButtonClicked(View arg0) {
     onBuySetup();
 
-    // with the price and currency fields as optionals (not included):
     String url =
-        //BuildConfig.BACKEND_HOST + "transaction/inapp?product=oil&value=0.05&currency=USD"
-        //    + "&callback_url=https%3A%2F%2Fapi.dev.catappult.io%2Fbroker%2F8.20200101%2Fmock%2Fcallback"
-        //    + "&domain=" + getPackageName();
-        BuildConfig.BACKEND_HOST + "transaction/inapp?product=oil&domain=" + getPackageName();
+        BuildConfig.BACKEND_HOST + "transaction/inapp?product=oil&value=0.05&currency=USD"
+            + "&callback_url=https%3A%2F%2Fapi.dev.catappult.io%2Fbroker%2F8.20200101%2Fmock%2Fcallback"
+            + "&domain=" + getPackageName();
+        //BuildConfig.BACKEND_HOST + "transaction/inapp?product=oil&domain=" + getPackageName();
 
     if (BuildConfig.TEST_NETWORK) {
-      //url += "&signature=570c49c27cb916c595744e73d0aca61faf8ebae16603d90504ed8677ac5d4504";
-      url += "&signature=cb2a0bf9eb470f1540207596c840672760fc05cbd69329ad86526ba141f8d9b4";
+      url += "&signature=570c49c27cb916c595744e73d0aca61faf8ebae16603d90504ed8677ac5d4504";
+      //url += "&signature=cb2a0bf9eb470f1540207596c840672760fc05cbd69329ad86526ba141f8d9b4";
     } else {
-      //url += "&signature=231c9185134f9c3ae2d525fef24c3d8234c159f0c05e22842b836ff72f38f08c";
-      url += "&signature=644604f3c01373ac193e91ebda34f50f1354b7f933dffe0c8e6f1d5ecbb727ab";
+      url += "&signature=231c9185134f9c3ae2d525fef24c3d8234c159f0c05e22842b836ff72f38f08c";
+      //url += "&signature=644604f3c01373ac193e91ebda34f50f1354b7f933dffe0c8e6f1d5ecbb727ab";
     }
-
-    //// (old) with the price and currency fields as before:
-    //String url =
-    //    BuildConfig.BACKEND_HOST + "transaction/inapp?product=oil&value=0.05&currency=USD&domain=" + getPackageName();
-    //
-    //if (BuildConfig.TEST_NETWORK) {
-    //  url += "&signature=56bc3568f83deb428b12c351a7115d4cfea47d727f8d7adbb624287155e3550a";
-    //} else {
-    //  url += "&signature=31161a6d9f6d946612f0816822da2a518d5168e3ca8a48831a9529c08e8d521b";
-    //}
 
     startOneStepPayment(url);
   }
