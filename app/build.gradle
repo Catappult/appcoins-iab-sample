@@ -1,17 +1,18 @@
 apply plugin: 'com.android.application'
 
 android {
+  compileSdkVersion 33
+  buildToolsVersion '29.0.2'
   namespace "com.aptoide.iabexample"
 
   flavorDimensions = ["iab", "network"]
 
   defaultConfig {
     applicationId "com.appcoins.trivialdrivesample"
-    compileSdk 30
-    minSdk 21
-    targetSdk 30
-    versionCode 24
-    versionName "1.5.4"
+    minSdkVersion 21
+    targetSdkVersion 33
+    versionCode 25
+    versionName "1.5.5"
     multiDexEnabled true
   }
 
@@ -143,7 +144,7 @@ android {
 
 dependencies {
   api(files("libs/aptoide-analytics.aar"))
-  implementation 'com.android.support:appcompat-v7:27.1.1'
+  implementation 'com.android.support:appcompat-v7:28.0.0'
   implementation 'com.google.code.gson:gson:2.10.1'
   debugImplementation "io.catappult:appcoins-ads:$sdkDev"
   debugImplementation "io.catappult:android-appcoins-billing:$sdkDev"
