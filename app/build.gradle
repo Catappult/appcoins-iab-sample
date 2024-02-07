@@ -145,8 +145,10 @@ dependencies {
   api(files("libs/aptoide-analytics.aar"))
   implementation 'com.android.support:appcompat-v7:28.0.0'
   implementation 'com.google.code.gson:gson:2.10.1'
-  implementation 'io.reactivex.rxjava2:rxjava:2.2.19'
-  implementation 'com.madgag.spongycastle:prov:1.58.0.0'
+§o  debugImplementation 'io.reactivex.rxjava2:rxjava:2.2.19'
+  debugImplementation 'com.madgag.spongycastle:prov:1.58.0.0'
+  debugImplementation 'com.indicative.client.android:Indicative-Android:1.1.0'
+  debugImplementation "org.jetbrains.kotlin:kotlin-stdlib:1.8.10"
 
   debugImplementation(files("libs/android-appcoins-billing-debug.aar"))
   debugImplementation(files("libs/appcoins-billing-debug.aar"))
