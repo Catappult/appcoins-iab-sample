@@ -145,13 +145,17 @@ dependencies {
   api(files("libs/aptoide-analytics.aar"))
   implementation 'com.android.support:appcompat-v7:28.0.0'
   implementation 'com.google.code.gson:gson:2.10.1'
+  implementation 'io.reactivex.rxjava2:rxjava:2.2.19'
+  implementation 'com.madgag.spongycastle:prov:1.58.0.0'
 
   debugImplementation(files("libs/android-appcoins-billing-debug.aar"))
   debugImplementation(files("libs/appcoins-billing-debug.aar"))
   debugImplementation(files("libs/appcoins-adyen-debug.aar"))
   debugImplementation(files("libs/communication-debug.aar"))
-  debugImplementation "io.catappult:appcoins-ads:$sdkDev"
-  debugImplementation "io.catappult:appcoins-contract-proxy:$sdkDev"
+  debugImplementation(files("libs/appcoins-ads-debug.aar"))
+  debugImplementation(files("libs/appcoins-contract-proxy-debug.aar"))
+  debugImplementation(files("libs/appcoins-core-debug.aar"))
+  debugImplementation(files("libs/appcoins-lifecycle-debug.aar"))
 
   releaseImplementation "io.catappult:android-appcoins-billing:$sdk"
   releaseImplementation "io.catappult:appcoins-ads:$sdk_legacy"
