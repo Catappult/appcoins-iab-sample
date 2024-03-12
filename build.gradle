@@ -28,7 +28,8 @@ project.ext {
   // NOTE: in case you need to test a version of the SDK that points to prod but is yet to be
   // published and available as the staging snapshot, use sdk = <version>-staging-SNAPSHOT.
   // Example: sdk = "0.6.7.0.staging-SNAPSHOT"
-  sdk = "0.6.7.0"
+  sdk_legacy = "0.6.7.0" // Legacy SDK version, for non-updated modules that are used in trivial drive
+  sdk = "0.7.2.0"
 }
 
 wrapper {

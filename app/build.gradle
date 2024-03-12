@@ -2,7 +2,6 @@ apply plugin: 'com.android.application'
 
 android {
   compileSdkVersion 33
-  buildToolsVersion '29.0.2'
   namespace "com.aptoide.iabexample"
 
   flavorDimensions = ["iab", "network"]
@@ -11,8 +10,8 @@ android {
     applicationId "com.appcoins.trivialdrivesample"
     minSdkVersion 21
     targetSdkVersion 33
-    versionCode 25
-    versionName "1.5.5"
+    versionCode 26
+    versionName "1.5.6"
     multiDexEnabled true
   }
 
@@ -27,10 +26,10 @@ android {
 
   signingConfigs {
     release {
-      storeFile = file(project.APPCOINS_WALLET_STORE_FILE)
-      storePassword = project.APPCOINS_WALLET_STORE_PASSWORD
-      keyAlias = project.APPCOINS_WALLET_KEY_ALIAS
-      keyPassword = project.APPCOINS_WALLET_KEY_PASSWORD
+      storeFile = file(project.BDS_WALLET_STORE_FILE)
+      storePassword = project.BDS_WALLET_STORE_PASSWORD
+      keyAlias = project.BDS_WALLET_KEY_ALIAS
+      keyPassword = project.BDS_WALLET_KEY_PASSWORD
     }
   }
 
@@ -146,12 +145,23 @@ dependencies {
   api(files("libs/aptoide-analytics.aar"))
   implementation 'com.android.support:appcompat-v7:28.0.0'
   implementation 'com.google.code.gson:gson:2.10.1'
-  debugImplementation "io.catappult:appcoins-ads:$sdkDev"
-  debugImplementation "io.catappult:android-appcoins-billing:$sdkDev"
-  debugImplementation "io.catappult:appcoins-contract-proxy:$sdkDev"
-  releaseImplementation "io.catappult:appcoins-ads:$sdk"
+  debugImplementation 'io.reactivex.rxjava2:rxjava:2.2.19'
+  debugImplementation 'com.madgag.spongycastle:prov:1.58.0.0'
+  debugImplementation 'com.indicative.client.android:Indicative-Android:1.1.0'
+  debugImplementation "org.jetbrains.kotlin:kotlin-stdlib:1.8.10"
+
+  debugImplementation(files("libs/android-appcoins-billing-debug.aar"))
+  debugImplementation(files("libs/appcoins-billing-debug.aar"))
+  debugImplementation(files("libs/appcoins-adyen-debug.aar"))
+  debugImplementation(files("libs/communication-debug.aar"))
+  debugImplementation(files("libs/appcoins-ads-debug.aar"))
+  debugImplementation(files("libs/appcoins-contract-proxy-debug.aar"))
+  debugImplementation(files("libs/appcoins-core-debug.aar"))
+  debugImplementation(files("libs/appcoins-lifecycle-debug.aar"))
+
   releaseImplementation "io.catappult:android-appcoins-billing:$sdk"
-  releaseImplementation "io.catappult:appcoins-contract-proxy:$sdk"
+  releaseImplementation "io.catappult:appcoins-ads:$sdk_legacy"
+  releaseImplementation "io.catappult:appcoins-contract-proxy:$sdk_legacy"
 }
 
 def renameArtifact(defaultConfig) {
