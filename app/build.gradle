@@ -10,8 +10,8 @@ android {
     applicationId "com.appcoins.trivialdrivesample"
     minSdkVersion 21
     targetSdkVersion 33
-    versionCode 26
-    versionName "1.5.6"
+    versionCode 28
+    versionName "1.5.7"
     multiDexEnabled true
   }
 
@@ -148,7 +148,7 @@ dependencies {
   debugImplementation 'io.reactivex.rxjava2:rxjava:2.2.19'
   debugImplementation 'com.madgag.spongycastle:prov:1.58.0.0'
   debugImplementation 'com.indicative.client.android:Indicative-Android:1.1.0'
-  debugImplementation "org.jetbrains.kotlin:kotlin-stdlib:1.8.10"
+  implementation "org.jetbrains.kotlin:kotlin-stdlib:1.8.10"
 
   debugImplementation(files("libs/android-appcoins-billing-debug.aar"))
   debugImplementation(files("libs/appcoins-billing-debug.aar"))
