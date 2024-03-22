@@ -530,16 +530,23 @@ public class MainActivity extends Activity
     //  url += "&signature=f43bb044808622581147a157c68bcb581a93e8766574ef908f7f5a3579b4451a";
     //}
 
-    String url = BuildConfig.BACKEND_HOST
+    String url = "";
+    if (BuildConfig.TEST_NETWORK) {
+      url += BuildConfig.BACKEND_HOST
         + "transaction/inapp?product=antifreeze2"
         + "&value=3"
         + "&currency=USD"
         + "&callback_url=https%3A%2F%2Fapi.dev.catappult.io%2Fbroker%2F8.20200101%2Fmock%2Fcallback"
-        + "&domain=" + getPackageName();
-    if (BuildConfig.TEST_NETWORK) {
-      url += "&signature=f4d18fd461533d3d8dd9832bd08b14f8466fb612c160c2bcadb86de30259ad51";
+        + "&domain=" + getPackageName()
+        + "&signature=f4d18fd461533d3d8dd9832bd08b14f8466fb612c160c2bcadb86de30259ad51";
     } else {
-      url += "&signature=f43bb044808622581147a157c68bcb581a93e8766574ef908f7f5a3579b4451a";
+      url += BuildConfig.BACKEND_HOST
+        + "transaction/inapp?product=antifreeze"
+        + "&value=1.5"
+        + "&currency=USD"
+        + "&callback_url=https%3A%2F%2Fapi.dev.catappult.io%2Fbroker%2F8.20200101%2Fmock%2Fcallback"
+        + "&domain=" + getPackageName()
+        + "&signature=f43bb044808622581147a157c68bcb581a93e8766574ef908f7f5a3579b4451a";
     }
 
     startOneStepPayment(url);
