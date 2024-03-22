@@ -10,8 +10,8 @@ android {
     applicationId "com.appcoins.trivialdrivesample"
     minSdkVersion 21
     targetSdkVersion 33
-    versionCode 28
-    versionName "1.5.7"
+    versionCode 29
+    versionName "1.5.8"
     multiDexEnabled true
   }
 
@@ -127,6 +127,8 @@ android {
           "\"" + project.BACK_END_HOST_PROD + "\""
       buildConfigField "String", "WALLET_PACKAGE",
           "\"" + project.APPCOINS_IAB_BIND_PACKAGE + "\""
+      buildConfigField "String", "GAMESHUB_PACKAGE",
+          "\"" + project.GAMESHUB_PACKAGE + "\""
     }
 
     ropstenNetwork {
@@ -137,6 +139,8 @@ android {
           "\"" + project.BACK_END_HOST_DEV + "\""
       buildConfigField "String", "WALLET_PACKAGE",
           "\"" + project.APPCOINS_DEV_IAB_BIND_PACKAGE + "\""
+      buildConfigField "String", "GAMESHUB_PACKAGE",
+          "\"" + project.GAMESHUB_PACKAGE_DEV + "\""
     }
   }
 }

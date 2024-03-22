@@ -562,19 +562,22 @@ public void startOneStepPayment(String url) {
   intent.setData(Uri.parse(url));
 
   // If AppCoins Wallet is installed then start the Billing flow
+  // else if GH is installed then start the Billing flow in GH
   // Otherwise open the URL with default action to install the Wallet
-  if (isWalletInstalled()) {
+  if (isPackageInstalled(BuildConfig.WALLET_PACKAGE)) {
     intent.setPackage(BuildConfig.WALLET_PACKAGE);
+  } else if (isPackageInstalled(BuildConfig.GAMESHUB_PACKAGE)) {
+    intent.setPackage(BuildConfig.GAMESHUB_PACKAGE);
   }
   startActivityForResult(intent, RC_ONE_STEP);
 }
 
-private Boolean isWalletInstalled() {
+private Boolean isPackageInstalled(String packageName) {
   PackageManager packageManager = getApplicationContext().getPackageManager();
   Intent intentForCheck = new Intent(Intent.ACTION_VIEW);
   if (intentForCheck.resolveActivity(packageManager) != null) {
     try {
-      packageManager.getPackageInfo(BuildConfig.WALLET_PACKAGE, PackageManager.GET_ACTIVITIES);
+      packageManager.getPackageInfo(packageName, PackageManager.GET_ACTIVITIES);
       return true;
     } catch (PackageManager.NameNotFoundException e) {
       return false;
