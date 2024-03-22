@@ -175,7 +175,7 @@ public class MainActivity extends Activity
       // Do we have the premium upgrade?
       PurchasesResult purchasesResult = cab.queryPurchases(SkuType.inapp.toString());
       List<Purchase> purchases = purchasesResult.getPurchases();
-      mIsPremium = checkSkuExists(purchases, Skus.SKU_PREMIUM_ID);
+      mIsPremium = checkSkuExists(purchases, Skus.SKU_PREMIUM2_ID);
       Log.d(TAG, "User is " + (mIsPremium ? "PREMIUM" : "NOT PREMIUM"));
 
       // Check for gas delivery -- if we own gas, we should fill up the tank immediately
@@ -284,7 +284,7 @@ public class MainActivity extends Activity
                   Log.d(TAG, "Purchase is gas. Starting gas consumption.");
                   cab.consumeAsync(token, consumeResponseListener);
                   break;
-                case Skus.SKU_PREMIUM_ID:
+                case Skus.SKU_PREMIUM2_ID:
                   Log.d(TAG, "Purchase is premium upgrade. Congratulating user.");
                   MainActivity.this.alert("Thank you for upgrading to premium!");
                   mIsPremium = true;
@@ -443,7 +443,7 @@ public class MainActivity extends Activity
     skuDetailsParams.setItemType(SkuType.inapp.toString());
 
     skus.add(Skus.SKU_GAS_ID);
-    skus.add(Skus.SKU_PREMIUM_ID);
+    skus.add(Skus.SKU_PREMIUM2_ID);
 
     skuDetailsParams.setMoreItemSkus(skus);
 
@@ -516,16 +516,37 @@ public class MainActivity extends Activity
 
   public void onBuyAntiFreezeButtonClicked(View arg0) {
     onBuySetup();
+    //https://apichain.catappult.io/transaction/inapp?product=antifreeze2&domain=com.appcoins.trivialdrivesample.test&callback_url=https%3A%2F%2Fapi.dev.catappult.io%2Fbroker%2F8.20200101%2Fmock%2Fcallback&signature=5ddde3d5485bfa146d424e92a810d2fab878ab502ed224227a842aedb3c92a36
 
-    String url = BuildConfig.BACKEND_HOST
-        + "transaction/inapp?product=antifreeze&value=1.5&currency=USD"
-        + "&callback_url=https%3A%2F%2Fapi.dev.catappult.io%2Fbroker%2F8.20200101%2Fmock%2Fcallback"
-        + "&domain="
-        + getPackageName();
+    // old osp:
+    //String url = BuildConfig.BACKEND_HOST
+    //    + "transaction/inapp?product=antifreeze&value=1.5&currency=USD"
+    //    + "&callback_url=https%3A%2F%2Fapi.dev.catappult.io%2Fbroker%2F8.20200101%2Fmock%2Fcallback"
+    //    + "&domain="
+    //    + getPackageName();
+    //if (BuildConfig.TEST_NETWORK) {
+    //  url += "&signature=7878cb314b82ad2684ad4865cf84ab33e2905d2b6c7f9c3a368f6f70917e1364";
+    //} else {
+    //  url += "&signature=f43bb044808622581147a157c68bcb581a93e8766574ef908f7f5a3579b4451a";
+    //}
+
+    String url = "";
     if (BuildConfig.TEST_NETWORK) {
-      url += "&signature=7878cb314b82ad2684ad4865cf84ab33e2905d2b6c7f9c3a368f6f70917e1364";
+      url += BuildConfig.BACKEND_HOST
+        + "transaction/inapp?product=antifreeze2"
+        + "&value=3"
+        + "&currency=USD"
+        + "&callback_url=https%3A%2F%2Fapi.dev.catappult.io%2Fbroker%2F8.20200101%2Fmock%2Fcallback"
+        + "&domain=" + getPackageName()
+        + "&signature=f4d18fd461533d3d8dd9832bd08b14f8466fb612c160c2bcadb86de30259ad51";
     } else {
-      url += "&signature=f43bb044808622581147a157c68bcb581a93e8766574ef908f7f5a3579b4451a";
+      url += BuildConfig.BACKEND_HOST
+        + "transaction/inapp?product=antifreeze"
+        + "&value=1.5"
+        + "&currency=USD"
+        + "&callback_url=https%3A%2F%2Fapi.dev.catappult.io%2Fbroker%2F8.20200101%2Fmock%2Fcallback"
+        + "&domain=" + getPackageName()
+        + "&signature=f43bb044808622581147a157c68bcb581a93e8766574ef908f7f5a3579b4451a";
     }
 
     startOneStepPayment(url);
@@ -541,19 +562,22 @@ public void startOneStepPayment(String url) {
   intent.setData(Uri.parse(url));
 
   // If AppCoins Wallet is installed then start the Billing flow
+  // else if GH is installed then start the Billing flow in GH
   // Otherwise open the URL with default action to install the Wallet
-  if (isWalletInstalled()) {
+  if (isPackageInstalled(BuildConfig.WALLET_PACKAGE)) {
     intent.setPackage(BuildConfig.WALLET_PACKAGE);
+  } else if (isPackageInstalled(BuildConfig.GAMESHUB_PACKAGE)) {
+    intent.setPackage(BuildConfig.GAMESHUB_PACKAGE);
   }
   startActivityForResult(intent, RC_ONE_STEP);
 }
 
-private Boolean isWalletInstalled() {
+private Boolean isPackageInstalled(String packageName) {
   PackageManager packageManager = getApplicationContext().getPackageManager();
   Intent intentForCheck = new Intent(Intent.ACTION_VIEW);
   if (intentForCheck.resolveActivity(packageManager) != null) {
     try {
-      packageManager.getPackageInfo(BuildConfig.WALLET_PACKAGE, PackageManager.GET_ACTIVITIES);
+      packageManager.getPackageInfo(packageName, PackageManager.GET_ACTIVITIES);
       return true;
     } catch (PackageManager.NameNotFoundException e) {
       return false;
@@ -615,7 +639,7 @@ private Boolean isWalletInstalled() {
     Log.d(TAG, "Launching purchase flow for gas.");
 
     BillingFlowParams billingFlowParams =
-        new BillingFlowParams(Skus.SKU_PREMIUM_ID, SkuType.inapp.toString(), null, null, null);
+        new BillingFlowParams(Skus.SKU_PREMIUM2_ID, SkuType.inapp.toString(), null, null, null);
 
     if (!cab.isReady()) {
       startConnection();

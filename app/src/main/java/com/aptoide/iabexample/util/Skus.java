@@ -4,6 +4,8 @@ public final class Skus {
 
   // SKUs for our products: the premium upgrade (non-consumable) and gas (consumable)
   public static final String SKU_PREMIUM_ID = "premium";
+
+  public static final String SKU_PREMIUM2_ID = "premium2";
   public static final String SKU_GAS_ID = "gas";
 
   // SKU for our subscription (infinite gas)
