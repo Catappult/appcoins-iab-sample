@@ -560,7 +560,6 @@ public class MainActivity extends Activity
 public void startOneStepPayment(String url) {
   Intent intent = new Intent(Intent.ACTION_VIEW);
   intent.setData(Uri.parse(url));
-
   // If AppCoins Wallet is installed then start the Billing flow
   // else if GH is installed then start the Billing flow in GH
   // Otherwise open the URL with default action to install the Wallet
@@ -569,7 +568,13 @@ public void startOneStepPayment(String url) {
   } else if (isPackageInstalled(BuildConfig.GAMESHUB_PACKAGE)) {
     intent.setPackage(BuildConfig.GAMESHUB_PACKAGE);
   }
-  startActivityForResult(intent, RC_ONE_STEP);
+  try {
+    startActivityForResult(intent, RC_ONE_STEP);
+  } catch (Exception e) {
+    Intent intentFallback = new Intent(Intent.ACTION_VIEW);
+    intentFallback.setData(Uri.parse(url));
+    startActivityForResult(intentFallback, RC_ONE_STEP);
+  }
 }
 
 private Boolean isPackageInstalled(String packageName) {
