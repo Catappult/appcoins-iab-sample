@@ -5,6 +5,7 @@ buildscript {
     google()
     mavenCentral()
     maven { url "https://s01.oss.sonatype.org/content/repositories/snapshots" }
+    mavenLocal()
   }
 
   dependencies {
@@ -20,16 +21,16 @@ allprojects {
     google()
     mavenCentral()
     maven { url "https://s01.oss.sonatype.org/content/repositories/snapshots" }
+    mavenLocal()
   }
 }
 
 project.ext {
-  sdkDev = "0.6.7.0.dev-SNAPSHOT"
+  sdkDev = "0.7.3.0.dev-SNAPSHOT"
   // NOTE: in case you need to test a version of the SDK that points to prod but is yet to be
   // published and available as the staging snapshot, use sdk = <version>-staging-SNAPSHOT.
   // Example: sdk = "0.6.7.0.staging-SNAPSHOT"
-  sdk_legacy = "0.6.7.0" // Legacy SDK version, for non-updated modules that are used in trivial drive
-  sdk = "0.7.2.0"
+  sdk = "0.7.3.0"
 }
 
 wrapper {
