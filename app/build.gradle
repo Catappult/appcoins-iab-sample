@@ -10,8 +10,8 @@ android {
     applicationId "com.appcoins.trivialdrivesample"
     minSdkVersion 21
     targetSdkVersion 33
-    versionCode 29
-    versionName "1.5.8"
+    versionCode 30
+    versionName "1.5.9"
     multiDexEnabled true
   }
 
@@ -35,6 +35,7 @@ android {
 
   buildTypes {
     debug {
+      applicationIdSuffix ".test"
       minifyEnabled false
       proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
       applicationVariants.all { variant -> renameArtifact(defaultConfig)
@@ -151,21 +152,11 @@ dependencies {
   implementation 'com.google.code.gson:gson:2.10.1'
   debugImplementation 'io.reactivex.rxjava2:rxjava:2.2.19'
   debugImplementation 'com.madgag.spongycastle:prov:1.58.0.0'
-  debugImplementation 'com.indicative.client.android:Indicative-Android:1.1.0'
   implementation "org.jetbrains.kotlin:kotlin-stdlib:1.8.10"
 
-  debugImplementation(files("libs/android-appcoins-billing-debug.aar"))
-  debugImplementation(files("libs/appcoins-billing-debug.aar"))
-  debugImplementation(files("libs/appcoins-adyen-debug.aar"))
-  debugImplementation(files("libs/communication-debug.aar"))
-  debugImplementation(files("libs/appcoins-ads-debug.aar"))
-  debugImplementation(files("libs/appcoins-contract-proxy-debug.aar"))
-  debugImplementation(files("libs/appcoins-core-debug.aar"))
-  debugImplementation(files("libs/appcoins-lifecycle-debug.aar"))
-
-  releaseImplementation "io.catappult:android-appcoins-billing:$sdk"
-  releaseImplementation "io.catappult:appcoins-ads:$sdk_legacy"
-  releaseImplementation "io.catappult:appcoins-contract-proxy:$sdk_legacy"
+  implementation "io.catappult:android-appcoins-billing:$sdk"
+  implementation "io.catappult:appcoins-ads:$sdk"
+  implementation "io.catappult:appcoins-contract-proxy:$sdk"
 }
 
 def renameArtifact(defaultConfig) {
