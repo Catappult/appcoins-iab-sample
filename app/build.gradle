@@ -10,8 +10,8 @@ android {
     applicationId "com.appcoins.trivialdrivesample"
     minSdkVersion 21
     targetSdkVersion 33
-    versionCode 29
-    versionName "1.5.8"
+    versionCode 30
+    versionName "1.5.9"
     multiDexEnabled true
   }
 
