@@ -10,8 +10,8 @@ android {
     applicationId "com.appcoins.trivialdrivesample"
     minSdkVersion 21
     targetSdkVersion 33
-    versionCode 30
-    versionName "1.5.9"
+    versionCode 31
+    versionName "1.5.10"
     multiDexEnabled true
   }
 
@@ -134,7 +134,6 @@ android {
 
     ropstenNetwork {
       dimension "network"
-      applicationIdSuffix ".test"
       buildConfigField "boolean", "TEST_NETWORK", "true"
       buildConfigField "String", "BACKEND_HOST",
           "\"" + project.BACK_END_HOST_DEV + "\""
