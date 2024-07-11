@@ -30,7 +30,7 @@ class AppCoinsBillingService implements BillingService {
 
   @Override public Bundle getBuyIntent(int apiVersion, String packageName, String sku, String type,
       String developerPayload) throws RemoteException {
-    return service.getBuyIntent(apiVersion, packageName, sku, type, developerPayload);
+    return service.getBuyIntent(apiVersion, packageName, sku, type, developerPayload, null, null);
   }
 
   @Override public Bundle getPurchases(int apiVersion, String packageName, String type,

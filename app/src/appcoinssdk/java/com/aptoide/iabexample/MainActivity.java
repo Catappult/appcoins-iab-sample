@@ -334,6 +334,7 @@ public class MainActivity extends Activity
           purchasesService.verifyPurchase(sku, purchase.getToken());
         }
       } else {
+        setWaitScreen(false);
         MainActivity.this.complain(
             "Error purchasing: " + String.format(Locale.ENGLISH, "response code: %d -> %s",
                 responseCode, ResponseCode.values()[responseCode].name()));

@@ -26,11 +26,11 @@ allprojects {
 }
 
 project.ext {
-  sdkDev = "0.7.3.0.dev-SNAPSHOT"
+  sdkDev = "0.8.0.1.dev-SNAPSHOT"
   // NOTE: in case you need to test a version of the SDK that points to prod but is yet to be
   // published and available as the staging snapshot, use sdk = <version>-staging-SNAPSHOT.
   // Example: sdk = "0.6.7.0.staging-SNAPSHOT"
-  sdk = "0.7.3.0"
+  sdk = "0.8.0.1"
 }
 
 wrapper {
